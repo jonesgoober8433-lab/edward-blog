@@ -14,7 +14,7 @@
 <script src="https://cdn.jsdelivr.net/npm/turndown-plugin-gfm@1.0.2/dist/turndown-plugin-gfm.js"></script>
 </head>
 <body>
-<main><div class="wrap" id="root"><div class="empty">載入中…</div></div></main>
+<main><div class="wrap wide" id="root"><div class="empty">載入中…</div></div></main>
 
 <template id="tplAdmin">
   <div class="admin">
@@ -84,7 +84,12 @@
           <button class="btn ghost sm" data-ins="a">連結</button>
           <button class="btn ghost sm" data-ins="img">圖片</button>
           <button class="btn ghost sm" data-ins="tbl">表格</button>
+          <span class="sep"></span>
+          <label class="btn gold sm" title="也可以直接 Command＋V 貼上，或從照片 App 拖進來">🖼 上傳圖片<input type="file" id="pickImg" accept="image/*,video/*" multiple hidden></label>
+          <button class="btn ghost sm" data-media-lib type="button">📚 照片庫</button>
+          <button class="btn ghost sm" data-video type="button">🎬 影片</button>
         </div>
+        <p class="stamp" style="margin:0 0 6px">圖片大小：在說明後面加 <code>|小</code> <code>|中</code> <code>|大</code>，例如 <code>![填表範例|中](…)</code>；兩張以上連在一起會自動並排。</p>
         <div class="editor">
           <textarea id="body" placeholder="從這裡開始寫…（AI 給的 Markdown 大綱直接整段貼上）"></textarea>
           <div class="preview prose" id="preview"></div>
@@ -109,7 +114,10 @@
           <button class="btn ghost sm" data-cmd="insertUnorderedList">條列</button>
           <button class="btn ghost sm" data-cmd="insertOrderedList">編號</button>
           <button class="btn ghost sm" data-cmd="link">連結</button>
-          <button class="btn ghost sm" data-cmd="image">圖片</button>
+          <label class="btn gold sm" title="也可以直接 Command＋V 貼上，或從照片 App 拖進來">🖼 上傳圖片<input type="file" id="pickImg2" accept="image/*,video/*" multiple hidden></label>
+          <button class="btn ghost sm" data-media-lib type="button">📚 照片庫</button>
+          <button class="btn ghost sm" data-video type="button">🎬 影片</button>
+          <select id="vImgSize" title="先點一下文章裡的圖片，再選大小"><option value="">圖片大小</option><option value="s">小</option><option value="m">中</option><option value="l">大（滿版）</option><option value="0">原尺寸</option></select>
           <button class="btn ghost sm" data-cmd="removeFormat" title="清除選取文字的顏色、字級">清除格式</button>
         </div>
         <div class="visual prose" id="visual" contenteditable="true" data-ph="從這裡開始寫…選取文字後用上面的按鈕改顏色、字級"></div>
@@ -131,6 +139,19 @@
     <div id="tplList"></div>
     <div class="actions"><button class="btn ghost" data-close>關閉</button></div>
   </dialog>
+  <dialog id="dlgMedia" style="max-width:1100px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <div><h2 style="margin:0">📚 照片庫</h2><span class="stamp" id="mediaCount"></span></div>
+      <span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <span class="seg mfilter"><button class="on" data-f="all">全部</button><button data-f="used">有用到</button><button data-f="unused">沒用到</button></span>
+        <label class="btn gold sm">上傳照片<input type="file" id="mediaUpload" accept="image/*,video/*" multiple hidden></label>
+        <button class="btn ghost sm" data-close>關閉</button>
+      </span>
+    </div>
+    <p class="msgbox" id="mediaNote" hidden></p>
+    <p class="stamp" style="margin:6px 0">上傳時會自動檢查重複（同一個檔案，或同一張照片縮放、另存過都抓得到）。每張下面都寫著「用在哪篇文章」。</p>
+    <div class="mgrid" id="mediaGrid"></div>
+  </dialog>
   <dialog id="dlgOpt" style="max-width:1200px">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
       <h2 style="margin:0" id="optTitle"></h2>
@@ -149,7 +170,8 @@
 
 <script type="module">
 import { store, MODE, newId, isLive } from "./assets/store.js";
-import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette } from "./assets/ui.js";
+import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js";
+import { initMedia } from "./assets/media.js";
 const CFG = window.BLOG_CONFIG;
 header("admin"); footer();
 const root = document.getElementById("root");
@@ -243,7 +265,7 @@ function start() {
     const pub = !cur.publishedAt || cur.status !== "published" ? "尚未發布" : (cur.publishedAt > Date.now() ? "排程 " : "") + fmtTime(cur.publishedAt);
     $("stamps").textContent = cur.id ? `建立：${fmtTime(cur.createdAt)}　｜　發布：${pub}　｜　最後更新：${fmtTime(cur.updatedAt)}` : "還沒儲存";
   }
-  function preview() { $("preview").innerHTML = md($("body").value) || `<p class="stamp">預覽會出現在這裡</p>`; }
+  function preview() { $("preview").innerHTML = md($("body").value) || `<p class="stamp">預覽會出現在這裡</p>`; hydrateMedia($("preview")); }
   root.addEventListener("input", e => { if (e.target.closest(".panel") && e.target.id !== "filter") { dirty = true; if (e.target.id === "body") preview(); } });
   window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
 
@@ -299,7 +321,7 @@ function start() {
   async function drawTpl() {
     const list = await store.listTemplates();
     $("tplList").innerHTML = list.map(t => `<div class="tpl"><div><b>${esc(t.name)}</b><br><span class="stamp">${esc(t.category || "")}・${t.visibility === "members" ? "會員" : "公開"}・${fmtTime(t.updatedAt)}</span></div>
-      <span style="display:flex;gap:6px"><button class="btn sm" data-apply="${esc(t.id)}">套用</button><button class="btn danger sm" data-deltpl="${esc(t.id)}">刪</button></span></div>`).join("") || `<p class="stamp">還沒有模板，寫好一篇後按「存成模板」。</p>`;
+      <span style="display:flex;gap:6px"><button class="btn sm" data-apply="${esc(t.id)}">套用</button>${t.builtin ? "" : `<button class="btn danger sm" data-deltpl="${esc(t.id)}">刪</button>`}</span></div>`).join("") || `<p class="stamp">還沒有模板，寫好一篇後按「存成模板」。</p>`;
     $("tplList").onclick = async e => {
       const a = e.target.closest("[data-apply]"), d = e.target.closest("[data-deltpl]");
       if (a) {
@@ -328,6 +350,16 @@ function start() {
   try { mode = localStorage.getItem("eb-editor-mode") === "visual" ? "visual" : "md"; } catch (e) { }
   const td = new TurndownService({ headingStyle: "atx", bulletListMarker: "-", codeBlockStyle: "fenced", emDelimiter: "*" });
   if (window.turndownPluginGfm) td.use(window.turndownPluginGfm.gfm);
+  td.addRule("img", {          // 圖片：照片庫的圖寫回 media/ID，大小寫回 |小 |中 |大
+    filter: "img",
+    replacement: (c, n) => {
+      const size = { "img-s": "|小", "img-m": "|中", "img-l": "|大" }[[...n.classList].find(k => /^img-[sml]$/.test(k))] || "";
+      const src = n.dataset.media ? "media/" + n.dataset.media : n.getAttribute("src") || "";
+      return `![${(n.getAttribute("alt") || "").replace(/[\[\]|]/g, "")}${size}](${src})`;
+    }
+  });
+  td.addRule("figcap", { filter: "figcaption", replacement: () => "" });
+  td.addRule("gallery", { filter: n => n.nodeName === "DIV" && n.classList.contains("gallery"), replacement: c => "\n\n" + c.trim().replace(/\)\s*!\[/g, ")\n![") + "\n\n" });
   td.addRule("styledSpan", {   // 顏色、字級、螢光筆：Markdown 沒有這種語法，保留成 HTML
     filter: n => (n.nodeName === "SPAN" || n.nodeName === "FONT") && (n.getAttribute("style") || n.getAttribute("color") || n.getAttribute("size")),
     replacement: (content, n) => {
@@ -342,7 +374,7 @@ function start() {
       return st.length ? `<span style="${st.join(";")}">${content}</span>` : content;
     }
   });
-  function toVisual() { $("visual").innerHTML = md($("body").value); }
+  function toVisual() { $("visual").innerHTML = md($("body").value, { embed: false }); hydrateMedia($("visual")); }
   function fromVisual() { $("body").value = td.turndown($("visual").innerHTML).replace(/\n{3,}/g, "\n\n").trim() + "\n"; preview(); }
   function setMode(m) {
     if (m === mode) return;
@@ -352,7 +384,7 @@ function start() {
   }
   function paintMode() {
     $("mdPane").hidden = mode !== "md"; $("visPane").hidden = mode !== "visual";
-    document.querySelectorAll(".seg button").forEach(b => b.classList.toggle("on", b.dataset.mode === mode));
+    document.querySelectorAll(".seg [data-mode]").forEach(b => b.classList.toggle("on", b.dataset.mode === mode));
   }
   document.querySelector(".seg").addEventListener("click", e => { const b = e.target.closest("[data-mode]"); if (b) setMode(b.dataset.mode); });
   paintMode();
@@ -395,6 +427,37 @@ function start() {
     catch (err) { toast("切換失敗：" + err.message, true); }
   });
   drawPalettes();
+
+  // ---------- 照片庫、上傳圖片、影片 ----------
+  const bodyCache = {};
+  const media = initMedia({
+    store, $,
+    getMode: () => mode,
+    insertMd: text => { const ta = $("body"); ta.focus(); ta.setRangeText(text, ta.selectionStart, ta.selectionEnd, "end"); preview(); },
+    insertVisual: html => exec("insertHTML", html),
+    getPostsWithBody: async () => [...(cur && !cur.id ? [{ id: "__cur", title: "目前這篇（還沒儲存）", body: mode === "visual" ? td.turndown($("visual").innerHTML) : $("body").value }] : []), ...await Promise.all(posts.map(async p => {
+      if (cur?.id === p.id) return { ...p, body: mode === "visual" ? td.turndown($("visual").innerHTML) : $("body").value };
+      if (!(p.id in bodyCache) || bodyCache[p.id].u !== p.updatedAt) bodyCache[p.id] = { u: p.updatedAt, b: (await store.getPost(p.id))?.body || "" };
+      return { ...p, body: bodyCache[p.id].b };
+    }))],
+    onChange: () => { dirty = true; },
+  });
+  document.querySelectorAll("[data-media-lib]").forEach(b => b.onclick = () => media.openLib());
+  $("pickImg2").addEventListener("change", e => { media.upload(e.target.files); e.target.value = ""; });
+  document.querySelectorAll("[data-video]").forEach(b => b.onclick = () => {
+    const u = prompt("貼上 YouTube 影片網址（影片會在文章裡直接播放）"); if (!u) return;
+    if (!ytId(u)) return toast("看不懂這個網址，請貼 YouTube 影片的網址", true);
+    if (mode === "visual") exec("insertHTML", `<p><a href="${esc(u)}">🎬 ${esc(u)}</a></p>`);
+    else { const ta = $("body"); ta.focus(); ta.setRangeText(`\n\n🎬 ${u}\n\n`, ta.selectionStart, ta.selectionEnd, "end"); preview(); }
+    dirty = true; toast("已插入影片 ✓（發布後在文章裡會變成播放器）");
+  });
+  let selImg = null;
+  $("visual").addEventListener("click", e => { document.querySelectorAll("#visual img.sel").forEach(i => i.classList.remove("sel")); selImg = e.target.closest("img"); selImg?.classList.add("sel"); });
+  $("vImgSize").addEventListener("change", e => {
+    const v = e.target.value; e.target.value = "";
+    if (!selImg) return toast("先點一下文章裡要調整的圖片", true);
+    selImg.classList.remove("img-s", "img-m", "img-l"); if (v !== "0") selImg.classList.add("img-" + v); dirty = true;
+  });
 
   // ---------- 優化版審核 ----------
   let optList = [];

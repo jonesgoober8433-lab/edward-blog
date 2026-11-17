@@ -109,7 +109,18 @@ label { display: block; font-size: 13px; font-weight: 600; color: var(--mu); mar
 .prose h2 { font-size: 24px; margin: 36px 0 10px; padding-left: 12px; border-left: 4px solid var(--gold); }
 .prose h3 { font-size: 20px; margin: 26px 0 8px; }
 .prose blockquote { margin: 18px 0; padding: 10px 18px; background: var(--gold-soft); border-radius: 10px; color: var(--ink); }
-.prose img { max-width: 100%; border-radius: 10px; }
+.prose img { max-width: 100%; max-height: 78vh; width: auto; height: auto; display: block; margin: 14px auto; border-radius: 10px; box-shadow: 0 6px 18px -12px rgba(0,0,0,.35); cursor: zoom-in; }
+.prose img.img-s { width: 38%; min-width: 220px; }
+.prose img.img-m { width: 62%; min-width: 260px; }
+.prose img.img-l { width: 100%; max-height: none; }
+@media (max-width: 600px) { .prose img.img-s, .prose img.img-m { width: 100%; min-width: 0; } }
+.prose .gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0; align-items: start; }
+.prose .gallery:has(> :nth-child(2):last-child), .prose .gallery:has(> :nth-child(4):last-child) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 600px) { .prose .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+.prose .gallery img { width: 100%; max-height: 360px; object-fit: contain; margin: 0; background: var(--card); }
+.lightbox { position: fixed; inset: 0; z-index: 100; background: rgba(14,12,10,.88); display: grid; place-items: center; padding: 16px; cursor: zoom-out; }
+.lightbox img { max-width: 100%; max-height: 92vh; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.lightbox p { position: fixed; bottom: 14px; left: 0; right: 0; text-align: center; color: #eee; margin: 0; font-size: 14px; }
 .prose table { border-collapse: collapse; width: 100%; font-size: 15px; display: block; overflow-x: auto; }
 .prose th, .prose td { border: 1px solid var(--ln); padding: 6px 10px; text-align: left; }
 .prose th { background: var(--gold-soft); }
@@ -209,3 +220,36 @@ dialog::backdrop { background: rgba(14, 20, 32, .45); }
 .cmph { position: sticky; top: 0; background: var(--card); padding: 8px 0; font-weight: 700; color: var(--mu); border-bottom: 1px solid var(--ln); margin-bottom: 6px; }
 .cmph.new { color: var(--navy-2); }
 @media (max-width: 800px) { .optnotes, .cmp { grid-template-columns: 1fr; } }
+
+/* 影片內嵌、照片載入中 */
+.video { position: relative; aspect-ratio: 16/9; margin: 18px 0; border-radius: 12px; overflow: hidden; background: #000; }
+.video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+img.media-loading { min-height: 120px; width: 100%; background: var(--gold-soft); border-radius: 10px; }
+
+/* 後台寬版 */
+.wrap.wide { max-width: none; padding: 0 24px; }
+.wide .admin { grid-template-columns: 320px minmax(0, 1fr); gap: 20px; }
+@media (max-width: 900px) { .wrap.wide { padding: 0 12px; } .wide .admin { grid-template-columns: 1fr; } }
+.wide .editor textarea, .wide .preview, .wide .visual { min-height: 68vh; max-height: none; }
+.wide .preview { max-height: 82vh; }
+.wide .visual { max-height: 82vh; }
+.toolbar .sep { width: 1px; height: 22px; background: var(--ln); align-self: center; }
+.dropping { outline: 3px dashed var(--gold) !important; outline-offset: -6px; }
+#visual img.sel { outline: 3px solid var(--gold); }
+/* 照片庫 */
+.mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; max-height: 66vh; overflow: auto; padding: 2px; }
+.mcard { margin: 0; border: 1px solid var(--ln); border-radius: 12px; overflow: hidden; background: var(--field); display: flex; flex-direction: column; }
+.mcard.hl { border-color: var(--gold); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 45%, transparent); }
+.mcard img { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: var(--card); display: block; }
+.mcard figcaption { padding: 8px 10px; display: flex; flex-direction: column; gap: 3px; font-size: 13px; flex: 1; }
+.mcard b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mcard .used { color: var(--ink); line-height: 1.5; }
+.mcard .used a { color: var(--navy-2); }
+.mcard .unused { color: var(--mu); }
+.mcard .mact { display: flex; gap: 6px; margin-top: auto; padding-top: 4px; }
+.msgbox { background: var(--gold-soft); border-left: 4px solid var(--gold); border-radius: 8px; padding: 8px 12px; margin: 10px 0 0; }
+
+.prose .gallery figure { margin: 0; background: var(--card); border: 1px solid var(--ln); border-radius: 10px; padding: 8px; }
+.prose .gallery figure img { box-shadow: none; border-radius: 6px; }
+.prose .gallery figcaption { text-align: center; font-size: 14px; font-weight: 600; color: var(--ink); padding-top: 6px; }
+.prose table td, .prose table th { vertical-align: top; }

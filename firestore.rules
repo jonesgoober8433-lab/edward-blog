@@ -30,6 +30,14 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+    match /media/{id} {             // 照片庫：縮圖與資訊
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /mediaData/{id} {         // 照片庫：壓縮後原圖
+      allow read: if true;
+      allow write: if isAdmin();
+    }
     match /templates/{id} {
       allow read, write: if isAdmin();
     }

@@ -88,7 +88,21 @@ function demoStore() {
     async getSettings() { return db.settings || {}; },
     async saveSettings(s) { db.settings = { ...(db.settings || {}), ...s }; save(); },
     async listMembers() { return db.users.map(u => ({ uid: u.uid, email: u.email, name: u.name, role: u.role, joinedAt: u.joinedAt })); },
-    async resetDemo() { localStorage.removeItem(KEY); load(); emit(); },
+    async resetDemo() { localStorage.removeItem(KEY); try { localStorage.removeItem(KEY + "-media"); } catch (e) { } load(); emit(); },
+    // 照片庫（示範模式：存在瀏覽器）
+    async listMedia() { return [...(db.media || [])].sort((a, b) => b.createdAt - a.createdAt); },
+    async getMediaData(id) { try { return (JSON.parse(localStorage.getItem(KEY + "-media") || "{}"))[id] || null; } catch (e) { return null; } },
+    async saveMedia(meta, data) {
+      let all = {}; try { all = JSON.parse(localStorage.getItem(KEY + "-media") || "{}"); } catch (e) { }
+      all[meta.id] = data;
+      try { localStorage.setItem(KEY + "-media", JSON.stringify(all)); } catch (e) { throw new Error("示範模式的瀏覽器空間滿了"); }
+      db.media = [...(db.media || []).filter(m => m.id !== meta.id), meta]; save(); return meta;
+    },
+    async deleteMedia(id) {
+      let all = {}; try { all = JSON.parse(localStorage.getItem(KEY + "-media") || "{}"); } catch (e) { }
+      delete all[id]; try { localStorage.setItem(KEY + "-media", JSON.stringify(all)); } catch (e) { }
+      db.media = (db.media || []).filter(m => m.id !== id); save();
+    },
   };
 }
 
@@ -104,12 +118,7 @@ function seed() {
       { id: "members-only-demo", title: "【會員限定】一張表檢查你家的保單有沒有漏洞", summary: "會員專屬的保單健檢表。登入會員就能看到全文。（示範文章）", cover: "", category: "保險規劃", tags: ["保單健檢", "會員限定"], visibility: "members", status: "published", pinned: false, order: 2, createdAt: now - day, updatedAt: now - day, publishedAt: now - day,
         body: "## 保單健檢三步驟\n\n1. 列出全家所有保單\n2. 對照「死亡、失能、醫療、長照」四格\n3. 空格就是漏洞\n\n（示範內容）" },
     ],
-    templates: [
-      { id: "tpl-blog", name: "標準長文（Hook→翻轉金句→三點拆解→行動呼籲）", category: "投資理財", tags: [], visibility: "public", updatedAt: now,
-        body: "（情境開場：用一個讀者會遇到的場景或問題開頭？）\n\n**一句翻轉觀念的話！**\n\n## 一、\n\n白話比喻：\n\n## 二、\n\n白話比喻：\n\n## 三、\n\n白話比喻：\n\n## 結論\n\n（點出風險或急迫性）\n\n---\n\n### Edward 提供 2 種服務\n\n- **「醫生式」財務諮詢**：全方位健檢\n- **「藥局式」單點諮詢**：精準對策\n" },
-      { id: "tpl-social-insurance", name: "社會保險系列（白話＋數字＋提醒）", category: "社會保險", tags: ["社會保險"], visibility: "public", updatedAt: now - 1,
-        body: "## 先講結論\n\n## 你可能遇到的情況\n\n## 三個數字先看懂\n\n| 項目 | 數字 | 白話解釋 |\n|---|---|---|\n|  |  |  |\n\n## 常見誤會\n\n## 你現在可以做的一件事\n\n> 數字以主管機關最新公告為準。\n" },
-    ],
+    templates: [],
   };
 }
 
@@ -193,7 +202,22 @@ async function firebaseStore() {
     async saveSettings(s) { try { await fs.setDoc(fs.doc(db, "settings", "site"), s, { merge: true }); } catch (e) { throw err(e); } },
     async listMembers() { const s = await fs.getDocs(fs.collection(db, "members")); return s.docs.map(d => ({ uid: d.id, role: "member", ...d.data() })); },
     async resetDemo() { },
+    // 照片庫（正式模式）：media＝縮圖與資訊（列表用）、mediaData＝壓縮後的原圖
+    async listMedia() { const s = await fs.getDocs(fs.collection(db, "media")); return s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.createdAt - a.createdAt); },
+    async getMediaData(id) { try { const s = await fs.getDoc(fs.doc(db, "mediaData", id)); return s.exists() ? s.data().data : null; } catch (e) { return null; } },
+    async saveMedia(meta, data) {
+      try { const { id, ...rest } = meta; const b = fs.writeBatch(db); b.set(fs.doc(db, "media", id), rest); b.set(fs.doc(db, "mediaData", id), { data }); await b.commit(); return meta; }
+      catch (e) { throw err(e); }
+    },
+    async deleteMedia(id) { const b = fs.writeBatch(db); b.delete(fs.doc(db, "media", id)); b.delete(fs.doc(db, "mediaData", id)); await b.commit(); },
   };
 }
 
 export const store = MODE === "firebase" ? await firebaseStore() : demoStore();
+// 內建模板（從 Edward 既有文章歸納，放在 templates/builtin.json，不能刪）
+const _listT = store.listTemplates.bind(store);
+store.listTemplates = async () => {
+  let builtin = [];
+  try { builtin = (await (await fetch("templates/builtin.json", { cache: "no-store" })).json()).map(t => ({ ...t, builtin: true })); } catch (e) { }
+  return [...builtin, ...(await _listT())];
+};
