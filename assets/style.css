@@ -561,3 +561,31 @@ body.dv-open #preview { display: none; }
 .mreq b { font-size: 14.5px; }
 .mreq .acts { display: flex; gap: 6px; margin-top: 6px; }
 .dot-badge { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 999px; background: #D0312D; color: #fff; font-size: 12px; text-align: center; margin-left: 6px; }
+
+/* 後台：公開／VIP 看板 */
+.board { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+@media (max-width: 700px) { .board { grid-template-columns: 1fr; } }
+.lane { border: 2px dashed var(--ln); border-radius: 14px; padding: 10px; background: var(--field); min-height: 260px; transition: border-color .15s, background .15s; }
+.lane.vip { background: color-mix(in srgb, var(--gold) 8%, var(--field)); }
+.lane.over { border-color: var(--gold); background: var(--gold-soft); }
+.lane h3 { margin: 0 0 8px; font-size: 17px; display: flex; align-items: baseline; gap: 8px; }
+.lane h3 small { font: 400 12.5px var(--sans); color: var(--mu); }
+.lane-n { margin-left: auto; font: 700 13px var(--sans); background: var(--card); border: 1px solid var(--ln); border-radius: 999px; padding: 0 9px; }
+.lane-body { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow: auto; }
+.bcard { background: var(--card); border: 1px solid var(--ln); border-radius: 10px; padding: 8px 10px; cursor: grab; display: flex; flex-direction: column; gap: 2px; }
+.bcard b { font-size: 14.5px; line-height: 1.4; }
+.bcard small { color: var(--mu); font-size: 12px; }
+.bcard .bmove { align-self: flex-end; margin-top: 4px; padding: 2px 8px; font-size: 12px; }
+.bcard.dragging, .card.dragging { opacity: .45; }
+/* 首頁：管理員排序模式 */
+.sort-fab { position: fixed; left: 18px; bottom: 22px; z-index: 40; border: 0; border-radius: 999px; padding: 10px 16px; background: var(--gold); color: #fff; font: 700 14px var(--sans); box-shadow: 0 10px 24px -8px rgba(0,0,0,.45); cursor: pointer; }
+:root[data-theme="dark"] .sort-fab { color: #14110D; }
+.sort-fab[hidden] { display: none; }
+.sortbar { position: sticky; top: 66px; z-index: 15; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--gold-soft); border: 1px solid var(--gold); border-radius: 12px; padding: 8px 12px; margin: 6px 0 12px; font-size: 14px; }
+.sortbar[hidden] { display: none; }
+body.sorting .card { cursor: grab; outline: 2px dashed var(--gold); outline-offset: 2px; transform: none !important; }
+body.sorting .card .sort-ctl { position: absolute; top: 8px; right: 8px; z-index: 2; display: flex; gap: 4px; align-items: center; background: var(--card); border: 1px solid var(--ln); border-radius: 8px; padding: 2px 4px; font-size: 12px; }
+body.sorting .card { position: relative; }
+.sort-ctl button { background: none; border: 0; cursor: pointer; font-size: 14px; padding: 2px 6px; color: var(--ink); }
+.sort-ctl .grip { color: var(--mu); padding: 0 4px; }
+body.sorting .filters, body.sorting .search { opacity: .4; pointer-events: none; }

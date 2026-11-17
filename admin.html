@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261117173238">
-<script src="config.js?v=20261117173238"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261117174036">
+<script src="config.js?v=20261117174036"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"></script>
@@ -19,7 +19,7 @@
 <template id="tplAdmin">
   <div class="admin">
     <aside class="side panel">
-      <div class="side-head"><h2 style="margin:0">文章排序</h2><button class="btn sm" id="new">＋ 新文章</button></div>
+      <div class="side-head"><h2 style="margin:0">文章排序</h2><span style="display:flex;gap:6px"><button class="btn ghost sm" id="openBoard" title="拖曳文章，切換公開或 VIP">📂 公開／VIP</button><button class="btn sm" id="new">＋ 新文章</button></span></div>
       <p class="stamp" style="margin:0 0 8px">拖曳 ⠿ 或按 ▲▼ 調整順序（首頁由上到下）。「置頂」永遠排最前面。</p>
       <input id="filter" type="search" placeholder="找文章…" style="margin-bottom:8px">
       <ul class="plist" id="plist"></ul>
@@ -157,6 +157,16 @@
     </div>
     <div class="dv-stage" id="dvStage"><div class="dv-device" id="dvDevice"><iframe id="dvFrame" title="裝置預覽" src="about:blank"></iframe></div></div>
   </aside>
+  <dialog id="dlgBoard" style="max-width:1100px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <div><h2 style="margin:0">📂 文章分類：公開 ／ VIP</h2><p class="stamp" style="margin:2px 0 0">把文章拖到另一邊就立刻生效（手機請按卡片上的「移到 →」）。</p></div>
+      <button class="btn ghost sm" data-close>關閉</button>
+    </div>
+    <div class="board">
+      <section class="lane" data-vis="public"><h3>🌐 公開<small>所有人都能看</small><span class="lane-n"></span></h3><div class="lane-body"></div></section>
+      <section class="lane vip" data-vis="members"><h3>🔒 VIP<small>只有你核准的會員能看</small><span class="lane-n"></span></h3><div class="lane-body"></div></section>
+    </div>
+  </dialog>
   <dialog id="dlgVideo">
     <h2 style="margin-top:0">🎬 插入 YouTube</h2>
     <label for="vidUrl">YouTube 網址</label><input id="vidUrl" placeholder="https://www.youtube.com/watch?v=…">
@@ -209,9 +219,9 @@
 </template>
 
 <script type="module">
-import { store, MODE, newId, isLive } from "./assets/store.js?v=20261117173238";
-import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261117173238";
-import { initMedia } from "./assets/media.js?v=20261117173238";
+import { store, MODE, newId, isLive } from "./assets/store.js?v=20261117174036";
+import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261117174036";
+import { initMedia } from "./assets/media.js?v=20261117174036";
 const CFG = window.BLOG_CONFIG;
 header("admin"); footer();
 const root = document.getElementById("root");
@@ -455,6 +465,31 @@ function start() {
     else if (html) exec("insertHTML", window.DOMPurify.sanitize(html, { FORBID_ATTR: ["class", "id"], FORBID_TAGS: ["style", "meta"] }));
     else exec("insertText", text);
   });
+
+  // ---------- 文章分類看板：公開 ／ VIP（拖曳）----------
+  function drawBoard() {
+    document.querySelectorAll("#dlgBoard .lane").forEach(lane => {
+      const vis = lane.dataset.vis, list = posts.filter(p => (p.visibility || "public") === vis);
+      lane.querySelector(".lane-n").textContent = list.length;
+      lane.querySelector(".lane-body").innerHTML = list.map(p => `<div class="bcard" draggable="true" data-id="${esc(p.id)}">
+        <b>${esc(p.title || "（未命名）")}</b><small>${esc(p.category || "")}・${p.status === "published" ? "已發布" : "草稿"}</small>
+        <button type="button" class="btn ghost sm bmove" data-to="${vis === "public" ? "members" : "public"}">移到 ${vis === "public" ? "🔒 VIP" : "🌐 公開"} →</button></div>`).join("") || `<p class="stamp" style="text-align:center;padding:20px 0">把文章拖到這裡</p>`;
+    });
+  }
+  async function moveVis(id, vis) {
+    const p = await store.getPost(id); if (!p || p.visibility === vis) return;
+    delete p.locked;
+    try { await store.savePost({ ...p, visibility: vis }); toast(vis === "members" ? "已改成 🔒 VIP（只有會員能看）" : "已改成 🌐 公開"); await refresh(); drawBoard(); if (cur?.id === id) open(id); }
+    catch (e) { toast("失敗：" + e.message, true); }
+  }
+  $("openBoard").onclick = () => { drawBoard(); $("dlgBoard").showModal(); };
+  const board = document.querySelector("#dlgBoard .board");
+  let dragPost = null;
+  board.addEventListener("dragstart", e => { dragPost = e.target.closest(".bcard")?.dataset.id; e.target.closest(".bcard")?.classList.add("dragging"); });
+  board.addEventListener("dragend", e => { e.target.closest(".bcard")?.classList.remove("dragging"); document.querySelectorAll(".lane").forEach(l => l.classList.remove("over")); });
+  board.addEventListener("dragover", e => { const l = e.target.closest(".lane"); if (!l) return; e.preventDefault(); document.querySelectorAll(".lane").forEach(x => x.classList.toggle("over", x === l)); });
+  board.addEventListener("drop", e => { const l = e.target.closest(".lane"); if (!l || !dragPost) return; e.preventDefault(); moveVis(dragPost, l.dataset.vis); dragPost = null; });
+  board.addEventListener("click", e => { const b = e.target.closest(".bmove"); if (b) moveVis(b.closest(".bcard").dataset.id, b.dataset.to); });
 
   // ---------- 會員申請：核准／拒絕 ----------
   async function drawMembers() {

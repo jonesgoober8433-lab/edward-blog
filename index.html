@@ -6,8 +6,8 @@
 <meta name="description" content="財務顧問 Edward 用白話整理投資理財、退休傳承與社會保險。">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261117173238">
-<script src="config.js?v=20261117173238"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261117174036">
+<script src="config.js?v=20261117174036"></script>
 </head>
 <body>
 <main>
@@ -24,14 +24,18 @@
     </div>
     <div class="filters" id="filters"></div>
     <div class="count" id="count"></div>
+    <div class="sortbar" id="sortbar" hidden>
+      <span>↕ 排序模式：拖曳文章卡片調整順序（手機請按卡片上的 ▲▼）。置頂文章永遠排最前面。</span>
+      <span style="display:flex;gap:6px"><button class="btn ghost sm" id="sortCancel">取消</button><button class="btn sm" id="sortSave">完成並儲存</button></span>
+    </div>
     <div class="grid" id="grid"><div class="empty">載入中…</div></div>
   </div>
 </main>
 <script type="module">
-import { store } from "./assets/store.js?v=20261117173238";
-import { header, footer, esc, fmtDate } from "./assets/ui.js?v=20261117173238";
-import { mountMarket } from "./assets/market.js?v=20261117173238";
-import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261117173238";
+import { store } from "./assets/store.js?v=20261117174036";
+import { header, footer, esc, fmtDate, toast } from "./assets/ui.js?v=20261117174036";
+import { mountMarket } from "./assets/market.js?v=20261117174036";
+import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261117174036";
 mountMarket(document.getElementById("mkt"));
 loadIndex().then(latestVisible).then(b => {
   if (!b) return;
@@ -77,7 +81,8 @@ function render() {
   if (!list.length) { grid.innerHTML = `<div class="empty">${posts.length ? "找不到符合的文章，換個關鍵字試試。" : "文章準備中，敬請期待！"}</div>`; return; }
   const showFeatured = !words.length && cat === "全部";
   grid.innerHTML = list.map((p, i) => `
-    <a class="card ${showFeatured && i === 0 && p.pinned ? "featured" : ""}" href="post.html?id=${encodeURIComponent(p.id)}">
+    <a class="card ${showFeatured && i === 0 && p.pinned && !sorting ? "featured" : ""}" href="post.html?id=${encodeURIComponent(p.id)}" data-id="${esc(p.id)}" ${sorting ? `draggable="true"` : ""}>
+      ${sorting ? `<span class="sort-ctl"><span class="grip">⠿ 拖曳</span><button type="button" data-mv="up" aria-label="往前">▲</button><button type="button" data-mv="down" aria-label="往後">▼</button></span>` : ""}
       <div class="cover ${p.cover ? "" : "blank"}" data-cat="${esc(p.category || "Edward")}" ${p.cover ? `style="background-image:url('${esc(p.cover)}')"` : ""}></div>
       <div class="in">
         <span class="tag">${esc(p.category || "")}</span>
@@ -92,7 +97,46 @@ function render() {
       </div>
     </a>`).join("");
 }
-store.onAuth(() => load());
+// ---------- 管理員專用：在首頁直接拖曳文章順序 ----------
+let sorting = false;
+const sortBtn = document.createElement("button");
+sortBtn.className = "sort-fab"; sortBtn.type = "button"; sortBtn.hidden = true;
+sortBtn.innerHTML = "↕ 調整文章順序"; document.body.append(sortBtn);
+function setSort(on) {
+  sorting = on; document.body.classList.toggle("sorting", on);
+  document.getElementById("sortbar").hidden = !on; sortBtn.hidden = on || !isAdmin;
+  if (on) { cat = "全部"; q.value = ""; document.querySelectorAll(".chip").forEach(x => x.classList.toggle("on", x.dataset.c === "全部")); }
+  render();
+}
+let isAdmin = false;
+sortBtn.onclick = () => setSort(true);
+document.getElementById("sortCancel").onclick = () => setSort(false);
+document.getElementById("sortSave").onclick = async () => {
+  const ids = [...document.querySelectorAll("#grid .card")].map(c => c.dataset.id);
+  const b = document.getElementById("sortSave"); b.disabled = true; b.textContent = "儲存中…";
+  try { await store.reorder(ids); posts.sort((a, b2) => ids.indexOf(a.id) - ids.indexOf(b2.id)); toast("順序已儲存 ✓ 讀者重新整理就會看到"); setSort(false); }
+  catch (e) { toast("儲存失敗：" + e.message, true); }
+  b.disabled = false; b.textContent = "完成並儲存";
+};
+const gridEl = document.getElementById("grid");
+let dragCard = null;
+gridEl.addEventListener("click", e => {
+  if (!sorting) return;
+  const mv = e.target.closest("[data-mv]"); e.preventDefault();
+  if (!mv) return;
+  const card = mv.closest(".card"), sib = mv.dataset.mv === "up" ? card.previousElementSibling : card.nextElementSibling;
+  if (!sib) return;
+  mv.dataset.mv === "up" ? gridEl.insertBefore(card, sib) : gridEl.insertBefore(sib, card);
+});
+gridEl.addEventListener("dragstart", e => { if (!sorting) return; dragCard = e.target.closest(".card"); dragCard?.classList.add("dragging"); });
+gridEl.addEventListener("dragend", () => { dragCard?.classList.remove("dragging"); dragCard = null; });
+gridEl.addEventListener("dragover", e => {
+  if (!sorting || !dragCard) return; e.preventDefault();
+  const over = e.target.closest(".card"); if (!over || over === dragCard) return;
+  const r = over.getBoundingClientRect(), after = (e.clientY - r.top) / r.height > .5 || (e.clientX - r.left) / r.width > .5 && Math.abs(e.clientY - (r.top + r.height / 2)) < r.height / 3;
+  gridEl.insertBefore(dragCard, after ? over.nextSibling : over);
+});
+store.onAuth(u => { isAdmin = !!u?.isAdmin; sortBtn.hidden = !isAdmin || sorting; load(); });
 </script>
 </body>
 </html>
