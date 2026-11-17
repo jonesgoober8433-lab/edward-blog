@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Edward 的 Blog｜投資理財・退休傳承・社會保險</title>
+<meta name="description" content="財務顧問 Edward 用白話整理投資理財、退休傳承與社會保險。">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script src="config.js"></script>
+</head>
+<body>
+<main>
+  <section class="hero"><div class="wrap">
+    <div class="rule"></div>
+    <h1 id="siteName">Edward 的 Blog</h1>
+    <p id="tagline"></p>
+    <div class="search"><input id="q" type="search" placeholder="搜尋文章：例如 勞保、退休、ETF…" aria-label="搜尋文章"></div>
+  </div></section>
+  <div class="wrap">
+    <div class="filters" id="filters"></div>
+    <div class="count" id="count"></div>
+    <div class="grid" id="grid"><div class="empty">載入中…</div></div>
+  </div>
+</main>
+<script type="module">
+import { store } from "./assets/store.js";
+import { header, footer, esc, fmtDate } from "./assets/ui.js";
+const CFG = window.BLOG_CONFIG;
+header("home"); footer();
+document.getElementById("siteName").textContent = CFG.siteName;
+document.getElementById("tagline").textContent = CFG.tagline;
+
+let posts = [], cat = "全部", texts = {};
+const q = document.getElementById("q");
+q.value = new URLSearchParams(location.search).get("q") || "";
+
+async function load() {
+  posts = await store.listPosts();
+  await Promise.all(posts.map(async p => { texts[p.id] = (await store.searchText(p.id)) || ""; }));
+  const cats = ["全部", ...new Set([...CFG.categories, ...posts.map(p => p.category)].filter(Boolean))].filter(c => c === "全部" || posts.some(p => p.category === c));
+  document.getElementById("filters").innerHTML = cats.map(c => `<button class="chip ${c === cat ? "on" : ""}" data-c="${esc(c)}">${esc(c)}</button>`).join("");
+  render();
+}
+document.getElementById("filters").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  cat = b.dataset.c; document.querySelectorAll(".chip").forEach(x => x.classList.toggle("on", x === b)); render();
+});
+q.addEventListener("input", render);
+
+function render() {
+  const words = q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const list = posts.filter(p => (cat === "全部" || p.category === cat) &&
+    words.every(w => [p.title, p.summary, p.category, ...(p.tags || []), texts[p.id]].join(" ").toLowerCase().includes(w)));
+  document.getElementById("count").textContent = words.length || cat !== "全部" ? `找到 ${list.length} 篇` : `共 ${list.length} 篇文章`;
+  const grid = document.getElementById("grid");
+  if (!list.length) { grid.innerHTML = `<div class="empty">找不到符合的文章，換個關鍵字試試。</div>`; return; }
+  const showFeatured = !words.length && cat === "全部";
+  grid.innerHTML = list.map((p, i) => `
+    <a class="card ${showFeatured && i === 0 && p.pinned ? "featured" : ""}" href="post.html?id=${encodeURIComponent(p.id)}">
+      <div class="cover ${p.cover ? "" : "blank"}" data-cat="${esc(p.category || "Edward")}" ${p.cover ? `style="background-image:url('${esc(p.cover)}')"` : ""}></div>
+      <div class="in">
+        <span class="tag">${esc(p.category || "")}</span>
+        <h3>${esc(p.title)}</h3>
+        <p>${esc(p.summary || "")}</p>
+        <div class="meta">
+          ${p.pinned ? `<span class="badge pin">置頂</span>` : ""}
+          ${p.visibility === "members" ? `<span class="badge lock">會員限定</span>` : ""}
+          <span>發布 ${fmtDate(p.publishedAt || p.createdAt)}</span>
+          ${p.updatedAt && p.updatedAt - (p.publishedAt || 0) > 864e5 ? `<span>更新 ${fmtDate(p.updatedAt)}</span>` : ""}
+        </div>
+      </div>
+    </a>`).join("");
+}
+store.onAuth(() => load());
+</script>
+</body>
+</html>

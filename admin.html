@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>後台｜Edward 的 Blog</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+</head>
+<body>
+<main><div class="wrap" id="root"><div class="empty">載入中…</div></div></main>
+
+<template id="tplAdmin">
+  <div class="admin">
+    <aside class="side panel">
+      <div class="side-head"><h2 style="margin:0">文章排序</h2><button class="btn sm" id="new">＋ 新文章</button></div>
+      <p class="stamp" style="margin:0 0 8px">拖曳 ⠿ 或按 ▲▼ 調整順序（首頁由上到下）。「置頂」永遠排最前面。</p>
+      <input id="filter" type="search" placeholder="找文章…" style="margin-bottom:8px">
+      <ul class="plist" id="plist"></ul>
+      <div style="border-top:1px solid var(--ln);margin-top:12px;padding-top:10px">
+        <h2 style="font-size:16px;margin:0 0 4px">會員</h2>
+        <div id="members" class="stamp"></div>
+      </div>
+    </aside>
+
+    <section class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <h2 style="margin:0" id="edTitle">新文章</h2>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn ghost sm" id="useTpl">📋 套用模板</button>
+          <button class="btn ghost sm" id="saveTpl">💾 存成模板</button>
+        </div>
+      </div>
+      <p class="stamp" id="stamps"></p>
+
+      <label for="title">標題</label><input id="title" placeholder="例如：勞保年金到底領不領得到？">
+      <label for="summary">摘要（顯示在文章卡片與搜尋結果）</label><textarea id="summary" rows="2"></textarea>
+      <div class="row3">
+        <div><label for="category">分類</label><select id="category"></select></div>
+        <div><label for="tags">標籤（用逗號分開）</label><input id="tags" placeholder="勞保, 退休"></div>
+        <div><label for="cover">封面圖片網址（可留空）</label><input id="cover" placeholder="https://…"></div>
+      </div>
+      <div class="row3" style="margin-top:12px">
+        <div><label for="visibility">誰能看</label><select id="visibility"><option value="public">所有人（公開）</option><option value="members">會員限定</option></select></div>
+        <div><label for="status">狀態</label><select id="status"><option value="draft">草稿（只有你看得到）</option><option value="published">已發布</option></select></div>
+        <div><label>&nbsp;</label><label class="check"><input type="checkbox" id="pinned"> 置頂（排在首頁最前面、大張顯示）</label></div>
+      </div>
+
+      <label>內文（Markdown 格式，右邊即時預覽）</label>
+      <div class="toolbar">
+        <button class="btn ghost sm" data-ins="h2">大標</button>
+        <button class="btn ghost sm" data-ins="h3">小標</button>
+        <button class="btn ghost sm" data-ins="b">粗體</button>
+        <button class="btn ghost sm" data-ins="ul">條列</button>
+        <button class="btn ghost sm" data-ins="ol">編號</button>
+        <button class="btn ghost sm" data-ins="q">引言框</button>
+        <button class="btn ghost sm" data-ins="a">連結</button>
+        <button class="btn ghost sm" data-ins="img">圖片</button>
+        <button class="btn ghost sm" data-ins="tbl">表格</button>
+      </div>
+      <div class="editor">
+        <textarea id="body" placeholder="從這裡開始寫…（也可以按上面「套用模板」）"></textarea>
+        <div class="preview prose" id="preview"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn danger sm" id="del">刪除</button>
+        <span style="flex:1"></span>
+        <a class="btn ghost" id="view" target="_blank">看文章頁</a>
+        <button class="btn ghost" id="saveDraft">存成草稿</button>
+        <button class="btn" id="publish">發布</button>
+      </div>
+    </section>
+  </div>
+
+  <dialog id="dlgTpl">
+    <h2 style="margin-top:0">我的模板</h2>
+    <p class="stamp">套用後會換掉目前的內文、分類、標籤和「誰能看」，標題不動。</p>
+    <div id="tplList"></div>
+    <div class="actions"><button class="btn ghost" data-close>關閉</button></div>
+  </dialog>
+  <dialog id="dlgSave">
+    <h2 style="margin-top:0">存成模板</h2>
+    <p class="stamp">會記住目前的內文、分類、標籤和「誰能看」，下次寫新文章一鍵套用。</p>
+    <label for="tplName">模板名稱</label><input id="tplName" placeholder="例如：社會保險系列">
+    <div class="actions"><button class="btn ghost" data-close>取消</button><button class="btn" id="tplOk">儲存模板</button></div>
+  </dialog>
+</template>
+
+<script type="module">
+import { store, MODE, newId } from "./assets/store.js";
+import { header, footer, esc, fmtTime, md, toast } from "./assets/ui.js";
+const CFG = window.BLOG_CONFIG;
+header("admin"); footer();
+const root = document.getElementById("root");
+let started = false;
+
+store.onAuth(u => {
+  if (!u) { location.href = "login.html?next=admin.html"; return; }
+  if (!u.isAdmin) { root.innerHTML = `<div class="paywall" style="margin:40px auto;max-width:520px"><h3>這裡是管理員後台</h3><p>你的帳號是一般會員。${MODE === "firebase" ? "要把帳號設成管理員，請照 README.md 第 4 步到 Firebase 加上 roles。" : ""}</p><a class="btn" href="member.html">去會員專區</a></div>`; return; }
+  if (!started) { started = true; start(); }
+});
+
+function start() {
+  root.innerHTML = document.getElementById("tplAdmin").innerHTML;
+  const $ = id => document.getElementById(id);
+  const F = ["title", "summary", "category", "tags", "cover", "visibility", "status", "body"];
+  $("category").innerHTML = CFG.categories.map(c => `<option>${esc(c)}</option>`).join("");
+  let posts = [], cur = null, dirty = false;
+
+  const blank = () => ({ id: null, title: "", summary: "", category: CFG.categories[0], tags: [], cover: "", visibility: "public", status: "draft", pinned: false, body: "" });
+
+  async function refresh(selectId) {
+    posts = await store.listPosts({ all: true });
+    drawList();
+    if (selectId) open(posts.find(p => p.id === selectId) ? selectId : null);
+    const mem = await store.listMembers().catch(() => []);
+    $("members").innerHTML = `共 ${mem.length} 位` + (mem.length ? "：" + mem.slice(0, 30).map(m => esc(m.name || m.email)).join("、") : "");
+  }
+
+  function drawList() {
+    const v = $("filter").value.trim().toLowerCase();
+    $("plist").innerHTML = posts.filter(p => !v || (p.title + (p.tags || []).join(" ")).toLowerCase().includes(v)).map(p => `
+      <li draggable="true" data-id="${esc(p.id)}" class="${cur?.id === p.id ? "sel" : ""}">
+        <span class="grip" title="拖曳排序">⠿</span>
+        <div class="t"><b>${p.pinned ? "📌 " : ""}${esc(p.title || "（未命名）")}</b>
+          <small>${p.status === "published" ? "已發布" : "草稿"}${p.visibility === "members" ? "・會員" : ""}・更新 ${fmtTime(p.updatedAt)}</small></div>
+        <span class="mv"><button data-mv="-1" title="往上">▲</button><button data-mv="1" title="往下">▼</button></span>
+      </li>`).join("") || `<li class="stamp" style="cursor:default">還沒有文章</li>`;
+  }
+
+  async function saveOrder(ids) { await store.reorder(ids); ids.forEach((id, i) => { const p = posts.find(x => x.id === id); if (p) p.order = i; }); drawList(); toast("順序已更新"); }
+
+  $("plist").addEventListener("click", async e => {
+    const li = e.target.closest("li[data-id]"); if (!li) return;
+    const mv = e.target.closest("[data-mv]");
+    if (mv) {
+      e.stopPropagation();
+      const ids = posts.map(p => p.id), i = ids.indexOf(li.dataset.id), j = i + Number(mv.dataset.mv);
+      if (j < 0 || j >= ids.length) return;
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+      posts.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+      return saveOrder(ids);
+    }
+    if (dirty && !confirm("目前文章還沒儲存，確定要切換嗎？")) return;
+    open(li.dataset.id);
+  });
+  let dragId = null;
+  $("plist").addEventListener("dragstart", e => { dragId = e.target.closest("li")?.dataset.id; });
+  $("plist").addEventListener("dragover", e => { e.preventDefault(); document.querySelectorAll(".plist li").forEach(x => x.classList.remove("drag-over")); e.target.closest("li[data-id]")?.classList.add("drag-over"); });
+  $("plist").addEventListener("drop", async e => {
+    e.preventDefault(); const to = e.target.closest("li[data-id]")?.dataset.id;
+    document.querySelectorAll(".plist li").forEach(x => x.classList.remove("drag-over"));
+    if (!dragId || !to || dragId === to) return;
+    const ids = posts.map(p => p.id).filter(id => id !== dragId); ids.splice(ids.indexOf(to), 0, dragId);
+    posts.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+    saveOrder(ids);
+  });
+  $("filter").addEventListener("input", drawList);
+
+  async function open(id) {
+    cur = id ? await store.getPost(id) : blank();
+    if (!cur) cur = blank();
+    F.forEach(k => $(k).value = k === "tags" ? (cur.tags || []).join(", ") : (cur[k] ?? ""));
+    $("pinned").checked = !!cur.pinned;
+    $("edTitle").textContent = cur.id ? "編輯文章" : "新文章";
+    $("del").hidden = !cur.id; $("view").hidden = !cur.id;
+    if (cur.id) $("view").href = "post.html?id=" + encodeURIComponent(cur.id);
+    stamps(); preview(); dirty = false; drawList();
+    $("publish").textContent = cur.status === "published" ? "更新已發布文章" : "發布";
+  }
+  function stamps() {
+    $("stamps").textContent = cur.id ? `建立：${fmtTime(cur.createdAt)}　｜　發布：${cur.publishedAt ? fmtTime(cur.publishedAt) : "尚未發布"}　｜　最後更新：${fmtTime(cur.updatedAt)}` : "還沒儲存";
+  }
+  function preview() { $("preview").innerHTML = md($("body").value) || `<p class="stamp">預覽會出現在這裡</p>`; }
+  root.addEventListener("input", e => { if (e.target.closest(".panel") && e.target.id !== "filter") { dirty = true; if (e.target.id === "body") preview(); } });
+  window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+  const INS = { h2: ["\n## ", "標題", ""], h3: ["\n### ", "小標", ""], b: ["**", "粗體字", "**"], ul: ["\n- ", "重點", ""], ol: ["\n1. ", "第一點", ""], q: ["\n> ", "重點提醒", ""], a: ["[", "連結文字", "](https://)"], img: ["![", "圖片說明", "](https://圖片網址)"], tbl: ["\n| 項目 | 數字 | 說明 |\n|---|---|---|\n| ", "", " |  |  |\n"] };
+  document.querySelector(".toolbar").addEventListener("click", e => {
+    const b = e.target.closest("[data-ins]"); if (!b) return;
+    const [pre, def, post] = INS[b.dataset.ins], ta = $("body"), s = ta.selectionStart, en = ta.selectionEnd;
+    const sel = ta.value.slice(s, en) || def;
+    ta.setRangeText(pre + sel + post, s, en, "end"); ta.focus(); dirty = true; preview();
+  });
+
+  function collect(status) {
+    const now = Date.now();
+    const p = {
+      ...cur,
+      title: $("title").value.trim(), summary: $("summary").value.trim(), category: $("category").value,
+      tags: $("tags").value.split(/[,，、]/).map(s => s.trim()).filter(Boolean), cover: $("cover").value.trim(),
+      visibility: $("visibility").value, status, pinned: $("pinned").checked, body: $("body").value,
+    };
+    delete p.locked;
+    if (!p.id) { p.id = newId(p.title); p.createdAt = now; p.order = -1; }
+    p.updatedAt = now;
+    if (status === "published" && !p.publishedAt) p.publishedAt = now;
+    return p;
+  }
+  async function save(status) {
+    if (!$("title").value.trim()) return toast("請先填標題", true);
+    try {
+      const isNew = !cur.id;
+      cur = await store.savePost(collect(status)); dirty = false;
+      toast(status === "published" ? "已發布 ✓" : "草稿已儲存 ✓");
+      await refresh();
+      if (isNew) { const ids = posts.map(p => p.id); await store.reorder(ids); }
+      open(cur.id);
+    } catch (e) { toast(e.message, true); }
+  }
+  $("saveDraft").onclick = () => save("draft");
+  $("publish").onclick = () => save("published");
+  $("status").addEventListener("change", () => $("publish").textContent = "發布");
+  $("del").onclick = async () => {
+    if (!cur.id || !confirm(`確定刪除「${cur.title}」？刪了就救不回來。\n（只是不想公開的話，把狀態改成草稿就好）`)) return;
+    await store.deletePost(cur.id); toast("已刪除"); dirty = false; await refresh(); open(null);
+  };
+  $("new").onclick = () => { if (dirty && !confirm("目前文章還沒儲存，確定要開新文章嗎？")) return; open(null); };
+
+  // 模板
+  document.querySelectorAll("dialog [data-close]").forEach(b => b.onclick = () => b.closest("dialog").close());
+  async function drawTpl() {
+    const list = await store.listTemplates();
+    $("tplList").innerHTML = list.map(t => `<div class="tpl"><div><b>${esc(t.name)}</b><br><span class="stamp">${esc(t.category || "")}・${t.visibility === "members" ? "會員" : "公開"}・${fmtTime(t.updatedAt)}</span></div>
+      <span style="display:flex;gap:6px"><button class="btn sm" data-apply="${esc(t.id)}">套用</button><button class="btn danger sm" data-deltpl="${esc(t.id)}">刪</button></span></div>`).join("") || `<p class="stamp">還沒有模板，寫好一篇後按「存成模板」。</p>`;
+    $("tplList").onclick = async e => {
+      const a = e.target.closest("[data-apply]"), d = e.target.closest("[data-deltpl]");
+      if (a) {
+        const t = list.find(x => x.id === a.dataset.apply);
+        if ($("body").value.trim() && !confirm("會換掉目前的內文，確定嗎？")) return;
+        $("body").value = t.body || ""; if (t.category) $("category").value = t.category;
+        $("tags").value = (t.tags || []).join(", "); $("visibility").value = t.visibility || "public";
+        dirty = true; preview(); $("dlgTpl").close(); toast(`已套用「${t.name}」`);
+      }
+      if (d && confirm("刪除這個模板？")) { await store.deleteTemplate(d.dataset.deltpl); drawTpl(); }
+    };
+  }
+  $("useTpl").onclick = async () => { await drawTpl(); $("dlgTpl").showModal(); };
+  $("saveTpl").onclick = () => { $("tplName").value = ""; $("dlgSave").showModal(); $("tplName").focus(); };
+  $("tplOk").onclick = async () => {
+    const name = $("tplName").value.trim(); if (!name) return toast("請取個模板名稱", true);
+    await store.saveTemplate({ id: "tpl-" + Date.now().toString(36), name, category: $("category").value,
+      tags: $("tags").value.split(/[,，、]/).map(s => s.trim()).filter(Boolean), visibility: $("visibility").value, body: $("body").value, updatedAt: Date.now() });
+    $("dlgSave").close(); toast("模板已儲存 ✓");
+  };
+
+  refresh().then(() => open(new URLSearchParams(location.search).get("id")));
+}
+</script>
+</body>
+</html>
