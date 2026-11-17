@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261117170536">
-<script src="config.js?v=20261117170536"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261117171607">
+<script src="config.js?v=20261117171607"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"></script>
@@ -197,6 +197,7 @@
       <span style="display:flex;gap:6px"><button class="btn ghost sm" data-close>先不要</button><button class="btn sm" id="optApply">套用優化版</button></span>
     </div>
     <div class="optnotes"><div><b>改了什麼</b><ul id="optChanges"></ul></div><div><b>⚠️ 請你查證</b><ul id="optChecks"></ul></div></div>
+    <details class="fixes" id="optFixWrap" open><summary>🔍 查證修正（<span id="optFixN">0</span> 處）：改之前 → 改之後，附來源</summary><div id="optFixes"></div></details>
     <div class="cmp"><div><div class="cmph">原文（目前網站上）</div><div class="prose" id="optOld"></div></div><div><div class="cmph new">優化版</div><div class="prose" id="optNew"></div></div></div>
   </dialog>
   <dialog id="dlgSave">
@@ -208,9 +209,9 @@
 </template>
 
 <script type="module">
-import { store, MODE, newId, isLive } from "./assets/store.js?v=20261117170536";
-import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261117170536";
-import { initMedia } from "./assets/media.js?v=20261117170536";
+import { store, MODE, newId, isLive } from "./assets/store.js?v=20261117171607";
+import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261117171607";
+import { initMedia } from "./assets/media.js?v=20261117171607";
 const CFG = window.BLOG_CONFIG;
 header("admin"); footer();
 const root = document.getElementById("root");
@@ -598,7 +599,7 @@ ${currentMd()}`, "已複製給 AI 審閱 ✓（貼給 ChatGPT／Gemini／Claude 
   async function applyOpt(o) {
     const p = await store.getPost(o.id); if (!p) throw new Error("找不到原文");
     delete p.locked;
-    await store.savePost({ ...p, summary: o.summary, body: o.body, updatedAt: Date.now(), optRev: o.rev || 1 });
+    await store.savePost({ ...p, title: o.newTitle || p.title, summary: o.summary, body: o.body, updatedAt: Date.now(), optRev: o.rev || 1 });
   }
   let curOpt = null;
   $("optList").addEventListener("click", async e => {
@@ -612,9 +613,14 @@ ${currentMd()}`, "已複製給 AI 審閱 ✓（貼給 ChatGPT／Gemini／Claude 
     const b = e.target.closest("[data-opt]"); if (!b) return;
     curOpt = optList.find(o => o.id === b.dataset.opt);
     const p = await store.getPost(curOpt.id);
-    $("optTitle").textContent = curOpt.title;
+    $("optTitle").textContent = curOpt.newTitle ? `${curOpt.title} → 新標題：${curOpt.newTitle}` : curOpt.title;
     $("optChanges").innerHTML = (curOpt.changes || []).map(c => `<li>${esc(c)}</li>`).join("") || "<li>—</li>";
     $("optChecks").innerHTML = (curOpt.checks || []).map(c => `<li>${esc(c)}</li>`).join("") || "<li>沒有</li>";
+    const fx = curOpt.fixes || [];
+    $("optFixWrap").hidden = !fx.length; $("optFixN").textContent = fx.length;
+    $("optFixes").innerHTML = fx.map((f, i) => `<div class="fix"><span class="fix-t">${i + 1}．${esc(f.type || "修改")}</span>
+      <div class="fix-ba"><del>${esc(f.before)}</del><span class="fix-arrow">→</span><ins>${esc(f.after || "（刪除）")}</ins></div>
+      <p class="stamp">${esc(f.why || "")}${(f.sources || []).length ? "　來源：" + f.sources.map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}${s.date ? "（" + esc(s.date) + "）" : ""}</a>`).join("、") : ""}</p></div>`).join("");
     $("optOld").innerHTML = `<p class="stamp"><b>摘要：</b>${esc(p?.summary || "")}</p>` + md(p?.body || "");
     $("optNew").innerHTML = `<p class="stamp"><b>摘要：</b>${esc(curOpt.summary)}</p>` + md(curOpt.body);
     $("dlgOpt").showModal(); $("dlgOpt").scrollTop = 0;
