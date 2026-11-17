@@ -1,6 +1,6 @@
 // 照片庫：上傳（剪貼簿／照片 App 拖曳／選檔）→ 壓縮 → 檢查重複 → 插入文章
 // 重複判斷兩層：①檔案完全一樣（SHA-256）②看起來一樣（縮圖指紋 dHash，抓得到「同一張照片另存、縮放過」）
-import { esc, fmtTime, toast, rememberMedia, mediaUrl } from "./ui.js";
+import { esc, fmtTime, toast, rememberMedia, mediaUrl } from "./ui.js?v=202611171621";
 
 const MAX_SIDE = 1600, MAX_B64 = 700000, THUMB = 360;
 
@@ -40,7 +40,7 @@ function compress(img) {
   throw new Error("這張圖壓縮後還是太大");
 }
 
-export function initMedia({ store, $, getMode, insertMd, insertVisual, getPostsWithBody, onChange }) {
+export function initMedia({ store, $, getMode, insertMd, insertVisual, getPostsWithBody, onChange, onVideoFile }) {
   let lib = [];            // 照片庫（含 Notion 搬家的內建圖片）
   let repoFp = {};         // 內建圖片的指紋快取
   try { repoFp = JSON.parse(localStorage.getItem("eb-repo-fp") || "{}"); } catch (e) { }
@@ -91,7 +91,7 @@ export function initMedia({ store, $, getMode, insertMd, insertVisual, getPostsW
   async function upload(files) {
     files = [...files];
     const vids = files.filter(f => f.type.startsWith("video/"));
-    if (vids.length) toast("影片檔太大放不進免費方案：請先上傳到 YouTube，再按「🎬 影片」貼連結", true);
+    if (vids.length) { if (onVideoFile) onVideoFile(vids); else toast("影片檔太大放不進免費方案：請先上傳到 YouTube，再按「🎬 影片」貼連結", true); }
     const imgs = files.filter(f => f.type.startsWith("image/") || /\.(heic|jpe?g|png|gif|webp)$/i.test(f.name));
     if (!imgs.length) return;
     await loadLib(); await ensureRepoFingerprints();

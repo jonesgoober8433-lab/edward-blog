@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
-<script src="config.js"></script>
+<link rel="stylesheet" href="assets/style.css?v=202611171621">
+<script src="config.js?v=202611171621"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"></script>
@@ -71,6 +71,10 @@
 
       <div class="modebar">
         <label style="margin:0">內文</label>
+        <span style="display:flex;gap:6px;flex-wrap:wrap;margin-left:auto;margin-right:8px">
+          <button type="button" class="btn ghost sm" id="copyMd" title="把整篇（標題＋內文）轉成 Markdown 複製到剪貼簿">📋 複製 Markdown</button>
+          <button type="button" class="btn ghost sm" id="copyAi" title="複製全文＋審閱指令，直接貼給 AI">🤖 複製給 AI 審閱</button>
+        </span>
         <div class="seg" role="group" aria-label="編輯模式"><button type="button" data-mode="md" class="on">Markdown（給 AI 貼大綱）</button><button type="button" data-mode="visual">視覺編輯（顏色、字級）</button></div>
       </div>
       <div id="mdPane">
@@ -87,7 +91,7 @@
           <span class="sep"></span>
           <label class="btn gold sm" title="也可以直接 Command＋V 貼上，或從照片 App 拖進來">🖼 上傳圖片<input type="file" id="pickImg" accept="image/*,video/*" multiple hidden></label>
           <button class="btn ghost sm" data-media-lib type="button">📚 照片庫</button>
-          <button class="btn ghost sm" data-video type="button">🎬 影片</button>
+          <button class="btn ghost sm" data-video type="button">🎬 YouTube</button>
         </div>
         <p class="stamp" style="margin:0 0 6px">圖片大小：在說明後面加 <code>|小</code> <code>|中</code> <code>|大</code>，例如 <code>![填表範例|中](…)</code>；兩張以上連在一起會自動並排。</p>
         <div class="editor">
@@ -116,7 +120,7 @@
           <button class="btn ghost sm" data-cmd="link">連結</button>
           <label class="btn gold sm" title="也可以直接 Command＋V 貼上，或從照片 App 拖進來">🖼 上傳圖片<input type="file" id="pickImg2" accept="image/*,video/*" multiple hidden></label>
           <button class="btn ghost sm" data-media-lib type="button">📚 照片庫</button>
-          <button class="btn ghost sm" data-video type="button">🎬 影片</button>
+          <button class="btn ghost sm" data-video type="button">🎬 YouTube</button>
           <select id="vImgSize" title="先點一下文章裡的圖片，再選大小"><option value="">圖片大小</option><option value="s">小</option><option value="m">中</option><option value="l">大（滿版）</option><option value="0">原尺寸</option></select>
           <button class="btn ghost sm" data-cmd="removeFormat" title="清除選取文字的顏色、字級">清除格式</button>
         </div>
@@ -150,6 +154,27 @@
     </div>
     <div class="dv-stage" id="dvStage"><div class="dv-device" id="dvDevice"><iframe id="dvFrame" title="裝置預覽" src="about:blank"></iframe></div></div>
   </aside>
+  <dialog id="dlgVideo">
+    <h2 style="margin-top:0">🎬 插入 YouTube</h2>
+    <label for="vidUrl">YouTube 網址</label><input id="vidUrl" placeholder="https://www.youtube.com/watch?v=…">
+    <label for="vidTitle">顯示文字（書籤、超連結用；留空會用影片名稱）</label><input id="vidTitle" placeholder="例如：72 法則 3 分鐘教學">
+    <label>讀者看到的樣子</label>
+    <div class="vidopts">
+      <label class="vopt"><input type="radio" name="vidMode" value="video" checked><span><b>影片</b><small>直接在文章裡播放</small></span></label>
+      <label class="vopt"><input type="radio" name="vidMode" value="bookmark"><span><b>書籤卡片</b><small>縮圖＋標題，點了到 YouTube</small></span></label>
+      <label class="vopt"><input type="radio" name="vidMode" value="link"><span><b>超連結</b><small>一行文字連結，最低調</small></span></label>
+    </div>
+    <p class="msgbox">📌 影片「檔案」不能直接上傳（免費方案放不下），請先傳到 YouTube（不想公開可選「不公開」），再把網址貼在這裡。</p>
+    <div class="actions"><button class="btn ghost" data-close>取消</button><button class="btn" id="vidOk">插入</button></div>
+  </dialog>
+  <dialog id="dlgVidFile">
+    <h2 style="margin-top:0">🎬 影片檔要先傳到 YouTube</h2>
+    <p>你選了影片檔 <b id="vidFileName"></b>。免費方案放不下影片檔，照這 3 步就好：</p>
+    <ol><li>到 YouTube Studio 上傳這支影片（不想公開就選<b>「不公開」</b>，只有拿到連結的人看得到）</li>
+      <li>上傳完，複製影片網址</li>
+      <li>回來按「🎬 YouTube」，貼上網址，選「影片」</li></ol>
+    <div class="actions"><a class="btn ghost" href="https://studio.youtube.com/" target="_blank" rel="noopener">打開 YouTube Studio</a><button class="btn" data-close>知道了</button></div>
+  </dialog>
   <dialog id="dlgMedia" style="max-width:1100px">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
       <div><h2 style="margin:0">📚 照片庫</h2><span class="stamp" id="mediaCount"></span></div>
@@ -180,9 +205,9 @@
 </template>
 
 <script type="module">
-import { store, MODE, newId, isLive } from "./assets/store.js";
-import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js";
-import { initMedia } from "./assets/media.js";
+import { store, MODE, newId, isLive } from "./assets/store.js?v=202611171621";
+import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=202611171621";
+import { initMedia } from "./assets/media.js?v=202611171621";
 const CFG = window.BLOG_CONFIG;
 header("admin"); footer();
 const root = document.getElementById("root");
@@ -440,12 +465,19 @@ function start() {
   });
   drawPalettes();
 
+  // 記住 Markdown 編輯框的游標位置（按按鈕、開對話框後插入的內容會放回游標處）
+  let mdSel = null;
+  ["keyup", "click", "select", "blur", "input"].forEach(ev => $("body").addEventListener(ev, () => { mdSel = [$("body").selectionStart, $("body").selectionEnd]; }));
+  function insertAtCursor(text) {
+    const ta = $("body"); const [a, b] = mdSel || [ta.value.length, ta.value.length];
+    ta.focus(); ta.setRangeText(text, a, b, "end"); mdSel = [ta.selectionStart, ta.selectionEnd]; preview(); dirty = true;
+  }
   // ---------- 照片庫、上傳圖片、影片 ----------
   const bodyCache = {};
   const media = initMedia({
     store, $,
     getMode: () => mode,
-    insertMd: text => { const ta = $("body"); ta.focus(); ta.setRangeText(text, ta.selectionStart, ta.selectionEnd, "end"); preview(); },
+    insertMd: text => insertAtCursor(text),
     insertVisual: html => exec("insertHTML", html),
     getPostsWithBody: async () => [...(cur && !cur.id ? [{ id: "__cur", title: "目前這篇（還沒儲存）", body: mode === "visual" ? td.turndown($("visual").innerHTML) : $("body").value }] : []), ...await Promise.all(posts.map(async p => {
       if (cur?.id === p.id) return { ...p, body: mode === "visual" ? td.turndown($("visual").innerHTML) : $("body").value };
@@ -453,16 +485,45 @@ function start() {
       return { ...p, body: bodyCache[p.id].b };
     }))],
     onChange: () => { dirty = true; },
+    onVideoFile: vids => { $("vidFileName").textContent = vids.map(v => v.name).join("、"); $("dlgVidFile").showModal(); },
   });
   document.querySelectorAll("[data-media-lib]").forEach(b => b.onclick = () => media.openLib());
   $("pickImg2").addEventListener("change", e => { media.upload(e.target.files); e.target.value = ""; });
-  document.querySelectorAll("[data-video]").forEach(b => b.onclick = () => {
-    const u = prompt("貼上 YouTube 影片網址（影片會在文章裡直接播放）"); if (!u) return;
+  document.querySelectorAll("[data-video]").forEach(b => b.onclick = () => { $("vidUrl").value = ""; $("vidTitle").value = ""; $("dlgVideo").showModal(); $("vidUrl").focus(); });
+  $("vidOk").onclick = async () => {
+    const u = $("vidUrl").value.trim(), m = document.querySelector('input[name="vidMode"]:checked').value;
     if (!ytId(u)) return toast("看不懂這個網址，請貼 YouTube 影片的網址", true);
-    if (mode === "visual") exec("insertHTML", `<p><a href="${esc(u)}">🎬 ${esc(u)}</a></p>`);
-    else { const ta = $("body"); ta.focus(); ta.setRangeText(`\n\n🎬 ${u}\n\n`, ta.selectionStart, ta.selectionEnd, "end"); preview(); }
-    dirty = true; toast("已插入影片 ✓（發布後在文章裡會變成播放器）");
-  });
+    let t = $("vidTitle").value.trim();
+    if (!t && m !== "video") {   // 自動抓影片名稱（抓不到就用「YouTube 影片」）
+      try { t = (await (await fetch("https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent(u))).json()).title || ""; } catch (e) { }
+      t = t || "YouTube 影片";
+    }
+    t = t.replace(/[\[\]]/g, "");
+    const mdText = m === "video" ? `🎬 ${u}` : m === "bookmark" ? `🔖 [${t}](${u})` : `[${t}](${u})`;
+    const html = m === "video" ? `<p>🎬 <a href="${esc(u)}">${esc(u)}</a></p>` : m === "bookmark" ? `<p>🔖 <a href="${esc(u)}">${esc(t)}</a></p>` : `<a href="${esc(u)}">${esc(t)}</a>`;
+    $("dlgVideo").close();
+    if (mode === "visual") exec("insertHTML", html);
+    else insertAtCursor(m === "link" ? mdText : `\n\n${mdText}\n\n`);
+    dirty = true; toast({ video: "已插入影片 ✓", bookmark: "已插入書籤卡片 ✓", link: "已插入超連結 ✓" }[m]);
+  };
+  // 一鍵複製：Markdown／給 AI 審閱
+  function currentMd() { return mode === "visual" ? td.turndown($("visual").innerHTML).replace(/\n{3,}/g, "\n\n").trim() + "\n" : $("body").value; }
+  async function copyText(t, okMsg) {
+    try { await navigator.clipboard.writeText(t); toast(okMsg); }
+    catch (e) { const ta = document.createElement("textarea"); ta.value = t; document.body.append(ta); ta.select(); document.execCommand("copy"); ta.remove(); toast(okMsg); }
+  }
+  $("copyMd").onclick = () => copyText(`# ${$("title").value.trim()}\n\n${currentMd()}`, "已複製 Markdown ✓（可以直接貼到任何地方）");
+  $("copyAi").onclick = () => copyText(`請幫我審閱下面這篇部落格文章（Markdown 格式）。
+我是台灣的財務顧問 Edward，讀者是上班族、小資族與高資產家庭。
+請檢查：①錯字與用語 ②數字、法規、日期有沒有過時或錯誤（列出需要查證的句子）③段落結構與小標是否好讀 ④開頭是否吸引人、結尾是否自然導向預約諮詢。
+請保留我的語氣，最後「整篇用 Markdown 輸出修改後的版本」，我會直接貼回後台。
+圖片那行（![...](...)）和 🎬／🔖 開頭的影片、書籤行請原封不動保留。
+
+---
+標題：${$("title").value.trim()}
+摘要：${$("summary").value.trim()}
+
+${currentMd()}`, "已複製給 AI 審閱 ✓（貼給 ChatGPT／Gemini／Claude 都可以）");
   let selImg = null;
   $("visual").addEventListener("click", e => { document.querySelectorAll("#visual img.sel").forEach(i => i.classList.remove("sel")); selImg = e.target.closest("img"); selImg?.classList.add("sel"); });
   $("vImgSize").addEventListener("change", e => {

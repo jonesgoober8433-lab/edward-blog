@@ -255,7 +255,6 @@ img.media-loading { min-height: 120px; width: 100%; background: var(--gold-soft)
 .prose table td, .prose table th { vertical-align: top; }
 
 /* 頁尾預約區：按鈕與說明置中對齊 */
-.site-footer .wrap { align-items: center; }
 .site-footer .booking { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
 .site-footer .booking .btn { min-width: 132px; }
 .site-footer .booking small { color: var(--mu); }
@@ -269,22 +268,30 @@ img.media-loading { min-height: 120px; width: 100%; background: var(--gold-soft)
 .np-ico { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--hero-a); color: #fff; }
 @media (max-width: 600px) { .np-txt b { font-size: 16px; } .np-ico { width: 38px; height: 38px; } }
 
-/* 右下角大綱按鈕與面板 */
-.toc-fab { position: fixed; right: 18px; bottom: 22px; z-index: 40; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 48px; padding: 0 16px 0 14px; border-radius: 999px; border: 0; background: var(--hero-a); color: #fff; font: 700 15px/1 var(--sans); box-shadow: 0 10px 24px -8px rgba(0,0,0,.45); cursor: pointer; opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .2s, transform .2s; }
+/* 文章大綱：電腦＝右下角圓形圖示；手機＝右側中間 ☰ 小標籤，點開是小目錄（不蓋滿畫面） */
+.toc-fab { position: fixed; right: 22px; bottom: 24px; z-index: 40; width: 54px; height: 54px; padding: 0; border-radius: 50%; border: 0; background: var(--hero-a); color: #fff; display: grid; place-items: center; box-shadow: 0 10px 24px -8px rgba(0,0,0,.45); cursor: pointer; opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .2s, transform .2s, background .2s; }
 .toc-fab.show, .toc-fab.on { opacity: 1; transform: none; pointer-events: auto; }
-.toc-fab svg { display: block; }
-.toc-fab span { line-height: 1; padding-top: 1px; }
+.toc-fab.on { background: var(--gold); }
+.toc-fab svg { display: block; width: 24px; height: 24px; }
+.toc-tip { position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%); white-space: nowrap; background: var(--ink); color: var(--bg); font: 600 13px/1 var(--sans); padding: 7px 10px; border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity .15s; }
+.toc-fab:hover .toc-tip { opacity: 1; }
 .toc-panel[hidden] { display: none !important; }
-.toc-panel { display: block; position: fixed; right: 18px; bottom: 82px; z-index: 41; width: min(340px, calc(100vw - 36px)); max-height: min(60vh, 520px); overflow: auto; background: var(--card); border: 1px solid var(--ln); border-radius: 14px; box-shadow: 0 18px 40px -16px rgba(0,0,0,.45); padding: 6px 0 10px; }
-.toc-head { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--ln); position: sticky; top: 0; background: var(--card); }
+.toc-panel { display: block; position: fixed; right: 22px; bottom: 90px; z-index: 41; width: min(340px, calc(100vw - 44px)); max-height: min(60vh, 520px); overflow: auto; overscroll-behavior: contain; background: var(--card); border: 1px solid var(--ln); border-radius: 14px; box-shadow: 0 18px 40px -16px rgba(0,0,0,.45); padding: 0 0 8px; }
+.toc-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px 10px 16px; border-bottom: 1px solid var(--ln); position: sticky; top: 0; background: var(--card); z-index: 1; }
 .toc-x { background: none; border: 0; font-size: 16px; color: var(--mu); cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; }
+.toc-x:hover { background: var(--gold-soft); }
 .toc-panel ol { list-style: none; margin: 6px 0 0; padding: 0; }
-.toc-panel li a { display: block; padding: 7px 16px; color: var(--ink); text-decoration: none; font-size: 15px; line-height: 1.45; border-left: 3px solid transparent; }
-.toc-panel li.lv3 a { padding-left: 32px; font-size: 14px; color: var(--mu); }
+.toc-panel li a { display: block; padding: 8px 16px; color: var(--ink); text-decoration: none; font-size: 15px; line-height: 1.45; border-left: 3px solid transparent; }
+.toc-panel li.lv3 a { padding-left: 30px; font-size: 14px; color: var(--mu); }
 .toc-panel li a:hover, .toc-panel li a.cur { background: var(--gold-soft); border-left-color: var(--gold); color: var(--ink); }
 @media (max-width: 600px) {
-  .toc-fab { right: 14px; bottom: 16px; }
-  .toc-panel { left: 0; right: 0; bottom: 0; width: 100%; max-height: 70vh; border-radius: 16px 16px 0 0; }
+  .toc-fab { right: 0; top: 50%; bottom: auto; width: 40px; height: 48px; border-radius: 12px 0 0 12px; transform: translate(8px, -50%); }
+  .toc-fab.show, .toc-fab.on { transform: translate(0, -50%); }
+  .toc-fab svg { width: 22px; height: 22px; }
+  .toc-tip { display: none; }
+  .toc-panel { right: 48px; top: 50%; bottom: auto; transform: translateY(-50%); width: min(290px, calc(100vw - 64px)); max-height: 62vh; border-radius: 14px; }
+  .toc-panel li a { padding: 9px 14px; font-size: 14.5px; }
+  .toc-panel li.lv3 a { padding-left: 26px; font-size: 13.5px; }
 }
 
 /* 後台：裝置預覽面板（右側隱藏，寬度約螢幕 45%） */
@@ -358,9 +365,35 @@ body.dv-open .wrap.wide { padding-right: calc(clamp(420px, 45vw, 900px) + 16px);
   .nextpost { padding: 12px 14px; gap: 10px; }
   .paywall { padding: 22px 16px; }
   .site-footer { padding: 22px 0 90px; font-size: 13px; }
-  .site-footer .wrap { flex-direction: column; align-items: center; text-align: center; }
   .about-hero h1, .hero h1 { word-break: keep-all; overflow-wrap: anywhere; }
 }
 /* 裝置預覽打開時：編輯區只留打字框（預覽交給右邊面板） */
 body.dv-open .editor { grid-template-columns: 1fr; }
 body.dv-open #preview { display: none; }
+
+/* 頁尾：左邊網站資訊、右邊「預約諮詢」上下置中 */
+.site-footer .wrap.f-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px 32px; }
+.f-left p { margin: 2px 0 0; }
+.f-left .fine { margin-top: 14px; font-size: 12px; }
+@media (max-width: 600px) { .site-footer .wrap.f-grid { grid-template-columns: 1fr; justify-items: center; text-align: center; } .site-footer .booking { order: -1; } }
+
+/* YouTube 書籤卡片 */
+.bookmark { display: flex; align-items: center; gap: 14px; margin: 16px 0; padding: 10px; border: 1px solid var(--ln); border-radius: 12px; background: var(--card); color: var(--ink); text-decoration: none; box-shadow: var(--shadow); }
+.bookmark:hover { border-color: var(--gold); }
+.bm-thumb { position: relative; flex: none; width: 168px; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; background: var(--gold-soft); display: grid; place-items: center; }
+.bm-thumb img { width: 100%; height: 100%; object-fit: cover; margin: 0; box-shadow: none; border-radius: 0; max-height: none; cursor: pointer; }
+.bm-play { position: absolute; inset: 0; margin: auto; width: 40px; height: 28px; border-radius: 8px; background: rgba(220, 0, 0, .9); color: #fff; display: grid; place-items: center; font-size: 13px; }
+.bm-icon { font-size: 28px; }
+.bm-txt { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.bm-txt b { font-size: 16px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.bm-txt small { color: var(--mu); }
+@media (max-width: 600px) { .bm-thumb { width: 112px; } .bm-txt b { font-size: 14.5px; } }
+
+/* 插入 YouTube 對話框 */
+.vidopts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.vopt { display: flex; gap: 8px; align-items: flex-start; border: 1px solid var(--ln); border-radius: 10px; padding: 10px; margin: 0; cursor: pointer; color: var(--ink); font-weight: 400; }
+.vopt:has(input:checked) { border-color: var(--navy-2); box-shadow: 0 0 0 1px var(--navy-2); background: var(--gold-soft); }
+.vopt input { width: auto; margin-top: 4px; }
+.vopt span { display: flex; flex-direction: column; }
+.vopt small { color: var(--mu); font-size: 12px; }
+@media (max-width: 600px) { .vidopts { grid-template-columns: 1fr; } }

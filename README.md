@@ -47,3 +47,7 @@
 
 - 顏色：`assets/style.css` 最上面 `:root`
 - 網站名稱、分類、預約連結：`config.js`
+
+## 更新網站後
+
+改完 CSS／JS 要上線前跑 `python3 tools/bump.py`，幫檔案加新版本號，讀者就不會卡在舊外觀（GitHub Pages 會快取約 10 分鐘）。

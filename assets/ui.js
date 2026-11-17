@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js";
+import { store, MODE } from "./store.js?v=202611171621";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -30,9 +30,19 @@ export function md(text, { embed = true } = {}) {
              .replace(/class="media-loading"([^>]*?)class="(img-[sml])"/g, 'class="media-loading $2"$1');
   // 連續兩張以上的圖片自動並排
   html = html.replace(/<p>((?:\s*<img[^>]*>\s*(?:<br>)?\s*){2,})<\/p>/g, (m, inner) => `<div class="gallery">${inner.replace(/<br>/g, "").replace(/<img[^>]*>/g, t => { const a = (t.match(/alt="([^"]*)"/) || [])[1]; return a ? `<figure>${t}<figcaption>${a}</figcaption></figure>` : t; })}</div>`);
-  if (embed) html = html.replace(/<p>(?:🔗|🎬)?\s*(?:<a [^>]*href="([^"]+)"[^>]*>[^<]*<\/a>|(https?:\/\/[^\s<]+))\s*<\/p>/g, (m, a, b) => {
-    const id = ytId(a || b); if (!id) return m;
-    return `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${id}" title="YouTube 影片" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+  // 單獨一行的連結：🎬 或純網址＝內嵌影片；🔖 或 🔗＝書籤卡片；一般文字連結＝超連結（不轉換）
+  if (embed) html = html.replace(/<p>(🎬|🔖|🔗)?\s*(?:<a [^>]*href="([^"]+)"[^>]*>([^<]*)<\/a>|(https?:\/\/[^\s<]+))\s*<\/p>/g, (m, mark, href, text, bare) => {
+    const url = (href || bare || "").replace(/&amp;/g, "&"), id = ytId(url);
+    if ((mark === "🎬" || (!mark && bare)) && id)
+      return `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${id}" title="YouTube 影片" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+    if (mark === "🔖" || mark === "🔗") {
+      let host = ""; try { host = new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return m; }
+      const title = text && text !== url ? text : (id ? "YouTube 影片" : host);
+      return `<a class="bookmark" href="${esc(url)}" target="_blank" rel="noopener">
+        ${id ? `<span class="bm-thumb"><img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy"><span class="bm-play">▶</span></span>` : `<span class="bm-thumb bm-icon">🔗</span>`}
+        <span class="bm-txt"><b>${esc(title)}</b><small>${esc(host)}</small></span></a>`;
+    }
+    return m;
   });
   return html;
 }
@@ -84,9 +94,11 @@ export function header(active = "") {
 export function footer() {
   const f = document.createElement("footer");
   f.className = "site-footer";
-  f.innerHTML = `<div class="wrap"><div><b>${esc(CFG.siteName)}</b><p>${esc(CFG.tagline || "")}</p></div>
+  f.innerHTML = `<div class="wrap f-grid">
+    <div class="f-left"><b>${esc(CFG.siteName)}</b><p>${esc(CFG.tagline || "")}</p>
+      <p class="fine">文章內容為一般性資訊分享，不構成個別投資或保險建議；數字與法規以主管機關最新公告為準。</p></div>
     ${CFG.bookingUrl ? `<div class="booking"><a class="btn gold" href="${esc(CFG.bookingUrl)}" target="_blank" rel="noopener">預約諮詢</a><small>${esc(CFG.bookingNote || "")}</small></div>` : ""}
-    <p class="fine">文章內容為一般性資訊分享，不構成個別投資或保險建議；數字與法規以主管機關最新公告為準。</p></div>`;
+  </div>`;
   document.body.append(f);
 }
 

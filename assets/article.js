@@ -1,5 +1,5 @@
 // 文章頁畫面（正式文章頁 post.html 與後台裝置預覽 preview.html 共用）
-import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js";
+import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js?v=202611171621";
 
 const ICON_TOC = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 6h2M4 12h2M4 18h2M9 6h11M9 12h11M9 18h11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>`;
 const ICON_ARROW = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
@@ -29,7 +29,7 @@ export function renderArticle(art, p, { CFG, next = null, loginNext = "" } = {})
         <span class="np-txt"><small>下一篇文章</small><b>${esc(next.title)}</b></span>
         <span class="np-ico">${ICON_ARROW}</span></a>` : ""}`;
   hydrateMedia(art);
-  art.querySelectorAll(".prose img").forEach(img => img.addEventListener("click", () => {
+  art.querySelectorAll(".prose img").forEach(img => !img.closest(".bookmark") && img.addEventListener("click", () => {
     const box = document.createElement("div"); box.className = "lightbox";
     box.innerHTML = `<img src="${img.src}" alt=""><p>${esc(img.alt || "")}　點一下關閉</p>`;
     box.onclick = () => box.remove(); document.body.append(box);
@@ -45,7 +45,7 @@ function buildToc(art) {
   hs.forEach((h, i) => { h.id = h.id || "sec-" + (i + 1); });
   const fab = document.createElement("button");
   fab.className = "toc-fab"; fab.type = "button"; fab.setAttribute("aria-label", "文章大綱"); fab.setAttribute("aria-expanded", "false");
-  fab.innerHTML = `${ICON_TOC}<span>大綱</span>`;
+  fab.innerHTML = `${ICON_TOC}<span class="toc-tip">文章大綱</span>`; fab.title = "文章大綱";
   const panel = document.createElement("nav");
   panel.className = "toc-panel"; panel.hidden = true; panel.setAttribute("aria-label", "文章大綱");
   panel.innerHTML = `<div class="toc-head"><b>文章大綱</b><button type="button" class="toc-x" aria-label="關閉">✕</button></div>
