@@ -30,6 +30,10 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+    match /briefs/{date} {          // 每日財經早報：你的勾選與微調（大家可讀、只有管理員能改）
+      allow read: if true;
+      allow write: if isAdmin();
+    }
     match /media/{id} {             // 照片庫：縮圖與資訊
       allow read: if true;
       allow write: if isAdmin();

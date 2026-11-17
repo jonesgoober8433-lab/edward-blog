@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>早報後台｜Edward 的 Blog</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css?v=202611171645">
+<script src="config.js?v=202611171645"></script>
+</head>
+<body>
+<main><div class="wrap wide" id="root"><div class="empty">載入中…</div></div></main>
+<template id="tpl">
+  <div class="ba">
+    <section class="panel">
+      <div class="ba-top">
+        <div><h2 style="margin:0">📰 每日財經早報</h2><p class="stamp" id="status" style="margin:4px 0 0"></p></div>
+        <span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <select id="date" aria-label="選日期"></select>
+          <a class="btn ghost sm" id="view" target="_blank">看讀者畫面</a>
+        </span>
+      </div>
+      <label for="headline">今日一句話重點（顯示在最上面）</label><input id="headline">
+      <h3 style="margin:18px 0 6px">候選新聞：勾選今天要上的（建議 3～4 則）</h3>
+      <p class="stamp" style="margin:0 0 8px">每則都附「放的好處／壞處」。點標題、內文可以直接改字。已勾 <b id="nPick">0</b> 則。</p>
+      <div id="cands"></div>
+      <h3 style="margin:18px 0 6px">📚 今日財經小知識</h3>
+      <div class="row2"><div><label for="kTerm">名詞</label><input id="kTerm"></div><div><label for="kEx">例子</label><input id="kEx"></div></div>
+      <label for="kExp">白話解釋</label><textarea id="kExp" rows="3"></textarea>
+      <div class="actions">
+        <button class="btn danger sm" id="reset">恢復小Edward 的原始版</button>
+        <span style="flex:1"></span>
+        <button class="btn ghost" id="saveDraft">存檔（先不公開）</button>
+        <button class="btn" id="publish">存檔並發布</button>
+      </div>
+    </section>
+    <aside class="panel">
+      <h2 style="font-size:18px;margin:0 0 6px">🧭 給小Edward 的方向建議</h2>
+      <p class="stamp" style="margin:0 0 6px">寫下你希望早報多放／少放什麼，雲端排程每天產生候選時都會照這裡調整。</p>
+      <textarea id="direction" rows="7" placeholder="例如：多放跟台灣上班族有關的（勞保、房貸利率）；美股個股少放；每天至少一則匯率。"></textarea>
+      <button class="btn sm" id="saveDir" style="margin-top:8px">儲存方向</button>
+      <h2 style="font-size:18px;margin:20px 0 6px">怎麼運作</h2>
+      <ol class="stamp" style="padding-left:18px;margin:0">
+        <li>每天 06:30 雲端自動找新聞、寫好候選、預設勾好</li>
+        <li>你在 08:00 前勾選／微調，按「存檔並發布」</li>
+        <li>沒時間看也沒關係：08:00 會照預設勾選自動上線</li>
+        <li id="draftNote"></li>
+        <li>早報只保留一年，舊的自動刪除</li>
+      </ol>
+    </aside>
+  </div>
+</template>
+<script type="module">
+import { store } from "./assets/store.js?v=202611171645";
+import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=202611171645";
+import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE } from "./assets/brief.js?v=202611171645";
+const CFG = window.BLOG_CONFIG;
+header("badmin"); footer();
+const root = document.getElementById("root");
+let started = false;
+store.onAuth(u => {
+  if (!u) { location.href = "login.html?next=brief-admin.html"; return; }
+  if (!u.isAdmin) { root.innerHTML = `<div class="paywall" style="margin:40px auto;max-width:520px"><h3>這裡是管理員後台</h3></div>`; return; }
+  if (!started) { started = true; start(); }
+});
+
+async function start() {
+  root.innerHTML = document.getElementById("tpl").innerHTML;
+  const $ = id => document.getElementById(id);
+  $("draftNote").textContent = `${CFG.briefDraftUntil} 以前（前 5 天）是草稿：一定要你按「存檔並發布」才會上線`;
+  const dates = (await loadIndex()).sort().reverse();
+  // 一年前的早報：刪掉你的勾選紀錄（雲端排程會刪掉原始檔）
+  try {
+    const cut = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10);
+    for (const d of await store.listDocs("briefs")) if (d.id < cut) await store.deleteDoc("briefs", d.id);
+  } catch (e) { }
+  if (!dates.length) { $("cands").innerHTML = `<p class="empty">還沒有任何早報。雲端排程每天 06:30 會產生第一份。</p>`; return; }
+  $("date").innerHTML = dates.map(d => `<option value="${d}">${fmtDay(d)}</option>`).join("");
+  const s = await store.getDoc("settings", "brief"); $("direction").value = s?.direction || "";
+  $("saveDir").onclick = async () => { await store.setDoc("settings", "brief", { direction: $("direction").value.trim(), updatedAt: Date.now() }); toast("方向已儲存 ✓ 明天的候選就會照這個調整"); };
+
+  let raw, ov;
+  async function load(d) {
+    [raw, ov] = await Promise.all([loadRaw(d), store.getDoc("briefs", d)]);
+    $("view").href = "brief.html?d=" + d;
+    if (!raw) { $("cands").innerHTML = `<p class="empty">讀不到這天的資料</p>`; return; }
+    const picks = new Set(ov?.picks || raw.picks || raw.candidates.filter(c => c.recommend).map(c => c.id));
+    $("headline").value = ov?.headline ?? raw.headline ?? "";
+    const k = { ...raw.knowledge, ...(ov?.knowledge || {}) };
+    $("kTerm").value = k.term || ""; $("kExp").value = k.explain || ""; $("kEx").value = k.example || "";
+    $("cands").innerHTML = raw.candidates.map(c0 => {
+      const c = { ...c0, ...(ov?.edits?.[c0.id] || {}) }, [icon, color] = CAT_STYLE[c.category] || ["📰", "#4A3426"];
+      return `<div class="cand ${picks.has(c.id) ? "on" : ""}" data-id="${c.id}">
+        <label class="cand-chk"><input type="checkbox" ${picks.has(c.id) ? "checked" : ""}><span class="cand-cat" style="--c:${color}">${icon} ${esc(c.category || "")}</span>${c0.recommend ? `<span class="badge pin">小Edward 推薦</span>` : ""}${c.score ? `<span class="stamp">重要度 ${"★".repeat(c.score)}${"☆".repeat(5 - c.score)}</span>` : ""}</label>
+        <h4 contenteditable="true" data-f="title">${esc(c.title)}</h4>
+        <p contenteditable="true" data-f="facts">${esc(c.facts)}</p>
+        <div class="cand-why"><b>為什麼重要：</b><span contenteditable="true" data-f="why">${esc(c.why)}</span></div>
+        <div class="cand-pc"><div class="pro"><b>👍 放的好處</b>${esc(c.pros || "")}</div><div class="con"><b>⚠️ 放的壞處</b>${esc(c.cons || "")}</div></div>
+        <p class="stamp" style="margin:6px 0 0">來源：${(c.sources || []).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}${s.date ? "（" + esc(s.date) + "）" : ""}</a>`).join("、") || "—"}</p>
+      </div>`;
+    }).join("");
+    count(); status();
+  }
+  function count() {
+    const n = document.querySelectorAll(".cand input:checked").length;
+    $("nPick").textContent = n;
+    document.querySelectorAll(".cand").forEach(c => c.classList.toggle("on", c.querySelector("input").checked));
+  }
+  function status() {
+    const live = visible(raw, ov);
+    const draftDays = raw.date <= CFG.briefDraftUntil;
+    $("status").textContent = (live ? "🟢 讀者看得到" : "⚪ 讀者還看不到")
+      + (ov ? `・你在 ${fmtTime(ov.updatedAt)} 改過（${ov.status === "published" ? "已發布" : "草稿"}）` : "・目前是小Edward 的原始版")
+      + (draftDays ? "・前 5 天：要你按發布" : `・沒按發布的話 ${CFG.briefPublishTime} 自動上線`)
+      + `・產生時間 ${fmtTime(Date.parse(raw.generatedAt))}`;
+  }
+  $("cands").addEventListener("change", count);
+  $("date").onchange = e => load(e.target.value);
+
+  function collect(st) {
+    const picks = [...document.querySelectorAll(".cand")].filter(c => c.querySelector("input").checked).map(c => c.dataset.id);
+    const edits = {};
+    document.querySelectorAll(".cand").forEach(c => {
+      const orig = raw.candidates.find(x => x.id === c.dataset.id), e = {};
+      c.querySelectorAll("[data-f]").forEach(f => { const v = f.innerText.trim(); if (v !== orig[f.dataset.f]) e[f.dataset.f] = v; });
+      if (Object.keys(e).length) edits[c.dataset.id] = e;
+    });
+    return { picks, edits, headline: $("headline").value.trim(), knowledge: { term: $("kTerm").value.trim(), explain: $("kExp").value.trim(), example: $("kEx").value.trim() }, status: st, updatedAt: Date.now() };
+  }
+  async function save(st) {
+    const d = collect(st);
+    if (st === "published" && !d.picks.length) return toast("至少勾一則再發布", true);
+    try { await store.setDoc("briefs", raw.date, d); ov = d; status(); toast(st === "published" ? "已發布 ✓ 讀者現在看得到了" : "已存檔（讀者看不到）"); }
+    catch (e) { toast("存檔失敗：" + e.message, true); }
+  }
+  $("saveDraft").onclick = () => save("draft");
+  $("publish").onclick = () => save("published");
+  $("reset").onclick = async () => {
+    if (!confirm("清掉你的勾選與修改，回到小Edward 的原始版？")) return;
+    await store.deleteDoc("briefs", raw.date); ov = null; load(raw.date); toast("已恢復原始版");
+  };
+  load(dates[0]);
+}
+</script>
+</body>
+</html>

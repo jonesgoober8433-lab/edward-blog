@@ -6,8 +6,8 @@
 <meta name="description" content="財務顧問 Edward 用白話整理投資理財、退休傳承與社會保險。">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=202611171623">
-<script src="config.js?v=202611171623"></script>
+<link rel="stylesheet" href="assets/style.css?v=202611171645">
+<script src="config.js?v=202611171645"></script>
 </head>
 <body>
 <main>
@@ -18,14 +18,30 @@
     <div class="search"><input id="q" type="search" placeholder="搜尋文章：例如 勞保、退休、ETF…" aria-label="搜尋文章"></div>
   </div></section>
   <div class="wrap">
+    <div class="home-top">
+      <section class="mkt" id="mkt" aria-label="市場行情"></section>
+      <a class="today-brief" id="todayBrief" href="brief.html" hidden></a>
+    </div>
     <div class="filters" id="filters"></div>
     <div class="count" id="count"></div>
     <div class="grid" id="grid"><div class="empty">載入中…</div></div>
   </div>
 </main>
 <script type="module">
-import { store } from "./assets/store.js?v=202611171623";
-import { header, footer, esc, fmtDate } from "./assets/ui.js?v=202611171623";
+import { store } from "./assets/store.js?v=202611171645";
+import { header, footer, esc, fmtDate } from "./assets/ui.js?v=202611171645";
+import { mountMarket } from "./assets/market.js?v=202611171645";
+import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=202611171645";
+mountMarket(document.getElementById("mkt"));
+loadIndex().then(latestVisible).then(b => {
+  if (!b) return;
+  const el = document.getElementById("todayBrief");
+  el.href = "brief.html?d=" + b.date; el.hidden = false;
+  el.innerHTML = `<span class="tb-tag">📰 每日財經早報・${fmtDay(b.date)}</span>
+    <b>${esc(b.headline || "今天的財經重點")}</b>
+    <ol>${b.items.slice(0, 4).map(c => `<li>${esc(c.title)}</li>`).join("")}</ol>
+    <span class="tb-more">看完整早報（3 分鐘）→</span>`;
+});
 const CFG = window.BLOG_CONFIG;
 header("home"); footer();
 document.getElementById("siteName").textContent = CFG.siteName;

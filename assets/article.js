@@ -1,5 +1,5 @@
 // 文章頁畫面（正式文章頁 post.html 與後台裝置預覽 preview.html 共用）
-import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js?v=202611171623";
+import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js?v=202611171645";
 
 const ICON_TOC = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 6h2M4 12h2M4 18h2M9 6h11M9 12h11M9 18h11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>`;
 const ICON_ARROW = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;

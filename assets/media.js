@@ -1,6 +1,6 @@
 // 照片庫：上傳（剪貼簿／照片 App 拖曳／選檔）→ 壓縮 → 檢查重複 → 插入文章
 // 重複判斷兩層：①檔案完全一樣（SHA-256）②看起來一樣（縮圖指紋 dHash，抓得到「同一張照片另存、縮放過」）
-import { esc, fmtTime, toast, rememberMedia, mediaUrl } from "./ui.js?v=202611171623";
+import { esc, fmtTime, toast, rememberMedia, mediaUrl } from "./ui.js?v=202611171645";
 
 const MAX_SIDE = 1600, MAX_B64 = 700000, THUMB = 360;
 
@@ -108,12 +108,16 @@ export function initMedia({ store, $, getMode, insertMd, insertVisual, getPostsW
         if (dup) { dups.push(dup); continue; }
         const full = compress(img), th = render(img, THUMB, .7);
         const meta = { id: "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: f.name && f.name !== "image.png" ? f.name : `貼上的圖片 ${fmtTime(Date.now())}`,
-          hash, dhash: dh, w: full.w, h: full.h, bytes: Math.round(full.url.length * .75), thumb: th.url, createdAt: Date.now() };
+          hash, dhash: dh, w: full.w, h: full.h, bytes: Math.round(full.url.length * .75), thumb: th.url, createdAt: Date.now(),
+          origW: img.naturalWidth, origH: img.naturalHeight, origBytes: f.size };
         await store.saveMedia(meta, full.url);
         rememberMedia(meta.id, full.url);
         lib.unshift({ ...meta, key: "m:" + meta.id, src: meta.thumb, used: [] });
         insert(meta, full.url);
-        toast(`已上傳並插入：${meta.name} ✓`);
+        const kb = b => b >= 1048576 ? (b / 1048576).toFixed(1) + "MB" : Math.round(b / 1024) + "KB";
+        const shrunk = meta.w !== meta.origW || meta.bytes < f.size * .9;
+        toast(shrunk ? `已插入 ✓ 原圖 ${meta.origW}×${meta.origH}（${kb(f.size)}）超過容量，已等比例壓成 ${meta.w}×${meta.h}（${kb(meta.bytes)}），比例不變、不會變形`
+                     : `已上傳並插入：${meta.name} ✓（${meta.w}×${meta.h}，${kb(meta.bytes)}）`);
       } catch (e) { toast(`${f.name || "圖片"}：${e.message}`, true); }
     }
     if (dups.length) openLib({ highlight: dups.map(d => d.key), note: `有 ${dups.length} 張照片已經在照片庫裡了，沒有重複上傳。下面標黃色的就是，看「用在哪」決定要不要直接插入舊的那張。` });
@@ -138,6 +142,7 @@ export function initMedia({ store, $, getMode, insertMd, insertVisual, getPostsW
         <figcaption>
           <b title="${esc(m.name)}">${esc(m.name)}</b>
           <span class="stamp">${m.builtin ? "Notion 搬家" : `${m.w}×${m.h}・${Math.round((m.bytes || 0) / 1024)}KB・${fmtTime(m.createdAt)}`}</span>
+          ${m.origW && m.origW !== m.w ? `<span class="stamp">已等比例壓縮（原圖 ${m.origW}×${m.origH}），不變形</span>` : ""}
           <div class="used">${m.used.length ? "用在：" + m.used.map(u => u.id === "__cur" ? `<b>${esc(u.title)}</b>` : `<a href="admin.html?id=${encodeURIComponent(u.id)}" data-edit="${esc(u.id)}">${esc(u.title)}</a>`).join("、") : `<span class="unused">還沒有文章用到</span>`}</div>
           <span class="mact"><button class="btn sm" data-ins="${esc(m.key)}">插入</button>${!m.builtin && !m.used.length ? `<button class="btn danger sm" data-del="${esc(m.key)}">刪除</button>` : ""}</span>
         </figcaption>
