@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=202611171647">
-<script src="config.js?v=202611171647"></script>
+<link rel="stylesheet" href="assets/style.css?v=202611171652">
+<script src="config.js?v=202611171652"></script>
 </head>
 <body>
 <main><div class="wrap wide" id="root"><div class="empty">載入中…</div></div></main>
@@ -52,9 +52,9 @@
   </div>
 </template>
 <script type="module">
-import { store } from "./assets/store.js?v=202611171647";
-import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=202611171647";
-import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE } from "./assets/brief.js?v=202611171647";
+import { store } from "./assets/store.js?v=202611171652";
+import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=202611171652";
+import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE } from "./assets/brief.js?v=202611171652";
 const CFG = window.BLOG_CONFIG;
 header("badmin"); footer();
 const root = document.getElementById("root");
@@ -95,7 +95,9 @@ async function start() {
         <label class="cand-chk"><input type="checkbox" ${picks.has(c.id) ? "checked" : ""}><span class="cand-cat" style="--c:${color}">${icon} ${esc(c.category || "")}</span>${c0.recommend ? `<span class="badge pin">小Edward 推薦</span>` : ""}${c.score ? `<span class="stamp">重要度 ${"★".repeat(c.score)}${"☆".repeat(5 - c.score)}</span>` : ""}</label>
         <h4 contenteditable="true" data-f="title">${esc(c.title)}</h4>
         <p contenteditable="true" data-f="facts">${esc(c.facts)}</p>
-        <div class="cand-why"><b>為什麼重要：</b><span contenteditable="true" data-f="why">${esc(c.why)}</span></div>
+        <div class="cand-sec"><b>🔍 交叉比對：</b><span contenteditable="true" data-f="crossCheck">${esc(c.crossCheck || "")}</span></div>
+        <div class="cand-why"><b>💡 簡單分析：</b><span contenteditable="true" data-f="why">${esc(c.why)}</span></div>
+        <div class="cand-sec"><b>🔮 推估可能：</b><span contenteditable="true" data-f="outlook">${esc(c.outlook || "")}</span></div>
         <div class="cand-pc"><div class="pro"><b>👍 放的好處</b>${esc(c.pros || "")}</div><div class="con"><b>⚠️ 放的壞處</b>${esc(c.cons || "")}</div></div>
         <p class="stamp" style="margin:6px 0 0">來源：${(c.sources || []).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}${s.date ? "（" + esc(s.date) + "）" : ""}</a>`).join("、") || "—"}</p>
       </div>`;
@@ -123,7 +125,7 @@ async function start() {
     const edits = {};
     document.querySelectorAll(".cand").forEach(c => {
       const orig = raw.candidates.find(x => x.id === c.dataset.id), e = {};
-      c.querySelectorAll("[data-f]").forEach(f => { const v = f.innerText.trim(); if (v !== orig[f.dataset.f]) e[f.dataset.f] = v; });
+      c.querySelectorAll("[data-f]").forEach(f => { const v = f.innerText.trim(); if (v !== (orig[f.dataset.f] || "")) e[f.dataset.f] = v; });
       if (Object.keys(e).length) edits[c.dataset.id] = e;
     });
     return { picks, edits, headline: $("headline").value.trim(), knowledge: { term: $("kTerm").value.trim(), explain: $("kExp").value.trim(), example: $("kEx").value.trim() }, status: st, updatedAt: Date.now() };
