@@ -2,39 +2,48 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>會員專區｜Edward 的 Blog</title>
+<title>VIP 會員專區｜Edward 的 Blog</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261117171607">
-<script src="config.js?v=20261117171607"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261117172231">
+<script src="config.js?v=20261117172231"></script>
 </head>
 <body>
 <main><div class="wrap narrow" style="padding:32px 16px 48px" id="box"><div class="empty">載入中…</div></div></main>
 <script type="module">
-import { store } from "./assets/store.js?v=20261117171607";
-import { header, footer, esc, fmtDate } from "./assets/ui.js?v=20261117171607";
+import { store } from "./assets/store.js?v=20261117172231";
+import { header, footer, esc, fmtDate } from "./assets/ui.js?v=20261117172231";
 const CFG = window.BLOG_CONFIG;
 header("member"); footer();
 const box = document.getElementById("box");
 store.onAuth(async u => {
   if (!u) {
-    box.innerHTML = `<div class="paywall"><h2 style="margin-top:0">會員專區</h2>
-      <p>免費註冊後，可以閱讀所有「會員限定」文章，例如保單健檢表、退休試算整理。</p>
-      <a class="btn" href="login.html?next=member.html">登入／免費註冊</a></div>`;
+    box.innerHTML = `<div class="paywall"><h2 style="margin-top:0">VIP 會員專區</h2>
+      <p>VIP 文章只開放給會員：可以直接照著做的方法、工具和獨家整理。</p>
+      <p class="stamp">申請後由 Edward 親自審核開通。</p>
+      <a class="btn" href="login.html?next=member.html&apply=1">申請會員</a>　<a class="btn ghost" href="login.html?next=member.html">會員登入</a></div>`;
+    return;
+  }
+  if (!u.approved) {
+    box.innerHTML = u.status === "rejected"
+      ? `<div class="paywall"><h2 style="margin-top:0">會員申請未通過</h2><p>如有疑問，歡迎直接聯絡 Edward。</p></div>`
+      : `<div class="paywall"><div style="font-size:40px">⏳</div><h2 style="margin-top:0">正在取得授權</h2>
+         <p>${esc(u.name)} 您好，您的會員申請已送出，Edward 確認後就會開通。</p>
+         <p class="stamp">開通後重新整理這一頁，就能看到 VIP 文章。</p></div>`;
     return;
   }
   const posts = (await store.listPosts()).filter(p => p.visibility === "members");
   box.innerHTML = `
     <div class="panel"><h2>嗨，${esc(u.name)} 👋</h2>
-      <p class="stamp" style="margin:0">登入帳號：${esc(u.email)}${u.isAdmin ? "（管理員）" : ""}</p>
+      <p class="stamp" style="margin:0">VIP 會員・${esc(u.email)}${u.isAdmin ? "（管理員）" : ""}</p>
       ${CFG.bookingUrl ? `<p style="margin:12px 0 0"><a class="btn gold sm" href="${esc(CFG.bookingUrl)}" target="_blank" rel="noopener">預約一對一諮詢</a></p>` : ""}
     </div>
-    <div class="panel"><h2>會員限定文章（${posts.length}）</h2>
+    <div class="panel"><h2>VIP 文章（${posts.length}）</h2>
       ${posts.length ? posts.map(p => `<div class="tpl"><div><span class="tag">${esc(p.category || "")}</span><br>
         <a href="post.html?id=${encodeURIComponent(p.id)}"><b>${esc(p.title)}</b></a><br><span class="stamp">發布 ${fmtDate(p.publishedAt || p.createdAt)}</span></div>
         <a class="btn ghost sm" href="post.html?id=${encodeURIComponent(p.id)}">閱讀</a></div>`).join("")
-        : `<p class="stamp">目前還沒有會員文章，敬請期待。</p>`}
+        : `<p class="stamp">VIP 文章準備中，敬請期待。</p>`}
     </div>`;
 });
 </script>

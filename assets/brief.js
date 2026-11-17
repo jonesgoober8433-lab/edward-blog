@@ -1,6 +1,6 @@
 // 每日財經早報（給客戶看）：資料＝雲端排程產生的 briefs/data/日期.json ＋ Edward 在後台的勾選與微調（Firestore briefs/日期）
-import { store } from "./store.js?v=20261117171607";
-import { esc } from "./ui.js?v=20261117171607";
+import { store } from "./store.js?v=20261117172231";
+import { esc } from "./ui.js?v=20261117172231";
 
 const CFG = window.BLOG_CONFIG || {};
 export const CAT_STYLE = {

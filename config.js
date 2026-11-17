@@ -24,7 +24,9 @@ window.BLOG_CONFIG = {
   briefDraftUntil: "2026-11-22",
   briefPublishTime: "08:00",
   // 會員功能開關：false＝先隱藏「會員專區」與註冊（Edward 2026-11-17：之後再想怎麼用）
-  membersEnabled: false,
+  membersEnabled: true,
+  // 有人申請會員時，送一份到 Edward 的 Google 表單（表單會寄 Email 通知他）。action 留空＝不通知
+  memberNotifyForm: { action: "", name: "", email: "", time: "" },
   categories: ["投資理財", "保險規劃", "退休傳承", "社會保險", "時事觀點", "讀書心得", "新手入門", "生活財商"],
 
   firebase: {

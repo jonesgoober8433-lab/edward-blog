@@ -9,6 +9,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{db}/documents {
     function signedIn() { return request.auth != null; }
+    // 已核准的會員（Edward 在後台按「核准」才算）
+    function isMember() {
+      return signedIn() && exists(/databases/$(db)/documents/members/$(request.auth.uid))
+        && get(/databases/$(db)/documents/members/$(request.auth.uid)).data.approved == true;
+    }
     function isAdmin() {
       return signedIn() && exists(/databases/$(db)/documents/roles/$(request.auth.uid))
         && get(/databases/$(db)/documents/roles/$(request.auth.uid)).data.admin == true;
@@ -23,7 +28,7 @@ service cloud.firestore {
       allow read: if isAdmin()
         || (resource.data.status == 'published'
             && (!('publishedAt' in resource.data) || resource.data.publishedAt <= request.time.toMillis())
-            && (resource.data.visibility == 'public' || signedIn()));
+            && (resource.data.visibility == 'public' || isMember()));
       allow write: if isAdmin();
     }
     match /settings/{id} {          // 網站設定（配色）：大家可讀、只有管理員能改
@@ -47,8 +52,13 @@ service cloud.firestore {
     }
     match /members/{uid} {
       allow read: if (signedIn() && request.auth.uid == uid) || isAdmin();
-      allow create: if signedIn() && request.auth.uid == uid;
-      allow update: if signedIn() && request.auth.uid == uid;
+      // 註冊時只能建立「等候授權」的自己；不能自己把自己設成核准
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.approved == false && request.resource.data.status == 'pending';
+      allow update: if isAdmin()
+        || (signedIn() && request.auth.uid == uid
+            && request.resource.data.approved == resource.data.approved
+            && request.resource.data.status == resource.data.status);
       allow delete: if isAdmin();
     }
     match /roles/{uid} {

@@ -1,15 +1,15 @@
 // 文章頁畫面（正式文章頁 post.html 與後台裝置預覽 preview.html 共用）
-import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js?v=20261117171607";
+import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js?v=20261117172231";
 
 const ICON_TOC = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 6h2M4 12h2M4 18h2M9 6h11M9 12h11M9 18h11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>`;
 const ICON_ARROW = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
 
-export function renderArticle(art, p, { CFG, next = null, loginNext = "" } = {}) {
+export function renderArticle(art, p, { CFG, next = null, loginNext = "", user = null } = {}) {
   art.innerHTML = `
     <a href="index.html" class="stamp">← 回文章列表</a>
     <div style="margin-top:14px"><span class="tag">${esc(p.category || "")}</span>
       ${p.status && p.status !== "published" ? `<span class="badge draft">草稿（只有你看得到）</span>` : ""}
-      ${p.visibility === "members" ? `<span class="badge lock">會員限定</span>` : ""}</div>
+      ${p.visibility === "members" ? `<span class="badge lock">VIP</span>` : ""}</div>
     <h1>${esc(p.title || "（還沒有標題）")}</h1>
     <div class="dates">
       <span>✍️ ${esc(CFG.author)}</span>
@@ -20,8 +20,10 @@ export function renderArticle(art, p, { CFG, next = null, loginNext = "" } = {})
     ${p.cover ? `<img src="${esc(p.cover)}" alt="" style="width:100%;border-radius:14px;margin-bottom:20px">` : ""}
     ${p.locked
       ? `<p class="prose">${esc(p.summary || "")}</p>
-         <div class="paywall"><h3>🔒 這篇是會員限定文章</h3><p>免費註冊會員，就能看完整內容。</p>
-         <a class="btn" href="login.html?next=${encodeURIComponent(loginNext)}">登入／免費註冊</a></div>`
+         <div class="paywall">${user && !user.approved
+           ? `<h3>⏳ 正在取得授權</h3><p>你的會員申請已送出，Edward 確認後就能看這篇 VIP 文章。</p>`
+           : `<h3>🔒 這篇是 VIP 文章</h3><p>VIP 文章只開放給會員，申請後由 Edward 審核開通。</p>
+         <a class="btn" href="login.html?next=${encodeURIComponent(loginNext)}&apply=1">申請會員</a>　<a class="btn ghost" href="login.html?next=${encodeURIComponent(loginNext)}">會員登入</a>`}</div>`
       : `<div class="prose" id="prose">${md(p.body)}</div>`}
     ${(p.tags || []).length ? `<p class="stamp" style="margin-top:28px">標籤：${p.tags.map(t => `<a href="index.html?q=${encodeURIComponent(t)}">#${esc(t)}</a>`).join("　")}</p>` : ""}
     ${CFG.bookingUrl ? `<div class="cta"><div><b>想知道自己的情況怎麼規劃？</b><br><span style="opacity:.85">跟錢有關的問題，都可以找我！${esc(CFG.bookingNote || "")}。</span></div><a class="btn" href="${esc(CFG.bookingUrl)}" target="_blank" rel="noopener">預約諮詢</a></div>` : ""}

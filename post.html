@@ -5,23 +5,23 @@
 <title>文章｜Edward 的 Blog</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261117171607">
-<script src="config.js?v=20261117171607"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261117172231">
+<script src="config.js?v=20261117172231"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 </head>
 <body>
 <main><article class="wrap narrow article" id="art"><div class="empty">載入中…</div></article></main>
 <script type="module">
-import { store, isLive } from "./assets/store.js?v=20261117171607";
-import { header, footer } from "./assets/ui.js?v=20261117171607";
-import { renderArticle } from "./assets/article.js?v=20261117171607";
+import { store, isLive } from "./assets/store.js?v=20261117172231";
+import { header, footer } from "./assets/ui.js?v=20261117172231";
+import { renderArticle } from "./assets/article.js?v=20261117172231";
 const CFG = window.BLOG_CONFIG;
 header("home"); footer();
 const id = new URLSearchParams(location.search).get("id");
 const art = document.getElementById("art");
 
-async function render() {
+async function render(user) {
   const [p, list] = await Promise.all([id && store.getPost(id), store.listPosts().catch(() => [])]);
   if (!p) { art.innerHTML = `<div class="empty">找不到這篇文章，可能已下架。<br><a href="index.html">回文章列表</a></div>`; return; }
   document.title = `${p.title}｜${CFG.siteName}`;
@@ -29,9 +29,9 @@ async function render() {
   const live = list.filter(x => isLive(x));
   const i = live.findIndex(x => x.id === p.id);
   const next = live.length > 1 ? live[(i + 1) % live.length] : null;
-  renderArticle(art, p, { CFG, next: next && next.id !== p.id ? next : null, loginNext: location.pathname.split("/").pop() + location.search });
+  renderArticle(art, p, { CFG, next: next && next.id !== p.id ? next : null, loginNext: location.pathname.split("/").pop() + location.search, user });
 }
-store.onAuth(render);
+store.onAuth(u => render(u));
 </script>
 </body>
 </html>

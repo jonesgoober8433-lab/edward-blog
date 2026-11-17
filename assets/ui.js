@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=20261117171607";
+import { store, MODE } from "./store.js?v=20261117172231";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -93,7 +93,7 @@ export function header(active = "") {
   document.body.prepend(el);
   store.onAuth(u => {
     const links = [["index.html", "文章", "home"], ["brief.html", "早報", "brief"], ["about.html", "關於我", "about"]];
-    if (CFG.membersEnabled) links.push(["member.html", "會員專區", "member"]);
+    if (CFG.membersEnabled) links.push(["member.html", "VIP", "member"]);
     if (u?.isAdmin) links.push(["admin.html", "後台", "admin"], ["brief-admin.html", "📰早報後台", "badmin"]);
     el.querySelector("#nav").innerHTML = links.map(([h, t, k]) => `<a href="${h}" class="${k === active ? "on" : ""}">${t}</a>`).join("") + themeBtn() +
       (u ? `<span class="who" title="${esc(u.email)}">${esc(u.name)}</span><button class="btn ghost sm" id="logout">登出</button>`

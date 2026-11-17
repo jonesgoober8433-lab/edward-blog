@@ -39,7 +39,7 @@ function demoStore() {
     const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("edward-blog:" + s));
     return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
   }
-  const me = () => { const u = db.users.find(u => u.uid === db.session); return u ? { uid: u.uid, email: u.email, name: u.name, isAdmin: u.role === "admin", joinedAt: u.joinedAt } : null; };
+  const me = () => { const u = db.users.find(u => u.uid === db.session); return u ? { uid: u.uid, email: u.email, name: u.name, isAdmin: u.role === "admin", joinedAt: u.joinedAt, status: u.role === "admin" ? "approved" : (u.status || "pending"), approved: u.role === "admin" || u.status === "approved" } : null; };
   const emit = () => listeners.forEach(fn => fn(me()));
 
   return {
@@ -50,7 +50,7 @@ function demoStore() {
       if (password.length < 6) throw new Error("密碼至少 6 個字");
       if (db.users.some(u => u.email === email)) throw new Error("這個 Email 已經註冊過了");
       const role = db.users.some(u => u.role === "admin") ? "member" : "admin"; // 示範模式：第一個註冊的人是管理員
-      db.users.push({ uid: "u" + Date.now().toString(36), email, name: name || email.split("@")[0], role, pw: await hash(password), joinedAt: Date.now() });
+      db.users.push({ uid: "u" + Date.now().toString(36), email, name: name || email.split("@")[0], role, pw: await hash(password), joinedAt: Date.now(), status: role === "admin" ? "approved" : "pending" });
       db.session = db.users.at(-1).uid; save(); emit(); return me();
     },
     async signIn(email, password) {
@@ -69,7 +69,7 @@ function demoStore() {
       const p = db.posts.find(p => p.id === id); if (!p) return null;
       const u = me();
       if (!isLive(p) && !u?.isAdmin) return null;
-      const locked = p.visibility === "members" && !u;
+      const locked = p.visibility === "members" && !(u?.approved || u?.isAdmin);
       return { ...p, body: locked ? null : p.body, locked };
     },
     async searchText(id) { const p = db.posts.find(p => p.id === id); return p && (p.visibility === "public" || me()) ? p.body : ""; },
@@ -91,7 +91,8 @@ function demoStore() {
     async deleteDoc(col, id) { if (db.docs?.[col]) delete db.docs[col][id]; save(); },
     async listDocs(col) { return Object.entries(db.docs?.[col] || {}).map(([id, d]) => ({ id, ...d })); },
     async saveSettings(s) { db.settings = { ...(db.settings || {}), ...s }; save(); },
-    async listMembers() { return db.users.map(u => ({ uid: u.uid, email: u.email, name: u.name, role: u.role, joinedAt: u.joinedAt })); },
+    async listMembers() { return db.users.filter(u => u.role !== "admin").map(u => ({ uid: u.uid, email: u.email, name: u.name, role: u.role, requestedAt: u.joinedAt, status: u.status || "pending", decidedAt: u.decidedAt, notionSynced: !!u.notionSynced })); },
+    async decideMember(uid, status) { const u = db.users.find(x => x.uid === uid); if (u) { u.status = status; u.decidedAt = Date.now(); save(); } },
     async resetDemo() { localStorage.removeItem(KEY); try { localStorage.removeItem(KEY + "-media"); } catch (e) { } load(); emit(); },
     // 照片庫（示範模式：存在瀏覽器）
     async listMedia() { return [...(db.media || [])].sort((a, b) => b.createdAt - a.createdAt); },
@@ -144,9 +145,11 @@ async function firebaseStore() {
 
   async function toUser(u) {
     if (!u) return null;
-    let isAdmin = false;
+    let isAdmin = false, m = null;
     try { const r = await fs.getDoc(fs.doc(db, "roles", u.uid)); isAdmin = !!(r.exists() && r.data().admin); } catch (e) { }
-    return { uid: u.uid, email: u.email, name: u.displayName || (u.email || "").split("@")[0], isAdmin };
+    if (!isAdmin) try { const r = await fs.getDoc(fs.doc(db, "members", u.uid)); m = r.exists() ? r.data() : null; } catch (e) { }
+    const status = isAdmin ? "approved" : (m?.status || "pending");
+    return { uid: u.uid, email: u.email, name: m?.name || u.displayName || (u.email || "").split("@")[0], isAdmin, status, approved: isAdmin || status === "approved" };
   }
   authM.onAuthStateChanged(auth, async u => { user = await toUser(u); ready(); listeners.forEach(fn => fn(user)); });
 
@@ -162,7 +165,8 @@ async function firebaseStore() {
       try {
         const c = await authM.createUserWithEmailAndPassword(auth, email.trim(), password);
         if (name) await authM.updateProfile(c.user, { displayName: name });
-        await fs.setDoc(fs.doc(db, "members", c.user.uid), { email: c.user.email, name: name || "", joinedAt: Date.now() });
+        // 會員申請：狀態「等候授權」，只有 Edward（管理員）能改成核准
+        await fs.setDoc(fs.doc(db, "members", c.user.uid), { email: c.user.email, name: name || "", requestedAt: Date.now(), status: "pending", approved: false });
         user = await toUser(c.user); listeners.forEach(fn => fn(user)); return user;
       } catch (e) { throw err(e); }
     },
@@ -208,7 +212,8 @@ async function firebaseStore() {
     async listDocs(col) { const s = await fs.getDocs(fs.collection(db, col)); return s.docs.map(d => ({ id: d.id, ...d.data() })); },
     async getSettings() { try { const s = await fs.getDoc(fs.doc(db, "settings", "site")); return s.exists() ? s.data() : {}; } catch (e) { return {}; } },
     async saveSettings(s) { try { await fs.setDoc(fs.doc(db, "settings", "site"), s, { merge: true }); } catch (e) { throw err(e); } },
-    async listMembers() { const s = await fs.getDocs(fs.collection(db, "members")); return s.docs.map(d => ({ uid: d.id, role: "member", ...d.data() })); },
+    async listMembers() { const s = await fs.getDocs(fs.collection(db, "members")); return s.docs.map(d => ({ uid: d.id, role: "member", ...d.data() })).sort((a, b) => (b.requestedAt || 0) - (a.requestedAt || 0)); },
+    async decideMember(uid, status) { try { await fs.updateDoc(fs.doc(db, "members", uid), { status, approved: status === "approved", decidedAt: Date.now() }); } catch (e) { throw err(e); } },
     async resetDemo() { },
     // 照片庫（正式模式）：media＝縮圖與資訊（列表用）、mediaData＝壓縮後的原圖
     async listMedia() { const s = await fs.getDocs(fs.collection(db, "media")); return s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.createdAt - a.createdAt); },

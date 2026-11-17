@@ -553,3 +553,11 @@ body.dv-open #preview { display: none; }
 .fix-ba ins { background: color-mix(in srgb, #2E7D5B 12%, var(--card)); text-decoration: none; border-radius: 6px; padding: 4px 8px; }
 .fix-arrow { color: var(--mu); padding-top: 4px; }
 @media (max-width: 700px) { .fix-ba { grid-template-columns: 1fr; } .fix-arrow { display: none; } }
+
+.pending-dlg { text-align: center; max-width: 420px; padding: 28px 24px; }
+.pending-dlg h2 { margin: 6px 0; }
+/* 後台：會員申請 */
+.mreq { border: 1px solid var(--ln); border-radius: 10px; padding: 8px 10px; margin-bottom: 6px; background: var(--field); font-size: 13.5px; }
+.mreq b { font-size: 14.5px; }
+.mreq .acts { display: flex; gap: 6px; margin-top: 6px; }
+.dot-badge { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 999px; background: #D0312D; color: #fff; font-size: 12px; text-align: center; margin-left: 6px; }

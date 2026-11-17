@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261117171607">
-<script src="config.js?v=20261117171607"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261117172231">
+<script src="config.js?v=20261117172231"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"></script>
@@ -42,8 +42,8 @@
         <button class="btn gold sm" id="importBtn">匯入 Notion 文章</button>
       </div>
       <div style="border-top:1px solid var(--ln);margin-top:12px;padding-top:10px">
-        <h2 style="font-size:16px;margin:0 0 4px">會員</h2>
-        <div id="members" class="stamp"></div>
+        <h2 style="font-size:16px;margin:0 0 6px">👥 會員申請<span id="mreqN"></span></h2>
+        <div id="members"></div>
       </div>
     </aside>
 
@@ -65,7 +65,7 @@
         <div><label for="cover">封面圖片網址（可留空）</label><input id="cover" placeholder="https://…"></div>
       </div>
       <div class="row3" style="margin-top:12px">
-        <div><label for="visibility">誰能看</label><select id="visibility"><option value="public">所有人（公開）</option><option value="members">會員限定</option></select></div>
+        <div><label for="visibility">誰能看</label><select id="visibility"><option value="public">所有人（公開）</option><option value="members">VIP（只有核准的會員）</option></select></div>
         <div><label for="status">狀態</label><select id="status"><option value="draft">草稿（只有你看得到）</option><option value="published">已發布</option></select></div>
         <div><label>&nbsp;</label><label class="check"><input type="checkbox" id="pinned"> 置頂（排在首頁最前面、大張顯示）</label></div>
       </div>
@@ -209,9 +209,9 @@
 </template>
 
 <script type="module">
-import { store, MODE, newId, isLive } from "./assets/store.js?v=20261117171607";
-import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261117171607";
-import { initMedia } from "./assets/media.js?v=20261117171607";
+import { store, MODE, newId, isLive } from "./assets/store.js?v=20261117172231";
+import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261117172231";
+import { initMedia } from "./assets/media.js?v=20261117172231";
 const CFG = window.BLOG_CONFIG;
 header("admin"); footer();
 const root = document.getElementById("root");
@@ -236,8 +236,7 @@ function start() {
     posts = await store.listPosts({ all: true });
     drawList();
     if (selectId) open(posts.find(p => p.id === selectId) ? selectId : null);
-    const mem = await store.listMembers().catch(() => []);
-    $("members").innerHTML = `共 ${mem.length} 位` + (mem.length ? "：" + mem.slice(0, 30).map(m => esc(m.name || m.email)).join("、") : "");
+    drawMembers();
   }
 
   function drawList() {
@@ -455,6 +454,29 @@ function start() {
     if (!html && /^(#{1,4} |[-*] |\d+\. |> )/m.test(text)) exec("insertHTML", md(text));
     else if (html) exec("insertHTML", window.DOMPurify.sanitize(html, { FORBID_ATTR: ["class", "id"], FORBID_TAGS: ["style", "meta"] }));
     else exec("insertText", text);
+  });
+
+  // ---------- 會員申請：核准／拒絕 ----------
+  async function drawMembers() {
+    const mem = await store.listMembers().catch(() => []);
+    const pend = mem.filter(m => (m.status || "pending") === "pending"), ok = mem.filter(m => m.status === "approved");
+    $("mreqN").innerHTML = pend.length ? `<span class="dot-badge">${pend.length}</span>` : "";
+    const row = (m, acts) => `<div class="mreq"><b>${esc(m.name || "（沒填姓名）")}</b><br><span class="stamp">${esc(m.email || "")}・申請 ${fmtTime(m.requestedAt || m.joinedAt)}</span>${acts}</div>`;
+    $("members").innerHTML =
+      (pend.length ? pend.map(m => row(m, `<div class="acts"><button class="btn sm" data-ok="${m.uid}">核准</button><button class="btn danger sm" data-no="${m.uid}">拒絕</button></div>`)).join("") : `<p class="stamp" style="margin:0">目前沒有待審核的申請</p>`)
+      + (ok.length ? `<details style="margin-top:6px"><summary class="stamp">已核准 ${ok.length} 位</summary>${ok.map(m => row(m, `<div class="acts"><span class="stamp">核准於 ${fmtTime(m.decidedAt)}</span></div><div class="acts"><button class="btn ghost sm" data-reset="${esc(m.email || "")}" title="客戶忘記密碼時用：Firebase 會寄信讓客戶自己設新密碼">🔑 寄重設密碼信</button><button class="btn ghost sm" data-no="${m.uid}">取消資格</button></div>`)).join("")}</details>` : "");
+  }
+  $("members").addEventListener("click", async e => {
+    const ok = e.target.closest("[data-ok]"), no = e.target.closest("[data-no]"), rs = e.target.closest("[data-reset]");
+    if (rs) {
+      if (!confirm(`寄「重設密碼」的信給 ${rs.dataset.reset}？\n客戶點信裡的連結就能自己設新密碼（你和 AI 都看不到密碼）。`)) return;
+      try { await store.resetPassword(rs.dataset.reset); toast("已寄出重設密碼信 ✓"); } catch (err) { toast("寄送失敗：" + err.message, true); }
+      return;
+    }
+    if (!ok && !no) return;
+    if (no && !confirm("確定拒絕／取消這位的會員資格？")) return;
+    try { await store.decideMember((ok || no).dataset[ok ? "ok" : "no"], ok ? "approved" : "rejected"); toast(ok ? "已核准 ✓ 對方重新整理就能看 VIP 文章" : "已更新"); drawMembers(); }
+    catch (err) { toast("失敗：" + err.message, true); }
   });
 
   // ---------- 網站配色 ----------
