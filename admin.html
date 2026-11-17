@@ -28,6 +28,11 @@
         <div id="palettes" class="palettes"></div>
         <p class="stamp" style="margin:6px 0 0">按下去全網站立刻換色，訪客重新整理就會看到。<a href="themes.html" target="_blank">並排比較</a></p>
       </div>
+      <div id="optBox" hidden style="border-top:1px solid var(--ln);margin-top:12px;padding-top:10px">
+        <h2 style="font-size:16px;margin:0 0 4px">✨ 優化版待你審核</h2>
+        <p class="stamp" style="margin:0 0 6px" id="optInfo"></p>
+        <div id="optList"></div>
+      </div>
       <div id="importBox" hidden style="border-top:1px solid var(--ln);margin-top:12px;padding-top:10px">
         <h2 style="font-size:16px;margin:0 0 4px">從 Notion 搬家</h2>
         <p class="stamp" style="margin:0 0 6px" id="importInfo"></p>
@@ -125,6 +130,14 @@
     <p class="stamp">套用後會換掉目前的內文、分類、標籤和「誰能看」，標題不動。</p>
     <div id="tplList"></div>
     <div class="actions"><button class="btn ghost" data-close>關閉</button></div>
+  </dialog>
+  <dialog id="dlgOpt" style="max-width:1200px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <h2 style="margin:0" id="optTitle"></h2>
+      <span style="display:flex;gap:6px"><button class="btn ghost sm" data-close>先不要</button><button class="btn sm" id="optApply">套用優化版</button></span>
+    </div>
+    <div class="optnotes"><div><b>改了什麼</b><ul id="optChanges"></ul></div><div><b>⚠️ 請你查證</b><ul id="optChecks"></ul></div></div>
+    <div class="cmp"><div><div class="cmph">原文（目前網站上）</div><div class="prose" id="optOld"></div></div><div><div class="cmph new">優化版</div><div class="prose" id="optNew"></div></div></div>
   </dialog>
   <dialog id="dlgSave">
     <h2 style="margin-top:0">存成模板</h2>
@@ -383,6 +396,46 @@ function start() {
   });
   drawPalettes();
 
+  // ---------- 優化版審核 ----------
+  let optList = [];
+  async function checkOpt() {
+    let all = [];
+    try { all = await (await fetch("import/optimized.json", { cache: "no-store" })).json(); } catch (e) { return; }
+    optList = all.filter(o => { const p = posts.find(x => x.id === o.id); return p && (p.optRev || 0) < (o.rev || 1); });
+    $("optBox").hidden = !optList.length;
+    $("optInfo").textContent = `${optList.length} 篇整理好了，點開看「原文 vs 優化版」，滿意再套用。`;
+    $("optList").innerHTML = optList.map(o => `<div class="tpl"><span>${esc(o.title)}${o.checks?.length ? ` <span class="badge draft">查證 ${o.checks.length}</span>` : ""}</span><button class="btn ghost sm" data-opt="${esc(o.id)}">對照</button></div>`).join("")
+      + (optList.length > 1 ? `<p style="margin:8px 0 0"><button class="btn gold sm" id="optAll">全部套用（${optList.length} 篇）</button></p>` : "");
+  }
+  async function applyOpt(o) {
+    const p = await store.getPost(o.id); if (!p) throw new Error("找不到原文");
+    delete p.locked;
+    await store.savePost({ ...p, summary: o.summary, body: o.body, updatedAt: Date.now(), optRev: o.rev || 1 });
+  }
+  let curOpt = null;
+  $("optList").addEventListener("click", async e => {
+    if (e.target.id === "optAll") {
+      if (!confirm(`把 ${optList.length} 篇全部換成優化版？\n（原文備份在 import/notion-posts.json，隨時可以請小Edward 還原）`)) return;
+      e.target.disabled = true; let n = 0;
+      try { for (const o of optList) { await applyOpt(o); n++; e.target.textContent = `套用中… ${n}/${optList.length}`; } toast(`已套用 ${n} 篇 ✓`); }
+      catch (err) { toast(`第 ${n + 1} 篇失敗：${err.message}`, true); }
+      await refresh(); checkOpt(); return;
+    }
+    const b = e.target.closest("[data-opt]"); if (!b) return;
+    curOpt = optList.find(o => o.id === b.dataset.opt);
+    const p = await store.getPost(curOpt.id);
+    $("optTitle").textContent = curOpt.title;
+    $("optChanges").innerHTML = (curOpt.changes || []).map(c => `<li>${esc(c)}</li>`).join("") || "<li>—</li>";
+    $("optChecks").innerHTML = (curOpt.checks || []).map(c => `<li>${esc(c)}</li>`).join("") || "<li>沒有</li>";
+    $("optOld").innerHTML = `<p class="stamp"><b>摘要：</b>${esc(p?.summary || "")}</p>` + md(p?.body || "");
+    $("optNew").innerHTML = `<p class="stamp"><b>摘要：</b>${esc(curOpt.summary)}</p>` + md(curOpt.body);
+    $("dlgOpt").showModal(); $("dlgOpt").scrollTop = 0;
+  });
+  $("optApply").onclick = async () => {
+    try { await applyOpt(curOpt); toast("已套用 ✓"); $("dlgOpt").close(); await refresh(); checkOpt(); if (cur?.id === curOpt.id) open(cur.id); }
+    catch (err) { toast("套用失敗：" + err.message, true); }
+  };
+
   // ---------- 從 Notion 匯入 ----------
   let importList = [];
   async function checkImport() {
@@ -402,7 +455,7 @@ function start() {
     $("importBtn").disabled = false; await refresh(); checkImport();
   };
 
-  refresh().then(() => { open(new URLSearchParams(location.search).get("id")); checkImport(); });
+  refresh().then(() => { open(new URLSearchParams(location.search).get("id")); checkImport(); checkOpt(); });
 }
 </script>
 </body>

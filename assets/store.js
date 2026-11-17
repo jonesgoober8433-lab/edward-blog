@@ -21,7 +21,7 @@ export function newId(title = "") {
   return (base || "post") + "-" + Date.now().toString(36);
 }
 
-const META_KEYS = ["title", "summary", "cover", "category", "tags", "visibility", "status", "pinned", "order", "createdAt", "updatedAt", "publishedAt"];
+const META_KEYS = ["title", "summary", "cover", "category", "tags", "visibility", "status", "pinned", "order", "createdAt", "updatedAt", "publishedAt", "optRev"];
 function pick(o, keys) { const r = {}; keys.forEach(k => { if (o[k] !== undefined) r[k] = o[k]; }); return r; }
 
 // ------------------------------------------------------------------
