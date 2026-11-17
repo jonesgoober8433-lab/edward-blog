@@ -22,11 +22,11 @@
 <div class="grid" id="g"></div>
 <script>
 const P = [
-  ["navy", "1｜海軍藍＋穩重金", "專業、可靠、金融感（目前使用）"],
+  ["navy", "1｜海軍藍＋穩重金", "專業、可靠、金融感"],
   ["forest", "2｜墨綠＋香檳金", "穩健、長期、像資產慢慢長大"],
   ["burgundy", "3｜酒紅＋象牙金", "高級、私人銀行感，適合高資產客群"],
   ["slate", "4｜石板灰＋湖水綠", "理性、數據、現代科技感"],
-  ["coffee", "5｜咖啡棕＋米色", "溫暖親切，跟基金建議書同一套"],
+  ["coffee", "5｜咖啡棕＋米色", "溫暖親切，跟基金建議書同一套（目前使用）"],
 ];
 document.getElementById("g").innerHTML = P.map(([k, t, d]) => `<figure><figcaption><div><b>${t}</b><small>${d}</small></div><span class="no">${k}</span></figcaption><iframe src="index.html?palette=${k}" title="${t}"></iframe></figure>`).join("");
 </script>

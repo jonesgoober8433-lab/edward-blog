@@ -11,7 +11,7 @@
 window.BLOG_CONFIG = {
   siteName: "Edward 的 Blog",
   // 配色：navy（海軍藍＋金）／forest（墨綠＋香檳金）／burgundy（酒紅＋象牙金）／slate（石板灰＋湖水綠）／coffee（咖啡棕＋米色）
-  palette: "navy",
+  palette: "coffee",
   tagline: "投資理財・退休傳承・社會保險，用白話把錢的事講清楚",
   author: "Edward",
   authorTitle: "保經事業部負責人｜RFC・CFC",
