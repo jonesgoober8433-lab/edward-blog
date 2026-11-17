@@ -12,9 +12,12 @@ window.BLOG_CONFIG = {
   siteName: "Edward 的 Blog",
   tagline: "投資理財・退休傳承・社會保險，用白話把錢的事講清楚",
   author: "Edward",
-  authorTitle: "財務顧問｜MDRT",
+  authorTitle: "保經事業部負責人｜RFC・CFC",
   // 預約諮詢按鈕要連到哪裡（LINE、Google 表單等），留空就不顯示
-  bookingUrl: "",
+  bookingUrl: "https://docs.google.com/forms/d/e/1FAIpQLSehdMad5-KkAoZYLd29rQkWDhNoBJK2A7HniB-DaaABEtqLjg/viewform",
+  bookingNote: "免費 15-20 分鐘財務現況評估",
+  // 會員功能開關：false＝先隱藏「會員專區」與註冊（Edward 2026-11-17：之後再想怎麼用）
+  membersEnabled: false,
   categories: ["投資理財", "退休傳承", "社會保險", "保險規劃", "生活財商"],
 
   firebase: null,

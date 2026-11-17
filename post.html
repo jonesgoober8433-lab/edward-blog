@@ -43,7 +43,7 @@ async function render() {
          <a class="btn" href="login.html?next=${encodeURIComponent(location.pathname.split("/").pop() + location.search)}">登入／免費註冊</a></div>`
       : `<div class="prose">${md(p.body)}</div>`}
     ${(p.tags || []).length ? `<p class="stamp" style="margin-top:28px">標籤：${p.tags.map(t => `<a href="index.html?q=${encodeURIComponent(t)}">#${esc(t)}</a>`).join("　")}</p>` : ""}
-    ${CFG.bookingUrl ? `<div class="cta"><div><b>想知道自己的情況怎麼規劃？</b><br><span style="opacity:.85">預約一次財務諮詢，用你的數字算給你看。</span></div><a class="btn" href="${esc(CFG.bookingUrl)}" target="_blank" rel="noopener">預約諮詢</a></div>` : ""}`;
+    ${CFG.bookingUrl ? `<div class="cta"><div><b>想知道自己的情況怎麼規劃？</b><br><span style="opacity:.85">跟錢有關的問題，都可以找我！${esc(CFG.bookingNote || "")}。</span></div><a class="btn" href="${esc(CFG.bookingUrl)}" target="_blank" rel="noopener">預約諮詢</a></div>` : ""}`;
 }
 store.onAuth(render);
 </script>

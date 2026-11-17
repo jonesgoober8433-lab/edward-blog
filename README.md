@@ -32,12 +32,16 @@
    再到「設定 → 授權網域」加上 `jonesgoober8433-lab.github.io`。
 3. 左邊「Firestore Database」→ 建立資料庫（位置選 `asia-east1` 台灣）→ 正式版模式。
    到「規則」分頁，把本資料夾 `firestore.rules` 整份貼上 → 發布。
-4. 讓自己變管理員：先在網站 `login.html` 註冊你的帳號；回 Firebase「Authentication → 使用者」複製你的「使用者 UID」；
+4. 讓自己變管理員：在 Firebase「Authentication → 使用者 → 新增使用者」用你的 Email 建帳號（密碼你自己設，不要給任何人）；複製這個帳號的「使用者 UID」；
    到 Firestore 新增集合 `roles`，文件 ID 貼上 UID，欄位 `admin`（布林值）= `true`。
 5. 「專案設定 → 一般 → 你的應用程式」新增「網頁應用程式」，複製 `firebaseConfig` 的 apiKey、authDomain、projectId、appId，貼進 `config.js`。
 
 > Firebase 網頁設定那串本來就是公開的，放 GitHub 沒關係；真正擋人的是第 3 步的安全規則。
 > 免費額度（Spark 方案）：每天 5 萬次讀取、2 萬次寫入，個人 Blog 很夠用。
+
+## 會員功能開關
+
+`config.js` 的 `membersEnabled`：`false`＝隱藏「會員專區」與註冊（目前設定），`true`＝開放。
 
 ## 改外觀
 

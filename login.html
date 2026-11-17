@@ -13,7 +13,7 @@
 <main><div class="wrap">
   <div class="auth">
     <h1>歡迎回來</h1>
-    <p class="stamp">會員與管理員都從這裡登入。</p>
+    <p class="stamp" id="sub">會員與管理員都從這裡登入。</p>
     <div class="tabs"><button class="on" data-t="in">登入</button><button data-t="up">註冊會員</button></div>
     <form id="f" autocomplete="on">
       <div id="nameBox" hidden><label for="name">怎麼稱呼你</label><input id="name" autocomplete="nickname"></div>
@@ -33,6 +33,8 @@ header(""); footer();
 let mode = "in";
 const $ = id => document.getElementById(id);
 if (MODE === "demo") $("demoNote").hidden = false;
+// 會員功能關閉時：隱藏「註冊會員」分頁（示範模式在本機仍保留，才能建立第一個管理員）
+if (!window.BLOG_CONFIG.membersEnabled && MODE !== "demo") document.querySelector('.tabs [data-t="up"]').hidden = true;
 const next = new URLSearchParams(location.search).get("next");
 const goNext = u => location.href = next && !/^https?:|^\/\//.test(next) ? next : (u.isAdmin ? "admin.html" : "member.html");
 

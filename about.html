@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>關於我｜Edward 的 Blog</title>
+<meta name="description" content="跟錢有關的問題，都可以找我！保險經紀公司事業部負責人，服務超過 500 位客戶。">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<script src="config.js"></script>
+</head>
+<body>
+<main>
+  <section class="hero"><div class="wrap narrow">
+    <div class="rule"></div>
+    <p style="margin:0;opacity:.75;letter-spacing:.3em">EDWARD</p>
+    <h1>跟錢有關的問題，都可以找我！</h1>
+    <p>賺錢、存錢、花錢，先一起看清楚，再決定下一步。</p>
+    <a class="btn gold booking" target="_blank" rel="noopener">預約諮詢</a>
+  </div></section>
+
+  <div class="wrap narrow" style="padding:28px 16px 48px">
+    <div class="panel">
+      <h2>保險經紀公司事業部負責人（處經理）</h2>
+      <ul>
+        <li>服務超過 500 位客戶・保險實務 7 年</li>
+        <li>RFC 國際認證財務顧問師</li>
+        <li>CFC 專業財務教練認證</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h2>跟一般保險業務、理專哪裡不一樣？</h2>
+      <ul>
+        <li><b>先看全貌，最後才談工具</b>：保障、投資、退休、買房一起看</li>
+        <li><b>不先推商品</b>：先聽懂現況，和想過的生活</li>
+        <li><b>簽完不消失</b>：每月追蹤投資型保單，持續陪著調整</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h2>🎯 常見的三種煩惱</h2>
+      <ul>
+        <li><b>賺錢</b>：想開始投資，卻不知道從哪裡開始？</li>
+        <li><b>存錢</b>：錢總是存不下來，目標太多不知道怎麼分？</li>
+        <li><b>花錢</b>：買房、孩子教育、爸媽醫療、退休與傳承，要準備多少？</li>
+      </ul>
+      <p style="margin-top:12px;background:var(--gold-soft);border-radius:10px;padding:10px 14px"><b>我的承諾</b>：不懂就說不懂，查清楚再回覆。預算不多，一樣認真對待！</p>
+    </div>
+
+    <div class="cta">
+      <div><b>☟ 免費 15-20 分鐘財務現況評估</b><br><span style="opacity:.85">〔☀️讓自己發光，對的人才能迎光而來〕</span></div>
+      <a class="btn booking" target="_blank" rel="noopener">預約諮詢</a>
+    </div>
+
+    <div class="panel" style="margin-top:18px">
+      <h2>VIP 專區（邀請制）</h2>
+      <p>VIP 專區只開放給客戶與受邀朋友：可以直接照著做的方法、工具和獨家數據。</p>
+      <p>預約諮詢後，Edward 會親自傳給你專屬連結！</p>
+    </div>
+  </div>
+</main>
+<script type="module">
+import { header, footer } from "./assets/ui.js";
+header("about"); footer();
+document.querySelectorAll(".booking").forEach(a => a.href = window.BLOG_CONFIG.bookingUrl);
+</script>
+</body>
+</html>
