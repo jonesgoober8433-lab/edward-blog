@@ -54,7 +54,7 @@ function render() {
     words.every(w => [p.title, p.summary, p.category, ...(p.tags || []), texts[p.id]].join(" ").toLowerCase().includes(w)));
   document.getElementById("count").textContent = words.length || cat !== "全部" ? `找到 ${list.length} 篇` : `共 ${list.length} 篇文章`;
   const grid = document.getElementById("grid");
-  if (!list.length) { grid.innerHTML = `<div class="empty">找不到符合的文章，換個關鍵字試試。</div>`; return; }
+  if (!list.length) { grid.innerHTML = `<div class="empty">${posts.length ? "找不到符合的文章，換個關鍵字試試。" : "文章準備中，敬請期待！"}</div>`; return; }
   const showFeatured = !words.length && cat === "全部";
   grid.innerHTML = list.map((p, i) => `
     <a class="card ${showFeatured && i === 0 && p.pinned ? "featured" : ""}" href="post.html?id=${encodeURIComponent(p.id)}">

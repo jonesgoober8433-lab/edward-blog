@@ -20,7 +20,12 @@ window.BLOG_CONFIG = {
   membersEnabled: false,
   categories: ["投資理財", "退休傳承", "社會保險", "保險規劃", "生活財商"],
 
-  firebase: null,
+  firebase: {
+    apiKey: "AIzaSyBlJfQlwau4m4kWpMzPiNYG2KYwQyGsUVU",
+    authDomain: "edward-blog-a6317.firebaseapp.com",
+    projectId: "edward-blog-a6317",
+    appId: "1:256094084216:web:272e1c2a340f85398d218d",
+  },
   // 正式模式範例（到 Firebase 主控台 → 專案設定 → 你的應用程式 複製）：
   // firebase: {
   //   apiKey: "....",
