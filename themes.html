@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>配色比較｜Edward 的 Blog</title>
+<meta name="robots" content="noindex">
+<style>
+  body { margin: 0; background: #ECEEF1; font: 15px/1.6 -apple-system, "PingFang TC", "Noto Sans TC", sans-serif; color: #1C2333; }
+  header { padding: 18px 16px 6px; max-width: 1400px; margin: auto; }
+  h1 { margin: 0 0 4px; font-size: 22px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 16px; padding: 12px 16px 40px; max-width: 1400px; margin: auto; }
+  @media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
+  figure { margin: 0; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 24px -16px rgba(0,0,0,.4); }
+  figcaption { padding: 10px 14px; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+  figcaption small { color: #5F6B7E; display: block; }
+  iframe { width: 100%; height: 560px; border: 0; display: block; border-top: 1px solid #E3E7ED; }
+  .no { font: 700 13px sans-serif; background: #1C2333; color: #fff; border-radius: 999px; padding: 2px 10px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<header><h1>五套配色，選一個告訴小Edward</h1><p style="margin:0;color:#5F6B7E">每一格都是真的網站首頁，可以上下捲動比較（點進文章會回到目前配色）。</p></header>
+<div class="grid" id="g"></div>
+<script>
+const P = [
+  ["navy", "1｜海軍藍＋穩重金", "專業、可靠、金融感（目前使用）"],
+  ["forest", "2｜墨綠＋香檳金", "穩健、長期、像資產慢慢長大"],
+  ["burgundy", "3｜酒紅＋象牙金", "高級、私人銀行感，適合高資產客群"],
+  ["slate", "4｜石板灰＋湖水綠", "理性、數據、現代科技感"],
+  ["coffee", "5｜咖啡棕＋米色", "溫暖親切，跟基金建議書同一套"],
+];
+document.getElementById("g").innerHTML = P.map(([k, t, d]) => `<figure><figcaption><div><b>${t}</b><small>${d}</small></div><span class="no">${k}</span></figcaption><iframe src="index.html?palette=${k}" title="${t}"></iframe></figure>`).join("");
+</script>
+</body>
+</html>

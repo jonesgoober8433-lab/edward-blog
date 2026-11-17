@@ -10,6 +10,8 @@
 <script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/turndown-plugin-gfm@1.0.2/dist/turndown-plugin-gfm.js"></script>
 </head>
 <body>
 <main><div class="wrap" id="root"><div class="empty">載入中…</div></div></main>
@@ -21,6 +23,11 @@
       <p class="stamp" style="margin:0 0 8px">拖曳 ⠿ 或按 ▲▼ 調整順序（首頁由上到下）。「置頂」永遠排最前面。</p>
       <input id="filter" type="search" placeholder="找文章…" style="margin-bottom:8px">
       <ul class="plist" id="plist"></ul>
+      <div id="importBox" hidden style="border-top:1px solid var(--ln);margin-top:12px;padding-top:10px">
+        <h2 style="font-size:16px;margin:0 0 4px">從 Notion 搬家</h2>
+        <p class="stamp" style="margin:0 0 6px" id="importInfo"></p>
+        <button class="btn gold sm" id="importBtn">匯入 Notion 文章</button>
+      </div>
       <div style="border-top:1px solid var(--ln);margin-top:12px;padding-top:10px">
         <h2 style="font-size:16px;margin:0 0 4px">會員</h2>
         <div id="members" class="stamp"></div>
@@ -49,22 +56,53 @@
         <div><label for="status">狀態</label><select id="status"><option value="draft">草稿（只有你看得到）</option><option value="published">已發布</option></select></div>
         <div><label>&nbsp;</label><label class="check"><input type="checkbox" id="pinned"> 置頂（排在首頁最前面、大張顯示）</label></div>
       </div>
+      <label for="schedAt">定時發布（留空＝按下發布就立刻上線）</label>
+      <div class="sched"><input type="datetime-local" id="schedAt"><button class="btn ghost sm" id="schedClear" type="button">清除</button><span class="stamp" id="schedHint"></span></div>
 
-      <label>內文（Markdown 格式，右邊即時預覽）</label>
-      <div class="toolbar">
-        <button class="btn ghost sm" data-ins="h2">大標</button>
-        <button class="btn ghost sm" data-ins="h3">小標</button>
-        <button class="btn ghost sm" data-ins="b">粗體</button>
-        <button class="btn ghost sm" data-ins="ul">條列</button>
-        <button class="btn ghost sm" data-ins="ol">編號</button>
-        <button class="btn ghost sm" data-ins="q">引言框</button>
-        <button class="btn ghost sm" data-ins="a">連結</button>
-        <button class="btn ghost sm" data-ins="img">圖片</button>
-        <button class="btn ghost sm" data-ins="tbl">表格</button>
+      <div class="modebar">
+        <label style="margin:0">內文</label>
+        <div class="seg" role="group" aria-label="編輯模式"><button type="button" data-mode="md" class="on">Markdown（給 AI 貼大綱）</button><button type="button" data-mode="visual">視覺編輯（顏色、字級）</button></div>
       </div>
-      <div class="editor">
-        <textarea id="body" placeholder="從這裡開始寫…（也可以按上面「套用模板」）"></textarea>
-        <div class="preview prose" id="preview"></div>
+      <div id="mdPane">
+        <div class="toolbar">
+          <button class="btn ghost sm" data-ins="h2">大標</button>
+          <button class="btn ghost sm" data-ins="h3">小標</button>
+          <button class="btn ghost sm" data-ins="b">粗體</button>
+          <button class="btn ghost sm" data-ins="ul">條列</button>
+          <button class="btn ghost sm" data-ins="ol">編號</button>
+          <button class="btn ghost sm" data-ins="q">引言框</button>
+          <button class="btn ghost sm" data-ins="a">連結</button>
+          <button class="btn ghost sm" data-ins="img">圖片</button>
+          <button class="btn ghost sm" data-ins="tbl">表格</button>
+        </div>
+        <div class="editor">
+          <textarea id="body" placeholder="從這裡開始寫…（AI 給的 Markdown 大綱直接整段貼上）"></textarea>
+          <div class="preview prose" id="preview"></div>
+        </div>
+      </div>
+      <div id="visPane" hidden>
+        <div class="vtool">
+          <select id="vBlock" title="段落樣式"><option value="P">內文</option><option value="H2">大標</option><option value="H3">小標</option><option value="BLOCKQUOTE">引言框</option></select>
+          <select id="vSize" title="文字大小"><option value="">字級</option><option value="2">小</option><option value="3">標準</option><option value="5">大</option><option value="6">特大</option></select>
+          <span class="sep"></span>
+          <button class="btn ghost sm" data-cmd="bold"><b>B</b></button>
+          <button class="btn ghost sm" data-cmd="italic"><i>I</i></button>
+          <button class="btn ghost sm" data-cmd="strikeThrough"><s>S</s></button>
+          <span class="sep"></span>
+          <button class="sw" data-color="#14284B" title="深藍" style="background:#14284B"></button>
+          <button class="sw" data-color="#B08A4E" title="金色" style="background:#B08A4E"></button>
+          <button class="sw" data-color="#B23B3B" title="紅色" style="background:#B23B3B"></button>
+          <button class="sw" data-color="#2E7D5B" title="綠色" style="background:#2E7D5B"></button>
+          <input type="color" id="vColor" value="#1F3A68" title="自選顏色">
+          <button class="btn ghost sm" data-cmd="hiliteColor" title="螢光筆">螢光</button>
+          <span class="sep"></span>
+          <button class="btn ghost sm" data-cmd="insertUnorderedList">條列</button>
+          <button class="btn ghost sm" data-cmd="insertOrderedList">編號</button>
+          <button class="btn ghost sm" data-cmd="link">連結</button>
+          <button class="btn ghost sm" data-cmd="image">圖片</button>
+          <button class="btn ghost sm" data-cmd="removeFormat" title="清除選取文字的顏色、字級">清除格式</button>
+        </div>
+        <div class="visual prose" id="visual" contenteditable="true" data-ph="從這裡開始寫…選取文字後用上面的按鈕改顏色、字級"></div>
       </div>
 
       <div class="actions">
@@ -92,7 +130,7 @@
 </template>
 
 <script type="module">
-import { store, MODE, newId } from "./assets/store.js";
+import { store, MODE, newId, isLive } from "./assets/store.js";
 import { header, footer, esc, fmtTime, md, toast } from "./assets/ui.js";
 const CFG = window.BLOG_CONFIG;
 header("admin"); footer();
@@ -128,7 +166,7 @@ function start() {
       <li draggable="true" data-id="${esc(p.id)}" class="${cur?.id === p.id ? "sel" : ""}">
         <span class="grip" title="拖曳排序">⠿</span>
         <div class="t"><b>${p.pinned ? "📌 " : ""}${esc(p.title || "（未命名）")}</b>
-          <small>${p.status === "published" ? "已發布" : "草稿"}${p.visibility === "members" ? "・會員" : ""}・更新 ${fmtTime(p.updatedAt)}</small></div>
+          <small>${p.status !== "published" ? "草稿" : isLive(p) ? "已發布" : "⏰ 排程 " + fmtTime(p.publishedAt)}${p.visibility === "members" ? "・會員" : ""}・更新 ${fmtTime(p.updatedAt)}</small></div>
         <span class="mv"><button data-mv="-1" title="往上">▲</button><button data-mv="1" title="往下">▼</button></span>
       </li>`).join("") || `<li class="stamp" style="cursor:default">還沒有文章</li>`;
   }
@@ -170,11 +208,22 @@ function start() {
     $("edTitle").textContent = cur.id ? "編輯文章" : "新文章";
     $("del").hidden = !cur.id; $("view").hidden = !cur.id;
     if (cur.id) $("view").href = "post.html?id=" + encodeURIComponent(cur.id);
-    stamps(); preview(); dirty = false; drawList();
-    $("publish").textContent = cur.status === "published" ? "更新已發布文章" : "發布";
+    $("schedAt").value = cur.publishedAt && cur.publishedAt > Date.now() ? toLocal(cur.publishedAt) : "";
+    if (mode === "visual") toVisual();
+    stamps(); preview(); schedUI(); dirty = false; drawList();
   }
+  const toLocal = ms => { const d = new Date(ms - new Date().getTimezoneOffset() * 6e4); return d.toISOString().slice(0, 16); };
+  const schedMs = () => $("schedAt").value ? new Date($("schedAt").value).getTime() : 0;
+  function schedUI() {
+    const t = schedMs(), future = t > Date.now();
+    $("schedHint").textContent = future ? `會在 ${fmtTime(t)} 自動出現在網站上` : (t ? "這個時間已經過了，按發布會立刻上線" : "");
+    $("publish").textContent = future ? "⏰ 排程發布" : (cur.status === "published" && isLive(cur) ? "更新已發布文章" : "發布");
+  }
+  $("schedAt").addEventListener("input", schedUI);
+  $("schedClear").onclick = () => { $("schedAt").value = ""; dirty = true; schedUI(); };
   function stamps() {
-    $("stamps").textContent = cur.id ? `建立：${fmtTime(cur.createdAt)}　｜　發布：${cur.publishedAt ? fmtTime(cur.publishedAt) : "尚未發布"}　｜　最後更新：${fmtTime(cur.updatedAt)}` : "還沒儲存";
+    const pub = !cur.publishedAt || cur.status !== "published" ? "尚未發布" : (cur.publishedAt > Date.now() ? "排程 " : "") + fmtTime(cur.publishedAt);
+    $("stamps").textContent = cur.id ? `建立：${fmtTime(cur.createdAt)}　｜　發布：${pub}　｜　最後更新：${fmtTime(cur.updatedAt)}` : "還沒儲存";
   }
   function preview() { $("preview").innerHTML = md($("body").value) || `<p class="stamp">預覽會出現在這裡</p>`; }
   root.addEventListener("input", e => { if (e.target.closest(".panel") && e.target.id !== "filter") { dirty = true; if (e.target.id === "body") preview(); } });
@@ -189,6 +238,7 @@ function start() {
   });
 
   function collect(status) {
+    if (mode === "visual") fromVisual();
     const now = Date.now();
     const p = {
       ...cur,
@@ -199,7 +249,11 @@ function start() {
     delete p.locked;
     if (!p.id) { p.id = newId(p.title); p.createdAt = now; p.order = -1; }
     p.updatedAt = now;
-    if (status === "published" && !p.publishedAt) p.publishedAt = now;
+    const t = schedMs();
+    if (status === "published") {
+      if (t > now) p.publishedAt = t;                                   // 定時發布
+      else if (!p.publishedAt || p.publishedAt > now) p.publishedAt = now; // 立即發布（取消原本的排程）
+    }
     return p;
   }
   async function save(status) {
@@ -207,7 +261,7 @@ function start() {
     try {
       const isNew = !cur.id;
       cur = await store.savePost(collect(status)); dirty = false;
-      toast(status === "published" ? "已發布 ✓" : "草稿已儲存 ✓");
+      toast(status !== "published" ? "草稿已儲存 ✓" : isLive(cur) ? "已發布 ✓" : `已排程，${fmtTime(cur.publishedAt)} 自動上線 ✓`);
       await refresh();
       if (isNew) { const ids = posts.map(p => p.id); await store.reorder(ids); }
       open(cur.id);
@@ -215,7 +269,7 @@ function start() {
   }
   $("saveDraft").onclick = () => save("draft");
   $("publish").onclick = () => save("published");
-  $("status").addEventListener("change", () => $("publish").textContent = "發布");
+
   $("del").onclick = async () => {
     if (!cur.id || !confirm(`確定刪除「${cur.title}」？刪了就救不回來。\n（只是不想公開的話，把狀態改成草稿就好）`)) return;
     await store.deletePost(cur.id); toast("已刪除"); dirty = false; await refresh(); open(null);
@@ -235,6 +289,7 @@ function start() {
         if ($("body").value.trim() && !confirm("會換掉目前的內文，確定嗎？")) return;
         $("body").value = t.body || ""; if (t.category) $("category").value = t.category;
         $("tags").value = (t.tags || []).join(", "); $("visibility").value = t.visibility || "public";
+        if (mode === "visual") toVisual();
         dirty = true; preview(); $("dlgTpl").close(); toast(`已套用「${t.name}」`);
       }
       if (d && confirm("刪除這個模板？")) { await store.deleteTemplate(d.dataset.deltpl); drawTpl(); }
@@ -244,12 +299,93 @@ function start() {
   $("saveTpl").onclick = () => { $("tplName").value = ""; $("dlgSave").showModal(); $("tplName").focus(); };
   $("tplOk").onclick = async () => {
     const name = $("tplName").value.trim(); if (!name) return toast("請取個模板名稱", true);
+    if (mode === "visual") fromVisual();
     await store.saveTemplate({ id: "tpl-" + Date.now().toString(36), name, category: $("category").value,
       tags: $("tags").value.split(/[,，、]/).map(s => s.trim()).filter(Boolean), visibility: $("visibility").value, body: $("body").value, updatedAt: Date.now() });
     $("dlgSave").close(); toast("模板已儲存 ✓");
   };
 
-  refresh().then(() => open(new URLSearchParams(location.search).get("id")));
+  // ---------- Markdown ⇄ 視覺編輯 ----------
+  let mode = "md";
+  try { mode = localStorage.getItem("eb-editor-mode") === "visual" ? "visual" : "md"; } catch (e) { }
+  const td = new TurndownService({ headingStyle: "atx", bulletListMarker: "-", codeBlockStyle: "fenced", emDelimiter: "*" });
+  if (window.turndownPluginGfm) td.use(window.turndownPluginGfm.gfm);
+  td.addRule("styledSpan", {   // 顏色、字級、螢光筆：Markdown 沒有這種語法，保留成 HTML
+    filter: n => (n.nodeName === "SPAN" || n.nodeName === "FONT") && (n.getAttribute("style") || n.getAttribute("color") || n.getAttribute("size")),
+    replacement: (content, n) => {
+      const st = [];
+      const s = n.style;
+      if (s.color) st.push("color:" + s.color); if (s.backgroundColor) st.push("background-color:" + s.backgroundColor);
+      if (s.fontSize) st.push("font-size:" + s.fontSize);
+      if (n.getAttribute("color")) st.push("color:" + n.getAttribute("color"));
+      if (n.getAttribute("size")) st.push("font-size:" + ({ 1: "x-small", 2: "small", 3: "medium", 4: "large", 5: "x-large", 6: "xx-large", 7: "xxx-large" }[n.getAttribute("size")] || "medium"));
+      if (s.fontWeight === "bold" || +s.fontWeight >= 600) content = "**" + content + "**";
+      if (s.fontStyle === "italic") content = "*" + content + "*";
+      return st.length ? `<span style="${st.join(";")}">${content}</span>` : content;
+    }
+  });
+  function toVisual() { $("visual").innerHTML = md($("body").value); }
+  function fromVisual() { $("body").value = td.turndown($("visual").innerHTML).replace(/\n{3,}/g, "\n\n").trim() + "\n"; preview(); }
+  function setMode(m) {
+    if (m === mode) return;
+    if (m === "visual") toVisual(); else fromVisual();
+    mode = m; try { localStorage.setItem("eb-editor-mode", m); } catch (e) { }
+    paintMode();
+  }
+  function paintMode() {
+    $("mdPane").hidden = mode !== "md"; $("visPane").hidden = mode !== "visual";
+    document.querySelectorAll(".seg button").forEach(b => b.classList.toggle("on", b.dataset.mode === mode));
+  }
+  document.querySelector(".seg").addEventListener("click", e => { const b = e.target.closest("[data-mode]"); if (b) setMode(b.dataset.mode); });
+  paintMode();
+
+  let savedRange = null;
+  const vis = $("visual");
+  document.addEventListener("selectionchange", () => { const s = getSelection(); if (s.rangeCount && vis.contains(s.anchorNode)) savedRange = s.getRangeAt(0).cloneRange(); });
+  function restore() { vis.focus(); if (savedRange) { const s = getSelection(); s.removeAllRanges(); s.addRange(savedRange); } }
+  function exec(cmd, val = null) { restore(); document.execCommand("styleWithCSS", false, true); document.execCommand(cmd, false, val); dirty = true; }
+  document.querySelector(".vtool").addEventListener("mousedown", e => { if (e.target.closest("button")) e.preventDefault(); });
+  document.querySelector(".vtool").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.color) return exec("foreColor", b.dataset.color);
+    const c = b.dataset.cmd; if (!c) return;
+    if (c === "link") { const u = prompt("連結網址（https://…）"); if (u) exec("createLink", u); return; }
+    if (c === "image") { const u = prompt("圖片網址（https://…）"); if (u) exec("insertImage", u); return; }
+    if (c === "hiliteColor") return exec("hiliteColor", "#FBF1DE");
+    exec(c);
+  });
+  $("vColor").addEventListener("input", e => exec("foreColor", e.target.value));
+  $("vBlock").addEventListener("change", e => { exec("formatBlock", e.target.value); e.target.value = "P"; });
+  $("vSize").addEventListener("change", e => { if (e.target.value) exec("fontSize", e.target.value); e.target.value = ""; });
+  vis.addEventListener("input", () => { dirty = true; });
+  vis.addEventListener("paste", e => {   // 貼上時去掉外部網頁的雜亂樣式；貼 Markdown 文字自動轉格式
+    const html = e.clipboardData.getData("text/html"), text = e.clipboardData.getData("text/plain");
+    e.preventDefault();
+    if (!html && /^(#{1,4} |[-*] |\d+\. |> )/m.test(text)) exec("insertHTML", md(text));
+    else if (html) exec("insertHTML", window.DOMPurify.sanitize(html, { FORBID_ATTR: ["class", "id"], FORBID_TAGS: ["style", "meta"] }));
+    else exec("insertText", text);
+  });
+
+  // ---------- 從 Notion 匯入 ----------
+  let importList = [];
+  async function checkImport() {
+    try { importList = await (await fetch("import/notion-posts.json", { cache: "no-store" })).json(); } catch (e) { return; }
+    const left = []; for (const p of importList) if (!(await store.exists(p.id))) left.push(p);
+    importList = left;
+    $("importBox").hidden = !left.length;
+    $("importInfo").textContent = `還有 ${left.length} 篇 Notion 文章可以匯入（含圖片、原本的發布日期與順序）。`;
+  }
+  $("importBtn").onclick = async () => {
+    if (!importList.length || !confirm(`匯入 ${importList.length} 篇 Notion 文章？已經匯入過的不會重複。`)) return;
+    $("importBtn").disabled = true; let n = 0;
+    try {
+      for (const p of importList) { const { source, ...post } = p; await store.savePost(post); n++; $("importInfo").textContent = `匯入中… ${n} / ${importList.length}`; }
+      toast(`已匯入 ${n} 篇 ✓`);
+    } catch (e) { toast(`第 ${n + 1} 篇失敗：${e.message}`, true); }
+    $("importBtn").disabled = false; await refresh(); checkImport();
+  };
+
+  refresh().then(() => { open(new URLSearchParams(location.search).get("id")); checkImport(); });
 }
 </script>
 </body>

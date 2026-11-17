@@ -13,6 +13,9 @@ export function sortPosts(list) {
     (b.publishedAt || b.createdAt || 0) - (a.publishedAt || a.createdAt || 0));
 }
 
+// 已發布、而且發布時間已到（publishedAt 在未來＝排程中）
+export const isLive = (p, now = Date.now()) => p.status === "published" && (!p.publishedAt || p.publishedAt <= now);
+
 export function newId(title = "") {
   const base = title.trim().toLowerCase().replace(/[^a-z0-9一-鿿]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
   return (base || "post") + "-" + Date.now().toString(36);
@@ -59,12 +62,13 @@ function demoStore() {
     async resetPassword() { throw new Error("示範模式沒有寄信功能；正式模式會寄重設密碼信"); },
     async listPosts({ all = false } = {}) {
       const u = me();
-      return sortPosts(db.posts.filter(p => all && u?.isAdmin ? true : p.status === "published").map(p => pick(p, ["id", ...META_KEYS])));
+      const now = Date.now();
+      return sortPosts(db.posts.filter(p => all && u?.isAdmin ? true : isLive(p, now)).map(p => pick(p, ["id", ...META_KEYS])));
     },
     async getPost(id) {
       const p = db.posts.find(p => p.id === id); if (!p) return null;
       const u = me();
-      if (p.status !== "published" && !u?.isAdmin) return null;
+      if (!isLive(p) && !u?.isAdmin) return null;
       const locked = p.visibility === "members" && !u;
       return { ...p, body: locked ? null : p.body, locked };
     },
@@ -80,6 +84,7 @@ function demoStore() {
     async listTemplates() { return [...db.templates].sort((a, b) => b.updatedAt - a.updatedAt); },
     async saveTemplate(t) { const i = db.templates.findIndex(x => x.id === t.id); if (i >= 0) db.templates[i] = t; else db.templates.push(t); save(); return t; },
     async deleteTemplate(id) { db.templates = db.templates.filter(t => t.id !== id); save(); },
+    async exists(id) { return db.posts.some(p => p.id === id); },
     async listMembers() { return db.users.map(u => ({ uid: u.uid, email: u.email, name: u.name, role: u.role, joinedAt: u.joinedAt })); },
     async resetDemo() { localStorage.removeItem(KEY); load(); emit(); },
   };
@@ -155,13 +160,15 @@ async function firebaseStore() {
       await readyP;
       const col = fs.collection(db, "posts");
       const q = all && user?.isAdmin ? col : fs.query(col, fs.where("status", "==", "published"));
-      const snap = await fs.getDocs(q);
-      return sortPosts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+      const snap = await fs.getDocs(q), now = Date.now();
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      return sortPosts(all && user?.isAdmin ? list : list.filter(p => isLive(p, now)));
     },
     async getPost(id) {
       await readyP;
       let meta;
       try { const m = await fs.getDoc(fs.doc(db, "posts", id)); if (!m.exists()) return null; meta = { id, ...m.data() }; } catch (e) { return null; }
+      if (!isLive(meta) && !user?.isAdmin) return null;
       try { const b = await fs.getDoc(fs.doc(db, "bodies", id)); return { ...meta, body: b.exists() ? b.data().body : "", locked: false }; }
       catch (e) { return { ...meta, body: null, locked: true }; }
     },
@@ -170,7 +177,7 @@ async function firebaseStore() {
       try {
         const batch = fs.writeBatch(db);
         batch.set(fs.doc(db, "posts", post.id), pick(post, META_KEYS));
-        batch.set(fs.doc(db, "bodies", post.id), { body: post.body || "", visibility: post.visibility, status: post.status });
+        batch.set(fs.doc(db, "bodies", post.id), { body: post.body || "", visibility: post.visibility, status: post.status, publishedAt: post.publishedAt || 0 });
         await batch.commit(); return post;
       } catch (e) { throw err(e); }
     },
@@ -179,6 +186,7 @@ async function firebaseStore() {
     async listTemplates() { const s = await fs.getDocs(fs.collection(db, "templates")); return s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.updatedAt - a.updatedAt); },
     async saveTemplate(t) { const { id, ...rest } = t; await fs.setDoc(fs.doc(db, "templates", id), rest); return t; },
     async deleteTemplate(id) { await fs.deleteDoc(fs.doc(db, "templates", id)); },
+    async exists(id) { try { return (await fs.getDoc(fs.doc(db, "posts", id))).exists(); } catch (e) { return false; } },
     async listMembers() { const s = await fs.getDocs(fs.collection(db, "members")); return s.docs.map(d => ({ uid: d.id, role: "member", ...d.data() })); },
     async resetDemo() { },
   };

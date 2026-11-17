@@ -18,7 +18,7 @@
     <form id="f" autocomplete="on">
       <div id="nameBox" hidden><label for="name">怎麼稱呼你</label><input id="name" autocomplete="nickname"></div>
       <label for="email">Email</label><input id="email" type="email" required autocomplete="username">
-      <label for="pw">密碼</label><input id="pw" type="password" required minlength="6" autocomplete="current-password">
+      <label for="pw">密碼</label><div class="pwbox"><input id="pw" type="password" required minlength="6" autocomplete="current-password"><button type="button" id="eye" class="eye" aria-label="顯示密碼" aria-pressed="false">顯示</button></div>
       <button class="btn" style="width:100%;margin-top:18px" id="go">登入</button>
       <div class="msg" id="msg"></div>
       <p style="text-align:center;margin:8px 0 0"><a href="#" id="forgot" class="stamp">忘記密碼？</a></p>
@@ -35,6 +35,13 @@ const $ = id => document.getElementById(id);
 if (MODE === "demo") $("demoNote").hidden = false;
 // 會員功能關閉時：隱藏「註冊會員」分頁（示範模式在本機仍保留，才能建立第一個管理員）
 if (!window.BLOG_CONFIG.membersEnabled && MODE !== "demo") document.querySelector('.tabs [data-t="up"]').hidden = true;
+$("eye").addEventListener("click", () => {
+  const show = $("pw").type === "password";
+  $("pw").type = show ? "text" : "password";
+  $("eye").textContent = show ? "隱藏" : "顯示";
+  $("eye").setAttribute("aria-pressed", String(show)); $("eye").setAttribute("aria-label", show ? "隱藏密碼" : "顯示密碼");
+  $("pw").focus();
+});
 const next = new URLSearchParams(location.search).get("next");
 const goNext = u => location.href = next && !/^https?:|^\/\//.test(next) ? next : (u.isAdmin ? "admin.html" : "member.html");
 

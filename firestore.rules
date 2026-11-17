@@ -19,8 +19,10 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     match /bodies/{id} {
+      // 排程文章：publishedAt（毫秒）還沒到，內文讀不到
       allow read: if isAdmin()
         || (resource.data.status == 'published'
+            && (!('publishedAt' in resource.data) || resource.data.publishedAt <= request.time.toMillis())
             && (resource.data.visibility == 'public' || signedIn()));
       allow write: if isAdmin();
     }

@@ -10,6 +10,8 @@
 // ============================================================
 window.BLOG_CONFIG = {
   siteName: "Edward 的 Blog",
+  // 配色：navy（海軍藍＋金）／forest（墨綠＋香檳金）／burgundy（酒紅＋象牙金）／slate（石板灰＋湖水綠）／coffee（咖啡棕＋米色）
+  palette: "navy",
   tagline: "投資理財・退休傳承・社會保險，用白話把錢的事講清楚",
   author: "Edward",
   authorTitle: "保經事業部負責人｜RFC・CFC",
@@ -18,7 +20,7 @@ window.BLOG_CONFIG = {
   bookingNote: "免費 15-20 分鐘財務現況評估",
   // 會員功能開關：false＝先隱藏「會員專區」與註冊（Edward 2026-11-17：之後再想怎麼用）
   membersEnabled: false,
-  categories: ["投資理財", "退休傳承", "社會保險", "保險規劃", "生活財商"],
+  categories: ["投資理財", "保險規劃", "退休傳承", "社會保險", "時事觀點", "讀書心得", "新手入門", "生活財商"],
 
   firebase: {
     apiKey: "AIzaSyBlJfQlwau4m4kWpMzPiNYG2KYwQyGsUVU",
@@ -34,3 +36,10 @@ window.BLOG_CONFIG = {
   //   appId: "...."
   // },
 };
+
+// 套用配色（網址加 ?palette=forest 可以臨時預覽別套）
+(() => {
+  let p = window.BLOG_CONFIG.palette || "navy";
+  try { p = new URLSearchParams(location.search).get("palette") || p; } catch (e) { }
+  document.documentElement.dataset.palette = p;
+})();
