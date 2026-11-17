@@ -3,7 +3,7 @@
 """
 import re, time, pathlib
 root = pathlib.Path(__file__).resolve().parent.parent
-v = time.strftime("%Y%m%d%H%M")
+v = time.strftime("%Y%m%d%H%M%S")
 n = 0
 for f in list(root.glob("*.html")) + list((root / "assets").glob("*.js")):
     s = f.read_text(encoding="utf-8"); o = s

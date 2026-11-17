@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=202611171656";
+import { store, MODE } from "./store.js?v=20261117165704";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -88,6 +88,7 @@ export function header(active = "") {
       (u ? `<span class="who" title="${esc(u.email)}">${esc(u.name)}</span><button class="btn ghost sm" id="logout">登出</button>`
          : (MODE === "demo" && !LOCAL ? "" : `<a class="btn sm" href="login.html">登入</a>`));
     el.querySelector("#themeBtn").onclick = toggleTheme;
+    if (!window.__ebThemeSync) { window.__ebThemeSync = 1; addEventListener("eb-theme", () => { const b = document.getElementById("themeBtn"); if (b) { b.outerHTML = themeBtn(); document.getElementById("themeBtn").onclick = toggleTheme; } }); }
     el.querySelector("#logout")?.addEventListener("click", async () => { await store.signOut(); location.href = "index.html"; });
   });
 }
@@ -102,7 +103,9 @@ function themeBtn() {
 export function toggleTheme() {
   const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
   document.documentElement.dataset.theme = t;
-  try { localStorage.setItem("eb-theme", t); } catch (e) { }
+  // 切回跟系統一樣 → 恢復「自動跟隨系統」；跟系統不一樣 → 記住他的選擇
+  const sys = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  try { if (t === sys) localStorage.removeItem("eb-theme"); else localStorage.setItem("eb-theme", t); } catch (e) { }
   const b = document.getElementById("themeBtn"); if (b) b.outerHTML = themeBtn();
   document.getElementById("themeBtn").onclick = toggleTheme;
   dispatchEvent(new CustomEvent("eb-theme", { detail: t }));

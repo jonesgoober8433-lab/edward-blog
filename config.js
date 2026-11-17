@@ -46,7 +46,16 @@ window.BLOG_CONFIG = {
   try { p = localStorage.getItem("eb-site-palette") || p; } catch (e) { }   // 後台切換過的配色（先用快取，避免閃一下）
   try { p = new URLSearchParams(location.search).get("palette") || p; } catch (e) { }
   document.documentElement.dataset.palette = p;
-  // 黑暗／日光模式：只影響這個網站，瀏覽器會記住（預設日光）
-  let t = "light"; try { t = localStorage.getItem("eb-theme") || "light"; } catch (e) { }
-  document.documentElement.dataset.theme = t;
+  // 黑暗／日光模式：沒手動選過就「自動跟讀者的手機／電腦設定」；按右上角按鈕選過就以他的選擇為準（只影響這個網站）
+  const mq = window.matchMedia ? matchMedia("(prefers-color-scheme: dark)") : null;
+  const sys = () => (mq && mq.matches ? "dark" : "light");
+  let saved = null; try { saved = localStorage.getItem("eb-theme"); } catch (e) { }
+  document.documentElement.dataset.theme = saved || sys();
+  // 系統模式改變時（例如晚上自動變深色），沒手動選過的讀者即時跟著換
+  mq && mq.addEventListener && mq.addEventListener("change", () => {
+    let s = null; try { s = localStorage.getItem("eb-theme"); } catch (e) { }
+    if (s) return;
+    document.documentElement.dataset.theme = sys();
+    window.dispatchEvent(new CustomEvent("eb-theme", { detail: sys() }));
+  });
 })();
