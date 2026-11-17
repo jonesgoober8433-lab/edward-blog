@@ -6,14 +6,14 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261117172456">
-<script src="config.js?v=20261117172456"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261117173238">
+<script src="config.js?v=20261117173238"></script>
 </head>
 <body>
 <main><div class="wrap narrow" style="padding:32px 16px 48px" id="box"><div class="empty">載入中…</div></div></main>
 <script type="module">
-import { store } from "./assets/store.js?v=20261117172456";
-import { header, footer, esc, fmtDate } from "./assets/ui.js?v=20261117172456";
+import { store } from "./assets/store.js?v=20261117173238";
+import { header, footer, esc, fmtDate } from "./assets/ui.js?v=20261117173238";
 const CFG = window.BLOG_CONFIG;
 header("member"); footer();
 const box = document.getElementById("box");
@@ -30,7 +30,9 @@ store.onAuth(async u => {
       ? `<div class="paywall"><h2 style="margin-top:0">會員申請未通過</h2><p>如有疑問，歡迎直接聯絡 Edward。</p></div>`
       : `<div class="paywall"><div style="font-size:40px">⏳</div><h2 style="margin-top:0">正在取得授權</h2>
          <p>${esc(u.name)} 您好，您的會員申請已送出，Edward 確認後就會開通。</p>
+         ${u.emailVerified ? `<p class="stamp">✅ Email 已驗證</p>` : `<p class="msgbox" style="text-align:left">📧 還沒驗證 Email：請到 <b>${esc(u.email)}</b> 點驗證連結（也看看垃圾信件匣）。<br><button class="btn ghost sm" id="resend" style="margin-top:6px">重寄驗證信</button></p>`}
          <p class="stamp">開通後重新整理這一頁，就能看到 VIP 文章。</p></div>`;
+    document.getElementById("resend")?.addEventListener("click", async e => { e.target.disabled = true; try { await store.resendVerification(); e.target.textContent = "已重寄 ✓"; } catch (err) { e.target.textContent = "太頻繁了，請稍後再試"; } });
     return;
   }
   const posts = (await store.listPosts()).filter(p => p.visibility === "members");

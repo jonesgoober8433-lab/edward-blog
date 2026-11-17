@@ -58,7 +58,9 @@ service cloud.firestore {
       allow update: if isAdmin()
         || (signedIn() && request.auth.uid == uid
             && request.resource.data.approved == resource.data.approved
-            && request.resource.data.status == resource.data.status);
+            && request.resource.data.status == resource.data.status
+            // 「Email 已驗證」只有真的點過驗證信才能設成 true
+            && (request.resource.data.get('emailVerified', false) == false || request.auth.token.email_verified == true));
       allow delete: if isAdmin();
     }
     match /roles/{uid} {

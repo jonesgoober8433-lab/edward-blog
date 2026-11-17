@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261117172456">
-<script src="config.js?v=20261117172456"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261117173238">
+<script src="config.js?v=20261117173238"></script>
 </head>
 <body>
 <main><div class="wrap">
@@ -18,6 +18,8 @@
     <form id="f" autocomplete="on">
       <div id="nameBox" hidden><label for="name">全名</label><input id="name" autocomplete="name" placeholder="請填真實姓名，方便 Edward 確認身分"></div>
       <label for="email">Email</label><input id="email" type="email" required autocomplete="username">
+      <p class="msg" id="emailHint" style="margin:4px 0 0"></p>
+      <div id="email2Box" hidden><label for="email2">再輸入一次 Email（避免打錯）</label><input id="email2" type="email" autocomplete="off"></div>
       <label for="pw">密碼</label><div class="pwbox"><input id="pw" type="password" required minlength="6" autocomplete="current-password"><button type="button" id="eye" class="eye" aria-label="顯示密碼" aria-pressed="false">顯示</button></div>
       <div id="pw2Box" hidden><label for="pw2">再輸入一次密碼</label><input id="pw2" type="password" minlength="6" autocomplete="new-password"></div>
       <p class="stamp" id="upNote" hidden style="margin:10px 0 0">送出後會由 Edward 審核，通過後就能看 VIP 文章。你的密碼經過加密保存，任何人（包括 Edward）都看不到。</p>
@@ -29,8 +31,8 @@
   </div>
 </div></main>
 <script type="module">
-import { store, MODE } from "./assets/store.js?v=20261117172456";
-import { header, footer } from "./assets/ui.js?v=20261117172456";
+import { store, MODE } from "./assets/store.js?v=20261117173238";
+import { header, footer } from "./assets/ui.js?v=20261117173238";
 header(""); footer();
 let mode = "in";
 const $ = id => document.getElementById(id);
@@ -45,6 +47,24 @@ $("eye").addEventListener("click", () => {
   $("eye").setAttribute("aria-pressed", String(show)); $("eye").setAttribute("aria-label", show ? "隱藏密碼" : "顯示密碼");
   $("pw").focus();
 });
+// 常見信箱打錯字提醒（gmial.com → gmail.com）
+const DOMAINS = ["gmail.com", "yahoo.com.tw", "yahoo.com", "hotmail.com", "outlook.com", "icloud.com", "msn.com", "hotmail.com.tw", "livemail.tw", "pchome.com.tw", "seed.net.tw", "hinet.net", "ms1.hinet.net"];
+function dist(a, b) { const d = Array.from({ length: a.length + 1 }, (_, i) => [i]); for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[a.length][b.length]; }
+function suggestEmail(v) {
+  const m = v.trim().toLowerCase().match(/^([^@\s]+)@([^@\s]+)$/); if (!m) return null;
+  if (DOMAINS.includes(m[2])) return null;
+  let best = null, bd = 9; for (const d of DOMAINS) { const x = dist(m[2], d); if (x < bd) { bd = x; best = d; } }
+  return bd > 0 && bd <= 2 ? `${m[1]}@${best}` : null;
+}
+$("email").addEventListener("blur", () => {
+  if (mode !== "up") return;
+  const s = suggestEmail($("email").value);
+  $("emailHint").className = "msg bad";
+  $("emailHint").innerHTML = s ? `是不是要輸入 <a href="#" id="useSug">${s}</a>？` : "";
+  document.getElementById("useSug")?.addEventListener("click", e => { e.preventDefault(); $("email").value = s; $("emailHint").textContent = ""; });
+});
+
 // 通知 Edward：送一份到他的 Google 表單（表單會寄 Email 給他）。不含密碼。
 function notifyEdward(u) {
   const f = window.BLOG_CONFIG.memberNotifyForm || {};
@@ -58,6 +78,7 @@ function showPending(u) {
   const d = document.createElement("dialog"); d.className = "pending-dlg";
   d.innerHTML = `<div style="font-size:40px">⏳</div><h2>正在取得授權</h2>
     <p>${u.name} 您好，已收到您的會員申請。</p>
+    <p class="msgbox" style="text-align:left">📧 請到信箱 <b>${u.email}</b> 點「驗證 Email」的連結（沒看到請查垃圾信件匣）。驗證完成，Edward 才能開通。</p>
     <p class="stamp">Edward 確認後就會開通，開通後用這組 Email 和密碼登入，就能看 VIP 文章。</p>
     <a class="btn" href="member.html" style="margin-top:8px">我知道了</a>`;
   document.body.append(d); d.showModal();
@@ -68,8 +89,8 @@ const goNext = u => location.href = next && !/^https?:|^\/\//.test(next) ? next 
 document.querySelector(".tabs").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   mode = b.dataset.t; document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b));
-  $("nameBox").hidden = $("pw2Box").hidden = $("upNote").hidden = mode !== "up"; $("go").textContent = mode === "up" ? "送出會員申請" : "登入";
-  $("name").required = $("pw2").required = mode === "up";
+  $("nameBox").hidden = $("pw2Box").hidden = $("upNote").hidden = $("email2Box").hidden = mode !== "up"; $("go").textContent = mode === "up" ? "送出會員申請" : "登入";
+  $("name").required = $("pw2").required = $("email2").required = mode === "up";
   $("pw").autocomplete = mode === "up" ? "new-password" : "current-password"; $("msg").textContent = "";
 });
 $("f").addEventListener("submit", async e => {
@@ -77,6 +98,8 @@ $("f").addEventListener("submit", async e => {
   try {
     if (mode === "up") {
       if ($("name").value.trim().length < 2) throw new Error("請填寫全名");
+      if ($("email").value.trim().toLowerCase() !== $("email2").value.trim().toLowerCase()) throw new Error("兩次輸入的 Email 不一樣，請再檢查一次");
+      const sug = suggestEmail($("email").value); if (sug && !confirm(`你輸入的是 ${$("email").value.trim()}\n是不是要輸入 ${sug}？\n\n按「確定」照原本的送出，按「取消」回去修改`)) throw new Error("請修改 Email 後再送出");
       if ($("pw").value !== $("pw2").value) throw new Error("兩次輸入的密碼不一樣");
       const u = await store.signUp($("email").value, $("pw").value, $("name").value.trim());
       notifyEdward(u);

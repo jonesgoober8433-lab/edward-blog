@@ -60,6 +60,7 @@ function demoStore() {
     },
     async signOut() { db.session = null; save(); emit(); },
     async resetPassword() { throw new Error("示範模式沒有寄信功能；正式模式會寄重設密碼信"); },
+    async resendVerification() { },
     async listPosts({ all = false } = {}) {
       const u = me();
       const now = Date.now();
@@ -137,6 +138,7 @@ async function firebaseStore() {
   const fs = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
   const app = appM.initializeApp(CFG.firebase);
   const auth = authM.getAuth(app);
+  auth.languageCode = "zh-TW";   // Firebase 寄的驗證信、重設密碼信用中文
   const db = fs.getFirestore(app);
   let user = null;
   const listeners = new Set();
@@ -148,8 +150,13 @@ async function firebaseStore() {
     let isAdmin = false, m = null;
     try { const r = await fs.getDoc(fs.doc(db, "roles", u.uid)); isAdmin = !!(r.exists() && r.data().admin); } catch (e) { }
     if (!isAdmin) try { const r = await fs.getDoc(fs.doc(db, "members", u.uid)); m = r.exists() ? r.data() : null; } catch (e) { }
+    // 客戶點過驗證信後，下次登入時把「已驗證」記到會員資料（Edward 後台看得到）
+    if (!isAdmin && m && !m.emailVerified) {
+      try { await u.reload(); } catch (e) { }
+      if (u.emailVerified) { try { await fs.updateDoc(fs.doc(db, "members", u.uid), { emailVerified: true }); m.emailVerified = true; } catch (e) { } }
+    }
     const status = isAdmin ? "approved" : (m?.status || "pending");
-    return { uid: u.uid, email: u.email, name: m?.name || u.displayName || (u.email || "").split("@")[0], isAdmin, status, approved: isAdmin || status === "approved" };
+    return { uid: u.uid, email: u.email, name: m?.name || u.displayName || (u.email || "").split("@")[0], isAdmin, status, approved: isAdmin || status === "approved", emailVerified: isAdmin || !!u.emailVerified };
   }
   authM.onAuthStateChanged(auth, async u => { user = await toUser(u); ready(); listeners.forEach(fn => fn(user)); });
 
@@ -166,7 +173,9 @@ async function firebaseStore() {
         const c = await authM.createUserWithEmailAndPassword(auth, email.trim(), password);
         if (name) await authM.updateProfile(c.user, { displayName: name });
         // 會員申請：狀態「等候授權」，只有 Edward（管理員）能改成核准
-        await fs.setDoc(fs.doc(db, "members", c.user.uid), { email: c.user.email, name: name || "", requestedAt: Date.now(), status: "pending", approved: false });
+        await fs.setDoc(fs.doc(db, "members", c.user.uid), { email: c.user.email, name: name || "", requestedAt: Date.now(), status: "pending", approved: false, emailVerified: false });
+        // 寄「驗證 Email」信：確認信箱是真的、而且是他本人的
+        try { await authM.sendEmailVerification(c.user, { url: location.origin + location.pathname.replace(/[^/]*$/, "") + "member.html" }); } catch (e) { }
         user = await toUser(c.user); listeners.forEach(fn => fn(user)); return user;
       } catch (e) { throw err(e); }
     },
@@ -175,6 +184,7 @@ async function firebaseStore() {
     },
     async signOut() { await authM.signOut(auth); },
     async resetPassword(email) { try { await authM.sendPasswordResetEmail(auth, email.trim()); } catch (e) { throw err(e); } },
+    async resendVerification() { if (auth.currentUser) await authM.sendEmailVerification(auth.currentUser); },
     async listPosts({ all = false } = {}) {
       await readyP;
       const col = fs.collection(db, "posts");

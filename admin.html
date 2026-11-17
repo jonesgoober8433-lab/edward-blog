@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261117172456">
-<script src="config.js?v=20261117172456"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261117173238">
+<script src="config.js?v=20261117173238"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"></script>
@@ -209,9 +209,9 @@
 </template>
 
 <script type="module">
-import { store, MODE, newId, isLive } from "./assets/store.js?v=20261117172456";
-import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261117172456";
-import { initMedia } from "./assets/media.js?v=20261117172456";
+import { store, MODE, newId, isLive } from "./assets/store.js?v=20261117173238";
+import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261117173238";
+import { initMedia } from "./assets/media.js?v=20261117173238";
 const CFG = window.BLOG_CONFIG;
 header("admin"); footer();
 const root = document.getElementById("root");
@@ -461,7 +461,7 @@ function start() {
     const mem = await store.listMembers().catch(() => []);
     const pend = mem.filter(m => (m.status || "pending") === "pending"), ok = mem.filter(m => m.status === "approved");
     $("mreqN").innerHTML = pend.length ? `<span class="dot-badge">${pend.length}</span>` : "";
-    const row = (m, acts) => `<div class="mreq"><b>${esc(m.name || "（沒填姓名）")}</b><br><span class="stamp">${esc(m.email || "")}・申請 ${fmtTime(m.requestedAt || m.joinedAt)}</span>${acts}</div>`;
+    const row = (m, acts) => `<div class="mreq"><b>${esc(m.name || "（沒填姓名）")}</b> ${m.emailVerified ? `<span class="badge" style="background:#2E7D5B;color:#fff">✅ Email 已驗證</span>` : `<span class="badge draft">⚠️ Email 未驗證</span>`}<br><span class="stamp">${esc(m.email || "")}・申請 ${fmtTime(m.requestedAt || m.joinedAt)}</span>${acts}</div>`;
     $("members").innerHTML =
       (pend.length ? pend.map(m => row(m, `<div class="acts"><button class="btn sm" data-ok="${m.uid}">核准</button><button class="btn danger sm" data-no="${m.uid}">拒絕</button></div>`)).join("") : `<p class="stamp" style="margin:0">目前沒有待審核的申請</p>`)
       + (ok.length ? `<details style="margin-top:6px"><summary class="stamp">已核准 ${ok.length} 位</summary>${ok.map(m => row(m, `<div class="acts"><span class="stamp">核准於 ${fmtTime(m.decidedAt)}</span></div><div class="acts"><button class="btn ghost sm" data-reset="${esc(m.email || "")}" title="客戶忘記密碼時用：Firebase 會寄信讓客戶自己設新密碼">🔑 寄重設密碼信</button><button class="btn ghost sm" data-no="${m.uid}">取消資格</button></div>`)).join("")}</details>` : "");
@@ -475,6 +475,7 @@ function start() {
     }
     if (!ok && !no) return;
     if (no && !confirm("確定拒絕／取消這位的會員資格？")) return;
+    if (ok) { const m = (await store.listMembers()).find(x => x.uid === ok.dataset.ok); if (m && !m.emailVerified && !confirm(`${m.name} 的 Email 還沒驗證（可能是假的或打錯）。\n確定還是要核准嗎？`)) return; }
     try { await store.decideMember((ok || no).dataset[ok ? "ok" : "no"], ok ? "approved" : "rejected"); toast(ok ? "已核准 ✓ 對方重新整理就能看 VIP 文章" : "已更新"); drawMembers(); }
     catch (err) { toast("失敗：" + err.message, true); }
   });
