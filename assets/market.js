@@ -1,7 +1,7 @@
 // 首頁「市場行情」小卡：6 檔、可左右滑動翻頁、1D／1W／1M 切換
 // 台股加權指數：用證交所官方公開資料自己畫（TradingView 免費版不提供台股）
 // 美股：TradingView 免費小圖（S&P 500、那斯達克、道瓊用追蹤指數的差價合約報價；費半用 SOXX ETF 代表）
-import { esc } from "./ui.js?v=202611171645";
+import { esc } from "./ui.js?v=202611171647";
 
 const CARDS = [
   { key: "twii", name: "台股加權指數", note: "證交所官方資料" },
@@ -54,7 +54,7 @@ export function mountMarket(el) {
       body.innerHTML = `<div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div></div>`;
       const sc = document.createElement("script");
       sc.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js"; sc.async = true;
-      sc.text = JSON.stringify({ symbol: key, width: "100%", height: 150, locale: "zh_TW", dateRange: TV_RANGE[range], colorTheme: "light", isTransparent: true, autosize: false, largeChartUrl: "", noTimeScale: false });
+      sc.text = JSON.stringify({ symbol: key, width: "100%", height: 150, locale: "zh_TW", dateRange: TV_RANGE[range], colorTheme: document.documentElement.dataset.theme === "dark" ? "dark" : "light", isTransparent: true, autosize: false, largeChartUrl: "", noTimeScale: false });
       body.firstChild.append(sc);
     });
     setTimeout(drawDots, 50);
@@ -64,6 +64,7 @@ export function mountMarket(el) {
     range = b.dataset.r; try { localStorage.setItem("eb-mkt-range", range); } catch (e) { } render();
   });
   render();
+  addEventListener("eb-theme", render);   // 切換黑暗／日光模式時，美股小圖跟著換色
   // 台股：開盤時間每分鐘更新一次
   setInterval(() => { if (range === "1D" && !document.hidden) twii(el.querySelector('[data-key="twii"] .mkt-body'), "1D", true); }, 60000);
 }

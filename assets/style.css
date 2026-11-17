@@ -493,3 +493,30 @@ body.dv-open #preview { display: none; }
 .cand-pc .con { background: color-mix(in srgb, #B23B3B 10%, var(--card)); }
 @media (max-width: 600px) { .cand-pc { grid-template-columns: 1fr; } }
 .home-top:has(> .today-brief[hidden]) { grid-template-columns: minmax(0, 1fr); }
+
+/* ===== 黑暗模式（右上角按鈕切換，只影響這個網站）===== */
+.theme-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--ln); background: var(--card); color: var(--ink); display: inline-grid; place-items: center; cursor: pointer; padding: 0; margin: 0 4px; flex: none; }
+.theme-btn:hover { border-color: var(--gold); color: var(--gold); }
+.theme-btn svg { display: block; }
+@media (max-width: 600px) { .theme-btn { width: 32px; height: 32px; margin: 0 2px; } .theme-btn svg { width: 18px; height: 18px; } }
+:root[data-theme="dark"] {
+  --bg: #13110E; --card: #1C1915; --ink: #ECE6DA; --mu: #A59C8E; --ln: #332C25; --field: #17140F;
+  --gold-soft: #2A2419; --gold: #D2AE77; --navy: #E2C08D; --navy-2: #E2C08D;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 28px -18px rgba(0,0,0,.8);
+  color-scheme: dark;
+}
+:root[data-theme="dark"][data-palette="navy"] { --navy: #9DB8EC; --navy-2: #9DB8EC; --bg: #0F131A; --card: #171C25; --field: #12161E; --ln: #283142; --gold-soft: #1E2533; --ink: #E6EAF1; --mu: #9AA6B8; }
+:root[data-theme="dark"][data-palette="burgundy"] { --navy: #E8AAB4; --navy-2: #E8AAB4; --bg: #151011; --card: #1E1718; --field: #181213; --ln: #3A2B2D; --gold-soft: #2C1F21; }
+:root[data-theme="dark"][data-palette="slate"] { --navy: #7FD3CA; --navy-2: #7FD3CA; --gold: #7FD3CA; --bg: #0F1417; --card: #172026; --field: #12191E; --ln: #283640; --gold-soft: #1B2A2E; --ink: #E4ECEF; --mu: #98A9B2; }
+:root[data-theme="dark"] .btn:not(.ghost):not(.danger) { color: #14110D; }
+:root[data-theme="dark"] .btn.gold { color: #14110D; }
+:root[data-theme="dark"] .chip.on, :root[data-theme="dark"] .seg button.on { color: #14110D; }
+:root[data-theme="dark"] .toast { color: #14110D; }
+:root[data-theme="dark"] .toast.bad { color: #fff; }
+:root[data-theme="dark"] .search input { background: var(--card); color: var(--ink); }
+:root[data-theme="dark"] .site-header { background: color-mix(in srgb, var(--card) 92%, transparent); }
+:root[data-theme="dark"] .card .cover.blank, :root[data-theme="dark"] .hero, :root[data-theme="dark"] .cta, :root[data-theme="dark"] .today-brief { filter: brightness(.92); }
+:root[data-theme="dark"] .prose img, :root[data-theme="dark"] .mcard img { filter: brightness(.9); }
+:root[data-theme="dark"] .np-ico, :root[data-theme="dark"] .toc-fab { color: #fff; }
+:root[data-theme="dark"] .badge.lock { color: #14110D; }
+:root[data-theme="dark"] .dv-device iframe, :root[data-theme="dark"] .mkt-body iframe { color-scheme: normal; }

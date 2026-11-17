@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=202611171645";
+import { store, MODE } from "./store.js?v=202611171647";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -84,11 +84,28 @@ export function header(active = "") {
     const links = [["index.html", "文章", "home"], ["brief.html", "早報", "brief"], ["about.html", "關於我", "about"]];
     if (CFG.membersEnabled) links.push(["member.html", "會員專區", "member"]);
     if (u?.isAdmin) links.push(["admin.html", "後台", "admin"], ["brief-admin.html", "📰早報後台", "badmin"]);
-    el.querySelector("#nav").innerHTML = links.map(([h, t, k]) => `<a href="${h}" class="${k === active ? "on" : ""}">${t}</a>`).join("") +
+    el.querySelector("#nav").innerHTML = links.map(([h, t, k]) => `<a href="${h}" class="${k === active ? "on" : ""}">${t}</a>`).join("") + themeBtn() +
       (u ? `<span class="who" title="${esc(u.email)}">${esc(u.name)}</span><button class="btn ghost sm" id="logout">登出</button>`
          : (MODE === "demo" && !LOCAL ? "" : `<a class="btn sm" href="login.html">登入</a>`));
+    el.querySelector("#themeBtn").onclick = toggleTheme;
     el.querySelector("#logout")?.addEventListener("click", async () => { await store.signOut(); location.href = "index.html"; });
   });
+}
+
+// 黑暗／日光模式切換鈕（右上角）
+function themeBtn() {
+  const dark = document.documentElement.dataset.theme === "dark";
+  return `<button type="button" class="theme-btn" id="themeBtn" aria-label="${dark ? "切換成日光模式" : "切換成黑暗模式"}" title="${dark ? "切換成日光模式" : "切換成黑暗模式"}">${dark
+    ? `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></g></svg>`
+    : `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1z" fill="currentColor"/></svg>`}</button>`;
+}
+export function toggleTheme() {
+  const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem("eb-theme", t); } catch (e) { }
+  const b = document.getElementById("themeBtn"); if (b) b.outerHTML = themeBtn();
+  document.getElementById("themeBtn").onclick = toggleTheme;
+  dispatchEvent(new CustomEvent("eb-theme", { detail: t }));
 }
 
 export function footer() {

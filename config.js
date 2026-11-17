@@ -46,4 +46,7 @@ window.BLOG_CONFIG = {
   try { p = localStorage.getItem("eb-site-palette") || p; } catch (e) { }   // 後台切換過的配色（先用快取，避免閃一下）
   try { p = new URLSearchParams(location.search).get("palette") || p; } catch (e) { }
   document.documentElement.dataset.palette = p;
+  // 黑暗／日光模式：只影響這個網站，瀏覽器會記住（預設日光）
+  let t = "light"; try { t = localStorage.getItem("eb-theme") || "light"; } catch (e) { }
+  document.documentElement.dataset.theme = t;
 })();
