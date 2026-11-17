@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=20261117170012";
+import { store, MODE } from "./store.js?v=20261117170154";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -14,11 +14,9 @@ export function applyPalette(p, remember = true) {
   if (remember) try { localStorage.setItem("eb-site-palette", p); } catch (e) { }
 }
 export const DARKS = [
-  ["warm", "1｜暖咖啡", "#13110E", "#E2C08D"],
   ["oled", "2｜純黑", "#000000", "#E2C08D"],
   ["charcoal", "3｜石墨灰", "#1B1C1F", "#D9D9DE"],
   ["midnight", "4｜深夜藍", "#0B1322", "#E2C08D"],
-  ["forest", "5｜墨綠", "#0D1814", "#D9BE86"],
 ];
 export function applyDark(d, remember = true) {
   if (!d) return;

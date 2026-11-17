@@ -23,18 +23,16 @@
 </head>
 <body>
 <header>
-  <h1>深色風格：五選一</h1>
-  <p>模擬讀者「手機系統是深色模式」時看到的網站（手機尺寸、真的網站）。每格可以捲動，選好跟小Edward 說編號，或到後台「深色風格」直接按。</p>
+  <h1>深色風格：三選一</h1>
+  <p>模擬讀者「手機系統是深色模式」時看到的網站（手機尺寸、真的網站）。每格可以捲動，到後台「深色風格」直接按就會切換。</p>
   <div class="tabs" id="tabs"><button data-p="index.html" class="on">首頁</button><button data-p="post.html?id=n-f73d0e49d0f4">文章頁</button><button data-p="brief.html">早報</button><button data-p="about.html">關於我</button></div>
 </header>
 <div class="grid" id="g"></div>
 <script>
 const D = [
-  ["warm", "1｜暖咖啡", "跟日光版咖啡色一致，溫暖（目前）"],
   ["oled", "2｜純黑", "最省電、對比最強"],
   ["charcoal", "3｜石墨灰", "中性現代，像 iPhone 系統深色"],
   ["midnight", "4｜深夜藍", "穩重專業，像金融 App"],
-  ["forest", "5｜墨綠", "沉穩、有質感"],
 ];
 let page = "index.html";
 function draw() {

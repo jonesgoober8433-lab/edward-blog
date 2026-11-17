@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261117170012">
-<script src="config.js?v=20261117170012"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261117170154">
+<script src="config.js?v=20261117170154"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"></script>
@@ -29,7 +29,7 @@
         <p class="stamp" style="margin:6px 0 0">按下去全網站立刻換色，訪客重新整理就會看到。<a href="themes.html" target="_blank">並排比較</a></p>
         <h2 style="font-size:16px;margin:12px 0 6px">深色風格（讀者手機是深色時）</h2>
         <div id="darks" class="palettes"></div>
-        <p class="stamp" style="margin:6px 0 0"><a href="darkthemes.html" target="_blank">五種深色並排比較</a></p>
+        <p class="stamp" style="margin:6px 0 0"><a href="darkthemes.html" target="_blank">深色並排比較</a></p>
       </div>
       <div id="optBox" hidden style="border-top:1px solid var(--ln);margin-top:12px;padding-top:10px">
         <h2 style="font-size:16px;margin:0 0 4px">✨ 優化版待你審核</h2>
@@ -208,9 +208,9 @@
 </template>
 
 <script type="module">
-import { store, MODE, newId, isLive } from "./assets/store.js?v=20261117170012";
-import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261117170012";
-import { initMedia } from "./assets/media.js?v=20261117170012";
+import { store, MODE, newId, isLive } from "./assets/store.js?v=20261117170154";
+import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261117170154";
+import { initMedia } from "./assets/media.js?v=20261117170154";
 const CFG = window.BLOG_CONFIG;
 header("admin"); footer();
 const root = document.getElementById("root");
@@ -468,7 +468,7 @@ function start() {
   });
   drawPalettes();
   async function drawDarks() {
-    const cur = (await store.getSettings()).dark || CFG.darkStyle || "warm";
+    const cur = (await store.getSettings()).dark || CFG.darkStyle || "oled";
     $("darks").innerHTML = DARKS.map(([k, n, a, b]) => `<button class="pal ${k === cur ? "on" : ""}" data-dk="${k}" title="${esc(n)}"><span class="sw2" style="background:linear-gradient(135deg,${a} 60%,${b} 60%);border:1px solid var(--ln)"></span>${esc(n.split("｜")[1])}</button>`).join("");
   }
   $("darks").addEventListener("click", async e => {
