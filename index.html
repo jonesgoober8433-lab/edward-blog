@@ -6,8 +6,8 @@
 <meta name="description" content="財務顧問 Edward 用白話整理投資理財、退休傳承與社會保險。">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261117170154">
-<script src="config.js?v=20261117170154"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261117170536">
+<script src="config.js?v=20261117170536"></script>
 </head>
 <body>
 <main>
@@ -28,10 +28,10 @@
   </div>
 </main>
 <script type="module">
-import { store } from "./assets/store.js?v=20261117170154";
-import { header, footer, esc, fmtDate } from "./assets/ui.js?v=20261117170154";
-import { mountMarket } from "./assets/market.js?v=20261117170154";
-import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261117170154";
+import { store } from "./assets/store.js?v=20261117170536";
+import { header, footer, esc, fmtDate } from "./assets/ui.js?v=20261117170536";
+import { mountMarket } from "./assets/market.js?v=20261117170536";
+import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261117170536";
 mountMarket(document.getElementById("mkt"));
 loadIndex().then(latestVisible).then(b => {
   if (!b) return;
