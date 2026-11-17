@@ -85,7 +85,7 @@ export function footer() {
   const f = document.createElement("footer");
   f.className = "site-footer";
   f.innerHTML = `<div class="wrap"><div><b>${esc(CFG.siteName)}</b><p>${esc(CFG.tagline || "")}</p></div>
-    ${CFG.bookingUrl ? `<div style="text-align:right"><a class="btn gold" href="${esc(CFG.bookingUrl)}" target="_blank" rel="noopener">預約諮詢</a><br><small>${esc(CFG.bookingNote || "")}</small></div>` : ""}
+    ${CFG.bookingUrl ? `<div class="booking"><a class="btn gold" href="${esc(CFG.bookingUrl)}" target="_blank" rel="noopener">預約諮詢</a><small>${esc(CFG.bookingNote || "")}</small></div>` : ""}
     <p class="fine">文章內容為一般性資訊分享，不構成個別投資或保險建議；數字與法規以主管機關最新公告為準。</p></div>`;
   document.body.append(f);
 }

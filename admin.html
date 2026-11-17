@@ -139,6 +139,17 @@
     <div id="tplList"></div>
     <div class="actions"><button class="btn ghost" data-close>關閉</button></div>
   </dialog>
+  <button type="button" class="dv-tab" id="dvTab" aria-controls="dvPanel" aria-expanded="false" title="裝置預覽：看手機、平板、電腦上長什麼樣子">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>預覽</span>
+  </button>
+  <aside class="dv-panel" id="dvPanel" aria-label="裝置預覽">
+    <div class="dv-head">
+      <span class="seg" id="dvSeg"><button type="button" data-dev="phone" class="on">📱 手機</button><button type="button" data-dev="tablet">平板</button><button type="button" data-dev="desktop">💻 電腦</button></span>
+      <span class="stamp" id="dvInfo"></span>
+      <button type="button" class="btn ghost sm" id="dvClose">收起 ✕</button>
+    </div>
+    <div class="dv-stage" id="dvStage"><div class="dv-device" id="dvDevice"><iframe id="dvFrame" title="裝置預覽" src="about:blank"></iframe></div></div>
+  </aside>
   <dialog id="dlgMedia" style="max-width:1100px">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
       <div><h2 style="margin:0">📚 照片庫</h2><span class="stamp" id="mediaCount"></span></div>
@@ -251,6 +262,7 @@ function start() {
     $("schedAt").value = cur.publishedAt && cur.publishedAt > Date.now() ? toLocal(cur.publishedAt) : "";
     if (mode === "visual") toVisual();
     stamps(); preview(); schedUI(); dirty = false; drawList();
+    window.__ebPushPreview?.();
   }
   const toLocal = ms => { const d = new Date(ms - new Date().getTimezoneOffset() * 6e4); return d.toISOString().slice(0, 16); };
   const schedMs = () => $("schedAt").value ? new Date($("schedAt").value).getTime() : 0;
@@ -458,6 +470,45 @@ function start() {
     if (!selImg) return toast("先點一下文章裡要調整的圖片", true);
     selImg.classList.remove("img-s", "img-m", "img-l"); if (v !== "0") selImg.classList.add("img-" + v); dirty = true;
   });
+
+  // ---------- 裝置預覽（右邊隱藏面板）----------
+  const DEV = { phone: [390, 844, "手機 390×844"], tablet: [820, 1180, "平板 820×1180"], desktop: [1366, 860, "電腦 1366×860"] };
+  let dev = "phone", dvReady = false, dvTimer = null;
+  try { dev = localStorage.getItem("eb-dv-dev") || "phone"; } catch (e) { }
+  function fitDevice() {
+    const [w, h, label] = DEV[dev], st = $("dvStage");
+    const sc = Math.min(1, (st.clientWidth - 24) / w, (st.clientHeight - 24) / h);
+    $("dvDevice").style.width = w * sc + "px"; $("dvDevice").style.height = h * sc + "px";
+    $("dvFrame").style.width = w + "px"; $("dvFrame").style.height = h + "px"; $("dvFrame").style.transform = `scale(${sc})`;
+    $("dvDevice").className = "dv-device " + dev;
+    $("dvInfo").textContent = `${label}（縮放 ${Math.round(sc * 100)}%）`;
+    document.querySelectorAll("#dvSeg [data-dev]").forEach(b => b.classList.toggle("on", b.dataset.dev === dev));
+  }
+  function pushPreview() {
+    if (!dvReady || !document.body.classList.contains("dv-open")) return;
+    const body = mode === "visual" ? td.turndown($("visual").innerHTML) : $("body").value;
+    const p = { ...cur, title: $("title").value, summary: $("summary").value, category: $("category").value, cover: $("cover").value,
+      tags: $("tags").value.split(/[,，、]/).map(s => s.trim()).filter(Boolean), visibility: $("visibility").value, status: $("status").value, body, locked: false };
+    const live = posts.filter(x => x.status === "published");
+    const i = live.findIndex(x => x.id === cur?.id), nx = live.length ? live[(i + 1) % live.length] : null;
+    $("dvFrame").contentWindow.postMessage({ type: "eb-preview", post: p, next: nx && nx.id !== cur?.id ? { id: nx.id, title: nx.title } : null }, location.origin);
+  }
+  addEventListener("message", e => { if (e.origin === location.origin && e.data?.type === "eb-preview-ready") { dvReady = true; pushPreview(); } });
+  function openDv(show) {
+    document.body.classList.toggle("dv-open", show);
+    $("dvTab").setAttribute("aria-expanded", String(show));
+    if (show) {
+      if ($("dvFrame").getAttribute("src") === "about:blank") { dvReady = false; $("dvFrame").src = "preview.html"; }
+      setTimeout(() => { fitDevice(); pushPreview(); }, 30); setTimeout(fitDevice, 320);
+    }
+  }
+  $("dvTab").onclick = () => openDv(!document.body.classList.contains("dv-open"));
+  $("dvClose").onclick = () => openDv(false);
+  $("dvSeg").addEventListener("click", e => { const b = e.target.closest("[data-dev]"); if (!b) return; dev = b.dataset.dev; try { localStorage.setItem("eb-dv-dev", dev); } catch (e) { } fitDevice(); });
+  addEventListener("resize", () => { if (document.body.classList.contains("dv-open")) fitDevice(); });
+  root.addEventListener("input", () => { clearTimeout(dvTimer); dvTimer = setTimeout(pushPreview, 500); });
+  new MutationObserver(() => { clearTimeout(dvTimer); dvTimer = setTimeout(pushPreview, 600); }).observe($("visual"), { childList: true, subtree: true, characterData: true, attributes: true });
+  window.__ebPushPreview = pushPreview;
 
   // ---------- 優化版審核 ----------
   let optList = [];
