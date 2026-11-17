@@ -5,45 +5,51 @@
   "market": [
     {
       "name": "台股加權",
-      "close": null,
-      "chg": null,
-      "pct": null,
-      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      "close": 40092.11,
+      "chg": -947.97,
+      "pct": -2.31,
+      "date": "11/17",
+      "asOf": "台股 11/17、美股 11/16"
     },
     {
       "name": "S&P 500",
-      "close": null,
-      "chg": null,
-      "pct": null,
-      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      "close": 7416.59,
+      "chg": -145.08,
+      "pct": -1.92,
+      "date": "11/16",
+      "asOf": "台股 11/17、美股 11/16"
     },
     {
       "name": "那斯達克",
-      "close": null,
-      "chg": null,
-      "pct": null,
-      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      "close": 24509.76,
+      "chg": -626.51,
+      "pct": -2.49,
+      "date": "11/16",
+      "asOf": "台股 11/17、美股 11/16"
     },
     {
       "name": "道瓊",
-      "close": null,
-      "chg": null,
-      "pct": null,
-      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      "close": 51608.17,
+      "chg": -739.38,
+      "pct": -1.41,
+      "date": "11/16",
+      "asOf": "台股 11/17、美股 11/16"
     },
     {
       "name": "費城半導體",
-      "close": null,
-      "chg": null,
-      "pct": null,
-      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      "close": 9610.65,
+      "chg": -535.67,
+      "pct": -5.28,
+      "date": "11/16",
+      "asOf": "台股 11/17、美股 11/16"
     },
     {
       "name": "美元/台幣",
-      "close": null,
-      "chg": null,
-      "pct": null,
-      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      "close": 32.89,
+      "chg": 0.02,
+      "pct": 0.05,
+      "date": "11/17",
+      "asOf": "台股 11/17、美股 11/16"
     }
   ],
   "candidates": [
@@ -53,11 +59,26 @@
       "facts": "台股17日收盤下跌947.97點、跌幅2.31%，收在40,092.11點。盤中一度摜破4萬點，最低來到39,786.45點，最高衝上41,533.84點，單日震幅達1,747.39點。台積電收盤2,170元，下跌45元、跌幅2.03%。",
       "why": "台積電等權值股下跌，會直接拉低加權指數，影響所有投資0050、台股基金或退休金帳戶與大盤連動的人。這次下跌背後是投資人對AI相關科技股估值過高的疑慮加深，加上外資同步賣超、資金從股市撤出轉向更保守的資產，才會出現盤中上沖下洗的劇烈震盪。",
       "category": "台股",
-      "number": { "value": "-947.97點", "label": "加權指數單日跌點" },
+      "number": {
+        "value": "-947.97點",
+        "label": "加權指數單日跌點"
+      },
       "sources": [
-        { "name": "新頭殼newtalk", "url": "https://newtalk.tw/news/view/2026-11-17/1071632", "date": "11/17" },
-        { "name": "經濟日報", "url": "https://udn.com/news/story/7251/9883924", "date": "11/17" },
-        { "name": "華視新聞網（央社）", "url": "https://news.cts.com.tw/cna/money/202611/202611173101991.html", "date": "11/17" }
+        {
+          "name": "新頭殼newtalk",
+          "url": "https://newtalk.tw/news/view/2026-11-17/1071632",
+          "date": "11/17"
+        },
+        {
+          "name": "經濟日報",
+          "url": "https://udn.com/news/story/7251/9883924",
+          "date": "11/17"
+        },
+        {
+          "name": "華視新聞網（央社）",
+          "url": "https://news.cts.com.tw/cna/money/202611/202611173101991.html",
+          "date": "11/17"
+        }
       ],
       "pros": "跟很多人持有的ETF、股票、退休金帳戶直接相關",
       "cons": "數字波動大，隔天行情可能完全不同",
@@ -70,10 +91,21 @@
       "facts": "美股11月16日那斯達克綜合指數收跌2.49%，費城半導體指數單日重挫5.28%，道瓊工業指數同日也下跌逾700點。那斯達克自10月的高點以來已回落約11%，正式進入「修正」區間（從高點下跌超過10%）。",
       "why": "AI與半導體相關股票市值龐大，一旦重挫，會透過基金、ETF、退休金等管道影響一般投資人的資產帳面價值；這類股票下跌也會讓台股中靠AI、半導體出口賺錢的公司股價跟著承壓，牽動台灣的出口訂單與相關從業人員的獎金收入。",
       "category": "美股",
-      "number": { "value": "-2.49%", "label": "那斯達克單日跌幅" },
+      "number": {
+        "value": "-2.49%",
+        "label": "那斯達克單日跌幅"
+      },
       "sources": [
-        { "name": "香港01", "url": "https://global.hk01.com/%E8%B4%A2%E7%BB%8F%E5%BF%AB%E8%AE%AF/60411486/%E7%BE%8E%E8%82%A1-%E9%81%93%E6%8C%87%E6%94%B6%E5%B8%82%E8%B7%8C739%E7%82%B9-%E7%BA%B3%E6%8C%87%E6%8C%AB2-49-%E8%8B%B1%E4%BC%9F%E8%BE%BE%E8%B7%8C4-12", "date": "11/16" },
-        { "name": "Moontalk資金流向日報", "url": "https://moontalksmarket.substack.com/p/moontalkep31-20261116528", "date": "11/16" }
+        {
+          "name": "香港01",
+          "url": "https://global.hk01.com/%E8%B4%A2%E7%BB%8F%E5%BF%AB%E8%AE%AF/60411486/%E7%BE%8E%E8%82%A1-%E9%81%93%E6%8C%87%E6%94%B6%E5%B8%82%E8%B7%8C739%E7%82%B9-%E7%BA%B3%E6%8C%87%E6%8C%AB2-49-%E8%8B%B1%E4%BC%9F%E8%BE%BE%E8%B7%8C4-12",
+          "date": "11/16"
+        },
+        {
+          "name": "Moontalk資金流向日報",
+          "url": "https://moontalksmarket.substack.com/p/moontalkep31-20261116528",
+          "date": "11/16"
+        }
       ],
       "pros": "跟台股AI供應鏈、台積電直接連動",
       "cons": "牽涉複雜的公司治理爭議，容易被過度簡化成單一原因",
@@ -86,11 +118,26 @@
       "facts": "美國商務部工業與安全局（BIS）公布暫行規則，新加坡、馬來西亞、泰國、印尼、巴西這5個國家的資料中心，要取得先進AI晶片必須先申請出口許可；已經在營運、服務相關企業的資料中心，則有90天過渡期可以補辦申請。",
       "why": "這項新規把管制範圍從「晶片賣去哪裡」延伸到「晶片被拿去哪裡用、服務誰」，目的是防止美國先進晶片透過第三地資料中心被轉手用於受限對象。對台灣來說，這會影響半導體供應鏈在東南亞的佈局與輝達等客戶的出貨節奏，間接牽動台廠訂單與相關股價表現。",
       "category": "政策",
-      "number": { "value": "90天", "label": "既有資料中心申請過渡期" },
+      "number": {
+        "value": "90天",
+        "label": "既有資料中心申請過渡期"
+      },
       "sources": [
-        { "name": "科技報橘TechOrange", "url": "https://techorange.com/2026/11/17/us-curbs-remote-access-ai-chips/", "date": "11/17" },
-        { "name": "工商時報", "url": "https://www.chinatimes.com/realtimenews/20261117002791-260410", "date": "11/17" },
-        { "name": "Inside硬塞的網路趨勢觀察", "url": "https://www.inside.com.tw/article/42931-us-bis-remote-access-ai-chips-rule-singapore-malaysia-license", "date": "11/17" }
+        {
+          "name": "科技報橘TechOrange",
+          "url": "https://techorange.com/2026/11/17/us-curbs-remote-access-ai-chips/",
+          "date": "11/17"
+        },
+        {
+          "name": "工商時報",
+          "url": "https://www.chinatimes.com/realtimenews/20261117002791-260410",
+          "date": "11/17"
+        },
+        {
+          "name": "Inside硬塞的網路趨勢觀察",
+          "url": "https://www.inside.com.tw/article/42931-us-bis-remote-access-ai-chips-rule-singapore-malaysia-license",
+          "date": "11/17"
+        }
       ],
       "pros": "直接影響台灣半導體供應鏈和相關股票",
       "cons": "細節複雜（算力門檻、豁免條件），一般讀者理解門檻較高",
@@ -103,11 +150,26 @@
       "facts": "新台幣兌美元11月16日收盤32.886元，貶值4.8分；盤中一度貶破33元大關，最低來到32.969元，尾盤央行進場調節才讓貶幅收斂。同一天美元指數一度衝上103.7，創一年多以來新高。",
       "why": "新台幣走貶，代表同樣的美元能換到更多台幣，對常出國旅遊、買美股或美元計價商品的人來說成本會變貴；但對台積電等外幣收入為主的出口型企業，把賺到的美元換回台幣時反而會增值，等於間接補貼出口產業的獲利。央行進場調節，顯示官方不希望貶勢過快影響市場預期心理。",
       "category": "匯率",
-      "number": { "value": "32.886元", "label": "新台幣兌美元11/16收盤" },
+      "number": {
+        "value": "32.886元",
+        "label": "新台幣兌美元11/16收盤"
+      },
       "sources": [
-        { "name": "自由財經", "url": "https://ec.ltn.com.tw/article/breakingnews/5643358", "date": "11/16" },
-        { "name": "工商時報", "url": "https://www.ctee.com.tw/news/20261116700994-430302", "date": "11/16" },
-        { "name": "經濟日報", "url": "https://udn.com/news/story/7239/9872314", "date": "11/16" }
+        {
+          "name": "自由財經",
+          "url": "https://ec.ltn.com.tw/article/breakingnews/5643358",
+          "date": "11/16"
+        },
+        {
+          "name": "工商時報",
+          "url": "https://www.ctee.com.tw/news/20261116700994-430302",
+          "date": "11/16"
+        },
+        {
+          "name": "經濟日報",
+          "url": "https://udn.com/news/story/7239/9872314",
+          "date": "11/16"
+        }
       ],
       "pros": "跟出國旅遊、海外投資、進口物價都有關，貼近生活",
       "cons": "數字變動快，隔天可能已經不同",
@@ -115,7 +177,12 @@
       "recommend": true
     }
   ],
-  "picks": ["c1", "c2", "c3", "c4"],
+  "picks": [
+    "c1",
+    "c2",
+    "c3",
+    "c4"
+  ],
   "knowledge": {
     "term": "股市修正",
     "explain": "當股市從近期最高點下跌超過10%，但還沒有跌到超過20%（那叫「熊市」），就叫做「修正」。修正通常反映投資人對未來獲利或景氣的疑慮突然升高，但不一定代表長期走勢已經反轉。",

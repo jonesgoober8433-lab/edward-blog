@@ -527,3 +527,6 @@ body.dv-open #preview { display: none; }
 .bf-out { border-left-color: var(--gold); }
 .bf-tag { margin-left: 8px; font-size: 11.5px; color: var(--mu); border: 1px solid var(--ln); border-radius: 999px; padding: 0 8px; }
 .cand-sec { font-size: 14px; margin: 6px 0; padding-left: 10px; border-left: 3px solid var(--ln); }
+
+.mkt-range button { padding: 3px 8px; font-size: 12.5px; }
+@media (max-width: 600px) { .mkt-head { flex-direction: column; align-items: flex-start; gap: 6px; } .mkt-range { width: 100%; display: flex; } .mkt-range button { flex: 1; padding: 4px 0; } }

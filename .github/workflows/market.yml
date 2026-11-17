@@ -1,0 +1,24 @@
+# 每天 06:00（台灣時間）抓收盤數字，給 06:30 的雲端早報與首頁台股長期走勢用
+name: 收盤數字
+on:
+  schedule:
+    - cron: "0 22 * * *"   # UTC 22:00 = 台灣 06:00
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  market:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 briefs/tools/market.py --write
+      - name: 存回 repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add briefs/market/latest.json briefs/market/twii.json
+          git diff --cached --quiet || git commit -m "收盤數字 $(TZ=Asia/Taipei date +%F)"
+          git pull --rebase origin main && git push

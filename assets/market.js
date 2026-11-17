@@ -1,7 +1,7 @@
 // 首頁「市場行情」小卡：6 檔、可左右滑動翻頁、1D／1W／1M 切換
 // 台股加權指數：用證交所官方公開資料自己畫（TradingView 免費版不提供台股）
 // 美股：TradingView 免費小圖（S&P 500、那斯達克、道瓊用追蹤指數的差價合約報價；費半用 SOXX ETF 代表）
-import { esc } from "./ui.js?v=202611171652";
+import { esc } from "./ui.js?v=202611171656";
 
 const CARDS = [
   { key: "twii", name: "台股加權指數", note: "證交所官方資料" },
@@ -11,15 +11,17 @@ const CARDS = [
   { key: "NASDAQ:SOXX", name: "費城半導體", note: "SOXX ETF 代表" },
   { key: "NYSE:TSM", name: "台積電 ADR", note: "美股掛牌" },
 ];
-const TV_RANGE = { "1D": "1D", "1W": "5D", "1M": "1M" };
+const RANGES = ["1D", "1W", "1M", "3M", "6M", "1Y", "ALL"];
+const TV_RANGE = { "1D": "1D", "1W": "5D", "1M": "1M", "3M": "3M", "6M": "6M", "1Y": "12M", "ALL": "ALL" };
 
 export function mountMarket(el) {
   let range = "1D";
   try { range = localStorage.getItem("eb-mkt-range") || "1D"; } catch (e) { }
+  if (!RANGES.includes(range)) range = "1D";
   el.innerHTML = `
     <div class="mkt-head">
       <b>市場行情</b>
-      <span class="seg mkt-range">${["1D", "1W", "1M"].map(r => `<button type="button" data-r="${r}">${r}</button>`).join("")}</span>
+      <span class="seg mkt-range">${RANGES.map(r => `<button type="button" data-r="${r}">${r}</button>`).join("")}</span>
     </div>
     <div class="mkt-wrap">
       <button type="button" class="mkt-arrow prev" aria-label="上一頁">‹</button>
@@ -108,16 +110,31 @@ async function twii(body, range, quiet = false) {
       const before = daily.filter(x => x.t < new Date(id.day.getFullYear(), id.day.getMonth(), id.day.getDate()).getTime());
       prevClose = before.length ? before.at(-1).v : pts[0];
       sub = `${id.day.getMonth() + 1}/${id.day.getDate()} ${id.pts.at(-1).label.slice(0, 5)}`;
-    } else {
+    } else if (range === "1W" || range === "1M") {
       const n = range === "1W" ? 6 : 23;
       const s = daily.slice(-n); pts = s.map(x => x.v); prevClose = pts[0];
       const a = new Date(s[0].t), b = new Date(s.at(-1).t);
       sub = `${a.getMonth() + 1}/${a.getDate()}～${b.getMonth() + 1}/${b.getDate()}`;
+    } else {
+      // 3M／6M／1Y／ALL：用每天 06:00 存好的長期資料（briefs/market/twii.json），再接上證交所最新收盤
+      const h = await twJson("briefs/market/twii.json");
+      if (range === "ALL") {
+        const m = h.monthly; pts = m.map(x => x[1]); prevClose = pts[0];
+        if (daily.length) pts.push(daily.at(-1).v);
+        sub = `${m[0][0].slice(0, 4)} 年至今（每月收盤）`;
+      } else {
+        const n = { "3M": 63, "6M": 126, "1Y": 250 }[range];
+        let s = h.daily.map(x => ({ t: Date.parse(x[0] + "T13:30:00+08:00"), v: x[1] }));
+        for (const x of daily) if (x.t > s.at(-1).t + 36e5) s.push(x);
+        s = s.slice(-n); pts = s.map(x => x.v); prevClose = pts[0];
+        const a = new Date(s[0].t), b = new Date(s.at(-1).t);
+        sub = `${a.getFullYear()}/${a.getMonth() + 1}/${a.getDate()}～${b.getMonth() + 1}/${b.getDate()}`;
+      }
     }
     const last = pts.at(-1), chg = last - prevClose, pct = chg / prevClose * 100, up = chg >= 0;
     body.innerHTML = `<div class="tw-num"><b>${last.toLocaleString("zh-TW", { maximumFractionDigits: 2 })}</b>
       <span class="${up ? "up" : "down"}">${up ? "▲" : "▼"} ${Math.abs(chg).toFixed(2)}（${up ? "+" : "−"}${Math.abs(pct).toFixed(2)}%）</span></div>
-      ${spark(pts, up, prevClose)}<div class="tw-sub">${sub}・資料：臺灣證券交易所</div>`;
+      ${spark(pts, up, prevClose)}<div class="tw-sub">${sub}・資料：${["1D", "1W", "1M"].includes(range) ? "臺灣證券交易所" : "Yahoo Finance＋證交所"}</div>`;
   } catch (e) {
     if (!quiet) body.innerHTML = `<div class="mkt-loading">暫時抓不到證交所資料，稍後再試<br><a href="https://www.twse.com.tw/zh/indices/taiex/mi-5min-hist.html" target="_blank" rel="noopener">到證交所看</a></div>`;
   }

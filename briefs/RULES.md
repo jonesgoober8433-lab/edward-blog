@@ -28,10 +28,11 @@
 
 取出 `fields.direction.stringValue`。有內容就照著調整選題方向；讀不到就當作沒有建議。
 
-### 2. 抓收盤數字
-執行 `python3 briefs/tools/market.py`，把輸出放進 `market`。
-- 每一筆加上 `asOf`，格式是「台股 MM/DD、美股 MM/DD」，日期取各自的 `date`。
-- 有 `error` 的那一筆照原樣保留，網站會顯示「—」。
+### 2. 讀收盤數字
+雲端排程的網路連不到 Yahoo，所以收盤數字由 GitHub Actions 每天 06:00 先抓好，存在 `briefs/market/latest.json`。這一步只要讀這個檔，**不要自己再去抓**。
+- 把 `items` 放進 `market`，每一筆加上 `asOf`，格式是「台股 MM/DD、美股 MM/DD」，日期取各自的 `date`。
+- 如果 `updatedAt` 不是今天：照樣使用，但在 `asOf` 註明「（資料時間 updatedAt）」。
+- 如果檔案不存在：`market` 給空陣列，網站會略過行情區。
 
 ### 3. 找新聞，寫 6～8 則候選
 用 WebSearch 找**過去 24 小時**的重要財經時事。優先順序：
