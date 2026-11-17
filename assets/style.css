@@ -194,3 +194,9 @@ dialog::backdrop { background: rgba(14, 20, 32, .45); }
 .sched { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .sched input { width: auto; }
 .badge.sched-b { background: color-mix(in srgb, var(--navy-2) 16%, var(--card)); color: var(--navy-2); }
+
+/* 後台配色切換 */
+.palettes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pal { display: flex; align-items: center; gap: 6px; border: 1px solid var(--ln); background: var(--field); color: var(--ink); border-radius: 8px; padding: 6px 8px; font: 13px var(--sans); cursor: pointer; text-align: left; }
+.pal.on { border-color: var(--navy-2); box-shadow: 0 0 0 1px var(--navy-2); font-weight: 700; }
+.pal .sw2 { width: 20px; height: 20px; border-radius: 5px; flex: none; }

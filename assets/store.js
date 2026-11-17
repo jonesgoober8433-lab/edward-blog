@@ -85,6 +85,8 @@ function demoStore() {
     async saveTemplate(t) { const i = db.templates.findIndex(x => x.id === t.id); if (i >= 0) db.templates[i] = t; else db.templates.push(t); save(); return t; },
     async deleteTemplate(id) { db.templates = db.templates.filter(t => t.id !== id); save(); },
     async exists(id) { return db.posts.some(p => p.id === id); },
+    async getSettings() { return db.settings || {}; },
+    async saveSettings(s) { db.settings = { ...(db.settings || {}), ...s }; save(); },
     async listMembers() { return db.users.map(u => ({ uid: u.uid, email: u.email, name: u.name, role: u.role, joinedAt: u.joinedAt })); },
     async resetDemo() { localStorage.removeItem(KEY); load(); emit(); },
   };
@@ -187,6 +189,8 @@ async function firebaseStore() {
     async saveTemplate(t) { const { id, ...rest } = t; await fs.setDoc(fs.doc(db, "templates", id), rest); return t; },
     async deleteTemplate(id) { await fs.deleteDoc(fs.doc(db, "templates", id)); },
     async exists(id) { try { return (await fs.getDoc(fs.doc(db, "posts", id))).exists(); } catch (e) { return false; } },
+    async getSettings() { try { const s = await fs.getDoc(fs.doc(db, "settings", "site")); return s.exists() ? s.data() : {}; } catch (e) { return {}; } },
+    async saveSettings(s) { try { await fs.setDoc(fs.doc(db, "settings", "site"), s, { merge: true }); } catch (e) { throw err(e); } },
     async listMembers() { const s = await fs.getDocs(fs.collection(db, "members")); return s.docs.map(d => ({ uid: d.id, role: "member", ...d.data() })); },
     async resetDemo() { },
   };

@@ -1,6 +1,19 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
 import { store, MODE } from "./store.js";
 const CFG = window.BLOG_CONFIG || {};
+export const PALETTES = [
+  ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
+  ["burgundy", "3｜酒紅＋象牙金", "#4A1822", "#E3C38E"],
+  ["slate", "4｜石板灰＋湖水綠", "#1E2A35", "#6CC5BC"],
+  ["coffee", "5｜咖啡棕＋米色", "#3E2B1F", "#E2C08D"],
+];
+export function applyPalette(p, remember = true) {
+  if (!p) return;
+  let preview = null; try { preview = new URLSearchParams(location.search).get("palette"); } catch (e) { }
+  if (!preview) document.documentElement.dataset.palette = p;
+  if (remember) try { localStorage.setItem("eb-site-palette", p); } catch (e) { }
+}
+store.getSettings().then(s => applyPalette(s.palette)).catch(() => { });
 export const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
 
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

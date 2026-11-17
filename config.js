@@ -10,7 +10,7 @@
 // ============================================================
 window.BLOG_CONFIG = {
   siteName: "Edward 的 Blog",
-  // 配色：navy（海軍藍＋金）／forest（墨綠＋香檳金）／burgundy（酒紅＋象牙金）／slate（石板灰＋湖水綠）／coffee（咖啡棕＋米色）
+  // 預設配色（後台「網站配色」按鈕切換後，以後台設定為準）：navy 海軍藍＋金／burgundy 酒紅＋象牙金／slate 石板灰＋湖水綠／coffee 咖啡棕＋米色
   palette: "coffee",
   tagline: "投資理財・退休傳承・社會保險，用白話把錢的事講清楚",
   author: "Edward",
@@ -40,6 +40,7 @@ window.BLOG_CONFIG = {
 // 套用配色（網址加 ?palette=forest 可以臨時預覽別套）
 (() => {
   let p = window.BLOG_CONFIG.palette || "navy";
+  try { p = localStorage.getItem("eb-site-palette") || p; } catch (e) { }   // 後台切換過的配色（先用快取，避免閃一下）
   try { p = new URLSearchParams(location.search).get("palette") || p; } catch (e) { }
   document.documentElement.dataset.palette = p;
 })();
