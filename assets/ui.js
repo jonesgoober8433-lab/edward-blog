@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=202611171621";
+import { store, MODE } from "./store.js?v=202611171623";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -29,7 +29,7 @@ export function md(text, { embed = true } = {}) {
   html = html.replace(/<img([^>]*?)alt="([^"]*?)\|(小|中|大)"/g, (m, a, alt, s) => `<img${a}alt="${alt}" class="img-${{ 小: "s", 中: "m", 大: "l" }[s]}"`)
              .replace(/class="media-loading"([^>]*?)class="(img-[sml])"/g, 'class="media-loading $2"$1');
   // 連續兩張以上的圖片自動並排
-  html = html.replace(/<p>((?:\s*<img[^>]*>\s*(?:<br>)?\s*){2,})<\/p>/g, (m, inner) => `<div class="gallery">${inner.replace(/<br>/g, "").replace(/<img[^>]*>/g, t => { const a = (t.match(/alt="([^"]*)"/) || [])[1]; return a ? `<figure>${t}<figcaption>${a}</figcaption></figure>` : t; })}</div>`);
+  html = html.replace(/<p>((?:\s*<img[^>]*>\s*(?:<br>)?\s*){2,})<\/p>/g, (m, inner) => `<div class="gallery">${inner.replace(/<br>/g, "").replace(/<img[^>]*>/g, t => { const a = (t.match(/alt="([^"]*)"/) || [])[1]; return a ? `<figure><figcaption>${a}</figcaption>${t}</figure>` : `<figure>${t}</figure>`; })}</div>`);
   // 單獨一行的連結：🎬 或純網址＝內嵌影片；🔖 或 🔗＝書籤卡片；一般文字連結＝超連結（不轉換）
   if (embed) html = html.replace(/<p>(🎬|🔖|🔗)?\s*(?:<a [^>]*href="([^"]+)"[^>]*>([^<]*)<\/a>|(https?:\/\/[^\s<]+))\s*<\/p>/g, (m, mark, href, text, bare) => {
     const url = (href || bare || "").replace(/&amp;/g, "&"), id = ytId(url);
