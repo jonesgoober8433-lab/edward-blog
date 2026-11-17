@@ -12,6 +12,8 @@ window.BLOG_CONFIG = {
   siteName: "Edward 的 Blog",
   // 預設配色（後台「網站配色」按鈕切換後，以後台設定為準）：navy 海軍藍＋金／burgundy 酒紅＋象牙金／slate 石板灰＋湖水綠／coffee 咖啡棕＋米色
   palette: "coffee",
+  // 深色模式風格（讀者手機是深色時看到的樣子）：warm 暖咖啡／oled 純黑／charcoal 石墨灰／midnight 深夜藍／forest 墨綠
+  darkStyle: "warm",
   tagline: "投資理財・退休傳承・社會保險，用白話把錢的事講清楚",
   author: "Edward",
   authorTitle: "保經事業部負責人｜RFC・CFC",
@@ -51,6 +53,11 @@ window.BLOG_CONFIG = {
   const sys = () => (mq && mq.matches ? "dark" : "light");
   let saved = null; try { saved = localStorage.getItem("eb-theme"); } catch (e) { }
   document.documentElement.dataset.theme = saved || sys();
+  // 深色風格（後台可切換；網址 ?theme=dark&dark=oled 可臨時預覽）
+  let dk = window.BLOG_CONFIG.darkStyle || "warm";
+  try { dk = localStorage.getItem("eb-site-dark") || dk; } catch (e) { }
+  try { const q = new URLSearchParams(location.search); dk = q.get("dark") || dk; if (q.get("theme")) document.documentElement.dataset.theme = q.get("theme"); } catch (e) { }
+  document.documentElement.dataset.dark = dk;
   // 系統模式改變時（例如晚上自動變深色），沒手動選過的讀者即時跟著換
   mq && mq.addEventListener && mq.addEventListener("change", () => {
     let s = null; try { s = localStorage.getItem("eb-theme"); } catch (e) { }

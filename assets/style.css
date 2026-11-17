@@ -535,3 +535,9 @@ body.dv-open #preview { display: none; }
 
 .mkt-range button { padding: 3px 8px; font-size: 12.5px; }
 @media (max-width: 600px) { .mkt-head { flex-direction: column; align-items: flex-start; gap: 6px; } .mkt-range { width: 100%; display: flex; } .mkt-range button { flex: 1; padding: 4px 0; } }
+
+/* ===== 深色模式的 5 種風格（後台「深色風格」切換）===== */
+:root[data-theme="dark"][data-dark="oled"] { --bg: #000000; --card: #0E0E0E; --field: #070707; --ln: #262626; --ink: #EDEDED; --mu: #A3A3A3; --gold-soft: #1C1710; --gold: #D6B078; --navy: #E2C08D; --navy-2: #E2C08D; --hero-a: #1A1209; --hero-b: #2E2014; }
+:root[data-theme="dark"][data-dark="charcoal"] { --bg: #1B1C1F; --card: #25262A; --field: #202124; --ln: #37383D; --ink: #ECECEF; --mu: #A6A7AE; --gold-soft: #2E2C28; --gold: #D2B07A; --navy: #D9D9DE; --navy-2: #E2C08D; --hero-a: #2A2B30; --hero-b: #3A3B41; --hero-accent: #E2C08D; }
+:root[data-theme="dark"][data-dark="midnight"] { --bg: #0B1322; --card: #121D31; --field: #0E1828; --ln: #22314C; --ink: #E7ECF4; --mu: #9AA8BF; --gold-soft: #1B2638; --gold: #D9B57F; --navy: #E2C08D; --navy-2: #9DB8EC; --hero-a: #0F1E3A; --hero-b: #1B3158; --hero-accent: #E2C08D; }
+:root[data-theme="dark"][data-dark="forest"] { --bg: #0D1814; --card: #15231E; --field: #111D19; --ln: #24382F; --ink: #E5EEE9; --mu: #9AB0A5; --gold-soft: #1D2A22; --gold: #D9BE86; --navy: #D9BE86; --navy-2: #8FCBB0; --hero-a: #12291F; --hero-b: #1E3D30; --hero-accent: #D9BE86; }

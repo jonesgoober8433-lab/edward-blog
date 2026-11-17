@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=20261117165827";
+import { store, MODE } from "./store.js?v=20261117170012";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -13,7 +13,20 @@ export function applyPalette(p, remember = true) {
   if (!preview) document.documentElement.dataset.palette = p;
   if (remember) try { localStorage.setItem("eb-site-palette", p); } catch (e) { }
 }
-store.getSettings().then(s => applyPalette(s.palette)).catch(() => { });
+export const DARKS = [
+  ["warm", "1｜暖咖啡", "#13110E", "#E2C08D"],
+  ["oled", "2｜純黑", "#000000", "#E2C08D"],
+  ["charcoal", "3｜石墨灰", "#1B1C1F", "#D9D9DE"],
+  ["midnight", "4｜深夜藍", "#0B1322", "#E2C08D"],
+  ["forest", "5｜墨綠", "#0D1814", "#D9BE86"],
+];
+export function applyDark(d, remember = true) {
+  if (!d) return;
+  let preview = null; try { preview = new URLSearchParams(location.search).get("dark"); } catch (e) { }
+  if (!preview) document.documentElement.dataset.dark = d;
+  if (remember) try { localStorage.setItem("eb-site-dark", d); } catch (e) { }
+}
+store.getSettings().then(s => { applyPalette(s.palette); applyDark(s.dark); }).catch(() => { });
 export const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
 
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

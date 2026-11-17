@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>深色風格比較｜Edward 的 Blog</title>
+<meta name="robots" content="noindex">
+<style>
+  body { margin: 0; background: #2a2a2d; font: 15px/1.6 -apple-system, "PingFang TC", "Noto Sans TC", sans-serif; color: #eee; }
+  header { padding: 18px 16px 6px; max-width: 1500px; margin: auto; }
+  h1 { margin: 0 0 4px; font-size: 22px; }
+  header p { margin: 0; color: #aaa; }
+  .tabs { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .tabs button { background: #3a3a3e; color: #ddd; border: 0; border-radius: 999px; padding: 6px 14px; cursor: pointer; font-size: 14px; }
+  .tabs button.on { background: #E2C08D; color: #1a1a1a; font-weight: 700; }
+  .grid { display: flex; gap: 22px; padding: 16px; max-width: 1500px; margin: auto; overflow-x: auto; }
+  figure { margin: 0; flex: none; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  figcaption { text-align: center; }
+  figcaption b { display: block; font-size: 16px; }
+  figcaption small { color: #aaa; }
+  .phone { width: 273px; height: 560px; border-radius: 28px; overflow: hidden; box-shadow: 0 0 0 9px #111, 0 20px 40px -10px rgba(0,0,0,.6); background: #000; }
+  .phone iframe { width: 390px; height: 800px; border: 0; transform: scale(.7); transform-origin: 0 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>深色風格：五選一</h1>
+  <p>模擬讀者「手機系統是深色模式」時看到的網站（手機尺寸、真的網站）。每格可以捲動，選好跟小Edward 說編號，或到後台「深色風格」直接按。</p>
+  <div class="tabs" id="tabs"><button data-p="index.html" class="on">首頁</button><button data-p="post.html?id=n-f73d0e49d0f4">文章頁</button><button data-p="brief.html">早報</button><button data-p="about.html">關於我</button></div>
+</header>
+<div class="grid" id="g"></div>
+<script>
+const D = [
+  ["warm", "1｜暖咖啡", "跟日光版咖啡色一致，溫暖（目前）"],
+  ["oled", "2｜純黑", "最省電、對比最強"],
+  ["charcoal", "3｜石墨灰", "中性現代，像 iPhone 系統深色"],
+  ["midnight", "4｜深夜藍", "穩重專業，像金融 App"],
+  ["forest", "5｜墨綠", "沉穩、有質感"],
+];
+let page = "index.html";
+function draw() {
+  const sep = page.includes("?") ? "&" : "?";
+  document.getElementById("g").innerHTML = D.map(([k, t, d]) => `<figure><div class="phone"><iframe src="${page}${sep}theme=dark&dark=${k}" title="${t}"></iframe></div><figcaption><b>${t}</b><small>${d}</small></figcaption></figure>`).join("");
+}
+document.getElementById("tabs").onclick = e => { const b = e.target.closest("[data-p]"); if (!b) return; page = b.dataset.p; document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x === b)); draw(); };
+draw();
+</script>
+</body>
+</html>
