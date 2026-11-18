@@ -623,3 +623,17 @@ body.resizing { cursor: col-resize; user-select: none; }
 .count-row .count { margin: 0; }
 .sort-inline { border: 1px solid var(--gold); background: var(--card); color: var(--gold); border-radius: 999px; padding: 3px 12px; font: 600 13px var(--sans); cursor: pointer; white-space: nowrap; }
 .sort-inline[hidden] { display: none; }
+
+/* 早報：大盤固定格式小表格 */
+.ix { border: 1px solid var(--ln); border-radius: 10px; margin: 0 0 10px; overflow: hidden; background: var(--field); }
+.ix-h { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 12px; border-bottom: 1px solid var(--ln); }
+.ix-h b { font-size: 14px; } .ix-h small { color: var(--mu); font-size: 12px; }
+.ix-g { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ix-g > div { padding: 8px 10px; display: flex; flex-direction: column; gap: 1px; border-right: 1px solid var(--ln); min-width: 0; }
+.ix-g > div:last-child { border-right: 0; }
+.ix-g small { color: var(--mu); font-size: 12px; }
+.ix-g b { font-size: 15.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ix-g span { font-size: 12px; }
+.ix .up { color: #D0312D; } .ix .down { color: #1E8E5A; }
+.ix-n { color: var(--mu); }
+@media (max-width: 600px) { .ix-g { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ix-g > div:nth-child(2) { border-right: 0; } .ix-g > div:nth-child(-n+2) { border-bottom: 1px solid var(--ln); } }

@@ -1,6 +1,6 @@
 // 每日財經早報（給客戶看）：資料＝雲端排程產生的 briefs/data/日期.json ＋ Edward 在後台的勾選與微調（Firestore briefs/日期）
-import { store } from "./store.js?v=20261118080651";
-import { esc } from "./ui.js?v=20261118080651";
+import { store } from "./store.js?v=20261118081545";
+import { esc } from "./ui.js?v=20261118081545";
 
 const CFG = window.BLOG_CONFIG || {};
 export const CAT_STYLE = {
@@ -46,6 +46,20 @@ function cover(c) {
   return `<div class="bf-cover" style="--c:${color}"><span class="bf-ico">${icon}</span>
     ${c.number?.value ? `<b>${esc(c.number.value)}</b><small>${esc(c.number.label || "")}</small>` : `<b class="bf-cat">${esc(c.category || "財經")}</b>`}</div>`;
 }
+// 大盤固定格式：現價／開盤／漲跌／收盤（台灣習慣：漲紅跌綠）
+const fmtN = v => v == null ? "—" : Number(v).toLocaleString("zh-TW", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const arrow = v => v == null ? "" : v >= 0 ? "▲" : "▼";
+const cls = v => v == null ? "" : v >= 0 ? "up" : "down";
+export function indexTable(x) {
+  if (!x || x.close == null) return "";
+  return `<div class="ix"><div class="ix-h"><b>${esc(x.name)}</b><small>${esc(x.roc || x.date || "")}${x.src ? "・" + esc(x.src) : ""}</small></div>
+    <div class="ix-g">
+      <div><small>現價</small><b>${fmtN(x.close)}</b><span class="ix-n">資料時間收盤</span></div>
+      <div><small>開盤</small><b>${fmtN(x.open)}</b><span class="${cls(x.openChg)}">${arrow(x.openChg)} ${fmtN(Math.abs(x.openChg ?? 0))}</span></div>
+      <div><small>漲跌</small><b class="${cls(x.chg)}">${arrow(x.chg)} ${fmtN(Math.abs(x.chg))}</b><span class="${cls(x.chg)}">${x.pct >= 0 ? "+" : "−"}${Math.abs(x.pct).toFixed(2)}%</span></div>
+      <div><small>收盤</small><b>${fmtN(x.close)}</b><span class="ix-n">前收 ${fmtN(x.prevClose)}</span></div>
+    </div></div>`;
+}
 export function marketStrip(m = []) {
   if (!m.length) return "";
   return `<div class="bf-market">${m.map(x => {
@@ -65,6 +79,7 @@ export function renderBrief(el, b) {
         <div class="bf-txt">
           <span class="bf-no">${i + 1}</span><h2>${esc(c.title)}</h2>
           <p class="bf-facts">${esc(c.facts)}</p>
+          ${(c.index || []).map(indexTable).join("")}
           ${c.crossCheck ? `<div class="bf-sec bf-cross"><b>🔍 交叉比對</b><p>${esc(c.crossCheck)}</p></div>` : ""}
           <div class="bf-why"><b>💡 簡單分析：為什麼重要？</b><p>${esc(c.why)}</p></div>
           ${c.outlook ? `<div class="bf-sec bf-out"><b>🔮 推估可能</b><span class="bf-tag">推估，非預測</span><p>${esc(c.outlook)}</p></div>` : ""}
