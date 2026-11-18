@@ -8,8 +8,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261118092608">
-<script src="config.js?v=20261118092608"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261118092841">
+<script src="config.js?v=20261118092841"></script>
 </head>
 <body>
 <main><div class="wrap wide" id="root"><div class="empty">載入中…</div></div></main>
@@ -54,9 +54,9 @@
   </div>
 </template>
 <script type="module">
-import { store } from "./assets/store.js?v=20261118092608";
-import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261118092608";
-import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE } from "./assets/brief.js?v=20261118092608";
+import { store } from "./assets/store.js?v=20261118092841";
+import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261118092841";
+import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE } from "./assets/brief.js?v=20261118092841";
 const CFG = window.BLOG_CONFIG;
 header("badmin"); footer();
 const root = document.getElementById("root");
@@ -97,7 +97,7 @@ async function start() {
   }
   // 每則候選：平常是閱讀模式；按「✏️ 編輯」變成輸入框，改完按「✓ 完成編輯」
   let E = {};
-  const FIELDS = [["title", "標題"], ["facts", "📰 新聞資訊"], ["crossCheck", "🔍 交叉比對"], ["why", "💡 簡單分析"], ["outlook", "🔮 推估可能"]];
+  const FIELDS = [["title", "標題"], ["facts", "📰 新聞資訊"], ["why", "💡 簡單分析"], ["outlook", "🔮 推估可能"]];
   function cardHtml(c0, on, editing = false) {
     const c = { ...c0, ...(E[c0.id] || {}) }, [icon, color] = CAT_STYLE[c.category] || ["📰", "#4A3426"];
     const changed = E[c0.id] && Object.keys(E[c0.id]).length;
@@ -109,12 +109,11 @@ async function start() {
       ? FIELDS.map(([f, label]) => `<label class="cand-lbl">${label}</label><textarea class="cand-ta" data-f="${f}" rows="${f === "title" ? 1 : 3}">${esc(c[f] || "")}</textarea>`).join("")
       : `<h4>${esc(c.title)}</h4>
         <p class="pre">${esc(c.facts)}</p>
-        <div class="cand-sec"><b>🔍 交叉比對：</b><span class="pre">${esc(c.crossCheck || "")}</span></div>
+        <div class="cand-sec"><b>🔍 交叉比對（出處）：</b>${(c.sources || []).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}${s.date ? "（" + esc(s.date) + "）" : ""}</a>`).join("、") || "—"}</div>
         <div class="cand-why"><b>💡 簡單分析：</b><span class="pre">${esc(c.why)}</span></div>
         <div class="cand-sec"><b>🔮 推估可能：</b><span class="pre">${esc(c.outlook || "")}</span></div>`;
     return `<div class="cand ${on ? "on" : ""} ${editing ? "editing" : ""}" data-id="${c0.id}">${head}${body}
         <div class="cand-pc"><div class="pro"><b>👍 放的好處</b>${esc(c.pros || "")}</div><div class="con"><b>⚠️ 放的壞處</b>${esc(c.cons || "")}</div></div>
-        <p class="stamp" style="margin:6px 0 0">來源：${(c.sources || []).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}${s.date ? "（" + esc(s.date) + "）" : ""}</a>`).join("、") || "—"}</p>
       </div>`;
   }
   const fit = ta => { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + 2 + "px"; };

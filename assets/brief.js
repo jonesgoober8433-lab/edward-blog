@@ -1,6 +1,6 @@
 // 每日財經早報（給客戶看）：資料＝雲端排程產生的 briefs/data/日期.json ＋ Edward 在後台的勾選與微調（Firestore briefs/日期）
-import { store } from "./store.js?v=20261118092608";
-import { esc } from "./ui.js?v=20261118092608";
+import { store } from "./store.js?v=20261118092841";
+import { esc } from "./ui.js?v=20261118092841";
 
 const CFG = window.BLOG_CONFIG || {};
 export const CAT_STYLE = {
@@ -80,10 +80,9 @@ export function renderBrief(el, b) {
           <span class="bf-no">${i + 1}</span><h2>${esc(c.title)}</h2>
           <p class="bf-facts">${esc(c.facts)}</p>
           ${(c.index || []).map(indexTable).join("")}
-          ${c.crossCheck ? `<div class="bf-sec bf-cross"><b>🔍 交叉比對</b><p>${esc(c.crossCheck)}</p></div>` : ""}
+          ${(c.sources || []).length ? `<div class="bf-sec bf-cross"><b>🔍 交叉比對（出處）</b><p>${(c.sources || []).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}${s.date ? "（" + esc(s.date) + "）" : ""}</a>`).join("、")}</p></div>` : ""}
           <div class="bf-why"><b>💡 簡單分析：為什麼重要？</b><p>${esc(c.why)}</p></div>
           ${c.outlook ? `<div class="bf-sec bf-out"><b>🔮 推估可能</b><span class="bf-tag">推估，非預測</span><p>${esc(c.outlook)}</p></div>` : ""}
-          ${(c.sources || []).length ? `<p class="bf-src">資料來源：${c.sources.map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`).join("、")}</p>` : ""}
         </div>
       </article>`).join("")}</div>
     ${b.knowledge?.term ? `<div class="bf-know"><span>📚 今日財經小知識</span><h3>${esc(b.knowledge.term)}</h3><p>${esc(b.knowledge.explain || "")}</p>${b.knowledge.example ? `<p class="bf-ex">例子：${esc(b.knowledge.example)}</p>` : ""}</div>` : ""}
