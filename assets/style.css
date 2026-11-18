@@ -646,3 +646,12 @@ body.resizing { cursor: col-resize; user-select: none; }
 .hero::after { content: ""; position: absolute; right: 4%; top: 50%; transform: translateY(-50%); width: min(42%, 480px); aspect-ratio: 892 / 231;
   background: url("brand/logo-full.png") no-repeat center / contain; filter: brightness(0) invert(1); opacity: .13; pointer-events: none; }
 @media (max-width: 640px) { .hero::after { width: 48%; right: 14px; top: 16px; transform: none; opacity: .12; } }
+
+/* 首頁：管理員排序圖示（在深色大標區右上角）＋排序時的時間資訊 */
+.hero > .wrap { position: relative; }
+.hero-sort { position: absolute; top: 0; right: 16px; z-index: 2; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.45); background: rgba(255,255,255,.12); color: #fff; font: 600 14px var(--sans); cursor: pointer; backdrop-filter: blur(4px); }
+.hero-sort:hover { background: rgba(255,255,255,.22); }
+.hero-sort[hidden] { display: none; }
+.sort-info { list-style: none; margin: 10px 0 0; padding: 8px 10px; border-radius: 10px; background: var(--gold-soft); border: 1px dashed var(--gold); font-size: 13px; line-height: 1.7; color: var(--ink); }
+.sort-info .soon { color: #B4532A; font-weight: 600; }
+@media (max-width: 640px) { .hero-sort { top: -10px; right: 12px; padding: 6px 10px; font-size: 13px; } .hero-sort svg { width: 18px; height: 18px; } }
