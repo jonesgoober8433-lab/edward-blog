@@ -1,7 +1,7 @@
 // 首頁「市場行情」小卡：6 檔、可左右滑動翻頁、1D／1W／1M 切換
 // 台股加權指數：用證交所官方公開資料自己畫（TradingView 免費版不提供台股）
 // 美股：TradingView 免費小圖（S&P 500、那斯達克、道瓊用追蹤指數的差價合約報價；費半用 SOXX ETF 代表）
-import { esc } from "./ui.js?v=20261118083037";
+import { esc } from "./ui.js?v=20261118084436";
 
 const CARDS = [
   { key: "twii", name: "台股加權指數", note: "證交所官方資料" },

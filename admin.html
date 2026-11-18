@@ -8,8 +8,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261118083037">
-<script src="config.js?v=20261118083037"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261118084436">
+<script src="config.js?v=20261118084436"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"></script>
@@ -37,6 +37,11 @@
         <h2 style="font-size:16px;margin:0 0 4px">✨ 優化版待你審核</h2>
         <p class="stamp" style="margin:0 0 6px" id="optInfo"></p>
         <div id="optList"></div>
+      </div>
+      <div id="tidyBox" hidden style="border-top:1px solid var(--ln);margin-top:12px;padding-top:10px">
+        <h2 style="font-size:16px;margin:0 0 4px">📏 斷句整理待審</h2>
+        <p class="stamp" style="margin:0 0 6px" id="tidyInfo"></p>
+        <div id="tidyList"></div>
       </div>
       <div id="importBox" hidden style="border-top:1px solid var(--ln);margin-top:12px;padding-top:10px">
         <h2 style="font-size:16px;margin:0 0 4px">從 Notion 搬家</h2>
@@ -79,6 +84,8 @@
         <label style="margin:0">內文</label>
         <span style="display:flex;gap:6px;flex-wrap:wrap;margin-left:auto;margin-right:8px">
           <button type="button" class="btn ghost sm" id="copyMd" title="把整篇（標題＋內文）轉成 Markdown 複製到剪貼簿">📋 複製 Markdown</button>
+          <button type="button" class="btn ghost sm" id="tidyBtn" title="像 FB 貼文一樣：一行一個意思、短句、段落空一行">📏 一鍵斷句</button>
+          <button type="button" class="btn ghost sm" id="tidyUndo" hidden>↩ 復原斷句</button>
           <button type="button" class="btn ghost sm" id="copyAi" title="複製全文＋審閱指令，直接貼給 AI">🤖 複製給 AI 審閱</button>
         </span>
         <div class="seg" role="group" aria-label="編輯模式"><button type="button" data-mode="md" class="on">Markdown（給 AI 貼大綱）</button><button type="button" data-mode="visual">視覺編輯（顏色、字級）</button></div>
@@ -222,9 +229,10 @@
 </template>
 
 <script type="module">
-import { store, MODE, newId, isLive } from "./assets/store.js?v=20261118083037";
-import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261118083037";
-import { initMedia } from "./assets/media.js?v=20261118083037";
+import { store, MODE, newId, isLive } from "./assets/store.js?v=20261118084436";
+import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261118084436";
+import { tidyLines } from "./assets/tidy.js?v=20261118084436";
+import { initMedia } from "./assets/media.js?v=20261118084436";
 const CFG = window.BLOG_CONFIG;
 header("admin"); footer();
 const root = document.getElementById("root");
@@ -600,6 +608,15 @@ function start() {
     try { await navigator.clipboard.writeText(t); toast(okMsg); }
     catch (e) { const ta = document.createElement("textarea"); ta.value = t; document.body.append(ta); ta.select(); document.execCommand("copy"); ta.remove(); toast(okMsg); }
   }
+  let tidyPrev = null;
+  $("tidyBtn").onclick = () => {
+    const before = currentMd(), after = tidyLines(before);
+    if (after === before) { toast("這篇已經斷得很乾淨了 ✓"); return; }
+    tidyPrev = before; $("body").value = after; if (mode === "visual") toVisual();
+    root.dispatchEvent(new Event("input", { bubbles: true })); $("tidyUndo").hidden = false;
+    toast("已斷句 ✓ 記得按儲存；不滿意可以按「↩ 復原斷句」");
+  };
+  $("tidyUndo").onclick = () => { if (tidyPrev == null) return; $("body").value = tidyPrev; if (mode === "visual") toVisual(); tidyPrev = null; $("tidyUndo").hidden = true; root.dispatchEvent(new Event("input", { bubbles: true })); toast("已復原"); };
   $("copyMd").onclick = () => copyText(`# ${$("title").value.trim()}\n\n${currentMd()}`, "已複製 Markdown ✓（可以直接貼到任何地方）");
   $("copyAi").onclick = () => copyText(`請幫我審閱下面這篇部落格文章（Markdown 格式）。
 我是台灣的財務顧問 Edward，讀者是上班族、小資族與高資產家庭。
@@ -673,8 +690,42 @@ ${currentMd()}`, "已複製給 AI 審閱 ✓（貼給 ChatGPT／Gemini／Claude 
   async function applyOpt(o) {
     const p = await store.getPost(o.id); if (!p) throw new Error("找不到原文");
     delete p.locked;
-    await store.savePost({ ...p, title: o.newTitle || p.title, summary: o.summary, body: o.body, updatedAt: Date.now(), optRev: o.rev || 1 });
+    if (o.tidy) { await store.savePost({ ...p, body: o.body, updatedAt: Date.now() }); return; }
+    await store.savePost({ ...p, title: o.newTitle || p.title, summary: o.summary, body: tidyLines(o.body), updatedAt: Date.now(), optRev: o.rev || 1 });
   }
+  // ---------- 斷句整理：網站上的文章，斷句前後不一樣的就列出來 ----------
+  let tidyItems = [];
+  async function checkTidy() {
+    tidyItems = [];
+    for (const m of posts) {
+      const p = await store.getPost(m.id); if (!p || p.locked || !p.body) continue;
+      const t = tidyLines(p.body); if (t !== p.body) tidyItems.push({ id: p.id, title: p.title, summary: p.summary, body: t, tidy: true,
+        changes: ["一行一個意思：句號、問號、驚嘆號後換行，行尾句號拿掉", "逗號分開的短句：太長才換行，短的留在同一行", "標題、清單、圖片、表格不動，段落空行保留"] });
+    }
+    $("tidyBox").hidden = !tidyItems.length;
+    $("tidyInfo").textContent = `${tidyItems.length} 篇可以斷得更乾淨（像 FB 貼文）。點「對照」看前後，滿意再套用。`;
+    $("tidyList").innerHTML = tidyItems.map(o => `<div class="tpl"><span>${esc(o.title)}</span><button class="btn ghost sm" data-tidy="${esc(o.id)}">對照</button></div>`).join("")
+      + (tidyItems.length > 1 ? `<p style="margin:8px 0 0"><button class="btn gold sm" id="tidyAll">全部套用（${tidyItems.length} 篇）</button></p>` : "");
+  }
+  $("tidyList").addEventListener("click", async e => {
+    if (e.target.id === "tidyAll") {
+      if (!confirm(`把 ${tidyItems.length} 篇全部換成斷句版？\n（只改換行和行尾句號，不改文字）`)) return;
+      e.target.disabled = true; let n = 0;
+      try { for (const o of tidyItems) { await applyOpt(o); n++; e.target.textContent = `套用中… ${n}/${tidyItems.length}`; } toast(`已套用 ${n} 篇 ✓`); }
+      catch (err) { toast(`第 ${n + 1} 篇失敗：${err.message}`, true); }
+      await refresh(); checkTidy(); return;
+    }
+    const b = e.target.closest("[data-tidy]"); if (!b) return;
+    curOpt = tidyItems.find(o => o.id === b.dataset.tidy);
+    const p = await store.getPost(curOpt.id);
+    $("optTitle").textContent = "📏 斷句整理：" + curOpt.title;
+    $("optChanges").innerHTML = curOpt.changes.map(c => `<li>${esc(c)}</li>`).join("");
+    $("optChecks").innerHTML = "<li>自動斷句，個別句子不滿意：套用後到編輯器直接改就好</li>";
+    $("optFixWrap").hidden = true;
+    $("optOld").innerHTML = md(p?.body || ""); $("optNew").innerHTML = md(curOpt.body);
+    $("optApply").textContent = "套用斷句版"; document.querySelector("#dlgOpt .cmph.new").textContent = "斷句版";
+    $("dlgOpt").showModal(); $("dlgOpt").scrollTop = 0;
+  });
   let curOpt = null;
   $("optList").addEventListener("click", async e => {
     if (e.target.id === "optAll") {
@@ -696,11 +747,12 @@ ${currentMd()}`, "已複製給 AI 審閱 ✓（貼給 ChatGPT／Gemini／Claude 
       <div class="fix-ba"><del>${esc(f.before)}</del><span class="fix-arrow">→</span><ins>${esc(f.after || "（刪除）")}</ins></div>
       <p class="stamp">${esc(f.why || "")}${(f.sources || []).length ? "　來源：" + f.sources.map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}${s.date ? "（" + esc(s.date) + "）" : ""}</a>`).join("、") : ""}</p></div>`).join("");
     $("optOld").innerHTML = `<p class="stamp"><b>摘要：</b>${esc(p?.summary || "")}</p>` + md(p?.body || "");
-    $("optNew").innerHTML = `<p class="stamp"><b>摘要：</b>${esc(curOpt.summary)}</p>` + md(curOpt.body);
+    $("optNew").innerHTML = `<p class="stamp"><b>摘要：</b>${esc(curOpt.summary)}</p>` + md(tidyLines(curOpt.body));
+    $("optApply").textContent = "套用優化版"; document.querySelector("#dlgOpt .cmph.new").textContent = "優化版";
     $("dlgOpt").showModal(); $("dlgOpt").scrollTop = 0;
   });
   $("optApply").onclick = async () => {
-    try { await applyOpt(curOpt); toast("已套用 ✓"); $("dlgOpt").close(); await refresh(); checkOpt(); if (cur?.id === curOpt.id) open(cur.id); }
+    try { await applyOpt(curOpt); toast("已套用 ✓"); $("dlgOpt").close(); await refresh(); curOpt.tidy ? checkTidy() : checkOpt(); if (cur?.id === curOpt.id) open(cur.id); }
     catch (err) { toast("套用失敗：" + err.message, true); }
   };
 
@@ -725,7 +777,7 @@ ${currentMd()}`, "已複製給 AI 審閱 ✓（貼給 ChatGPT／Gemini／Claude 
 
   refresh().then(async () => {
     const q = new URLSearchParams(location.search);
-    open(q.get("id")); checkImport(); await checkOpt();
+    open(q.get("id")); checkImport(); await checkOpt(); checkTidy();
     // 網址帶 ?opt=文章ID：直接打開那篇的「原文 vs 優化版」對照
     const want = q.get("opt");
     if (want) { const b = document.querySelector(`[data-opt="${CSS.escape(want)}"]`); if (b) b.click(); else toast("這篇已經套用過優化版了 ✓"); }
