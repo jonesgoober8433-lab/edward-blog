@@ -8,8 +8,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261118165145">
-<script src="config.js?v=20261118165145"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261118165907">
+<script src="config.js?v=20261118165907"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"></script>
@@ -24,6 +24,12 @@
       <div class="side-head"><h2 style="margin:0">文章排序</h2><span style="display:flex;gap:6px"><button class="btn ghost sm" id="openBoard" title="拖曳文章，切換公開或 VIP">📂 公開／VIP</button><button class="btn sm" id="new">＋ 新文章</button></span></div>
       <p class="stamp" style="margin:0 0 8px">拖曳 ⠿ 或按 ▲▼ 調整順序（首頁由上到下）。「置頂」永遠排最前面。</p>
       <input id="filter" type="search" placeholder="找文章…" style="margin-bottom:8px">
+      <div class="stf" id="stf" role="group" aria-label="依狀態篩選">
+        <button type="button" data-st="all" class="on">全部 <i></i></button>
+        <button type="button" data-st="draft">📝 草稿 <i></i></button>
+        <button type="button" data-st="scheduled">⏰ 已預定 <i></i></button>
+        <button type="button" data-st="published">✅ 已發布 <i></i></button>
+      </div>
       <ul class="plist" id="plist"></ul>
       <div style="border-top:1px solid var(--ln);margin-top:12px;padding-top:10px">
         <h2 style="font-size:16px;margin:0 0 6px">網站配色（一鍵切換）</h2>
@@ -145,7 +151,7 @@
         <button class="btn ghost" id="saveDraft">存成草稿</button>
       </div>
       <div class="pub-row">
-        <div class="sched"><label for="schedAt" style="margin:0">⏰ 定時發布</label><input type="datetime-local" id="schedAt"><button class="btn ghost sm" id="schedClear" type="button">清除</button></div>
+        <div class="sched"><label for="schedDate" style="margin:0">⏰ 定時發布</label><input type="date" id="schedDate"><select id="schedH" aria-label="時（24 小時制）"></select><b>:</b><select id="schedM" aria-label="分"></select><button class="btn ghost sm" id="schedClear" type="button">清除</button></div>
         <button class="btn" id="publish">立即發布</button>
       </div>
       <p class="stamp" id="schedHint" style="text-align:right;margin:6px 0 0">留空＝按下就立刻上線；選了時間＝到時間自動上線</p>
@@ -231,10 +237,10 @@
 </template>
 
 <script type="module">
-import { store, MODE, newId, isLive } from "./assets/store.js?v=20261118165145";
-import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261118165145";
-import { tidyLines } from "./assets/tidy.js?v=20261118165145";
-import { initMedia } from "./assets/media.js?v=20261118165145";
+import { store, MODE, newId, isLive } from "./assets/store.js?v=20261118165907";
+import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261118165907";
+import { tidyLines } from "./assets/tidy.js?v=20261118165907";
+import { initMedia } from "./assets/media.js?v=20261118165907";
 const CFG = window.BLOG_CONFIG;
 header("admin"); footer();
 const root = document.getElementById("root");
@@ -266,7 +272,10 @@ function start() {
 
   function drawList() {
     const v = $("filter").value.trim().toLowerCase();
-    $("plist").innerHTML = posts.filter(p => !v || (p.title + (p.tags || []).join(" ")).toLowerCase().includes(v)).map(p => `
+    const stSel = document.querySelector("#stf .on")?.dataset.st || "all";
+    const cnt = { all: posts.length, draft: 0, scheduled: 0, published: 0 }; posts.forEach(p => cnt[stateOf(p)]++);
+    document.querySelectorAll("#stf [data-st]").forEach(b => b.querySelector("i").textContent = cnt[b.dataset.st]);
+    $("plist").innerHTML = posts.filter(p => (stSel === "all" || stateOf(p) === stSel) && (!v || (p.title + (p.tags || []).join(" ")).toLowerCase().includes(v))).map(p => `
       <li draggable="true" data-id="${esc(p.id)}" class="${cur?.id === p.id ? "sel" : ""}">
         <span class="grip" title="拖曳排序">⠿</span>
         <div class="t"><b>${p.pinned ? "📌 " : ""}${esc(p.title || "（未命名）")}</b>
@@ -303,6 +312,7 @@ function start() {
     saveOrder(ids);
   });
   $("filter").addEventListener("input", drawList);
+  $("stf").addEventListener("click", e => { const b = e.target.closest("[data-st]"); if (!b) return; document.querySelectorAll("#stf [data-st]").forEach(x => x.classList.toggle("on", x === b)); drawList(); });
 
   async function open(id) {
     cur = id ? await store.getPost(id) : blank();
@@ -312,26 +322,43 @@ function start() {
     $("edTitle").textContent = cur.id ? "編輯文章" : "新文章";
     $("del").hidden = !cur.id; $("view").hidden = !cur.id;
     if (cur.id) $("view").href = "post.html?id=" + encodeURIComponent(cur.id);
-    $("schedAt").value = cur.status === "published" && cur.publishedAt && cur.publishedAt > Date.now() ? toLocal(cur.publishedAt) : "";
+    setSched(cur.status === "published" && cur.publishedAt && cur.publishedAt > Date.now() ? cur.publishedAt : 0);
     $("status").value = stateOf(cur);
     if (mode === "visual") toVisual();
     stamps(); preview(); schedUI(); dirty = false; drawList();
     window.__ebPushPreview?.();
   }
   const toLocal = ms => { const d = new Date(ms - new Date().getTimezoneOffset() * 6e4); return d.toISOString().slice(0, 16); };
-  const schedMs = () => $("schedAt").value ? new Date($("schedAt").value).getTime() : 0;
+  // 定時發布：日期＋24 小時制的「時」「分」下拉（Edward 2026-11-18：日曆要 24 小時制，瀏覽器內建的會跟系統顯示上午／下午）
+  const pad = n => String(n).padStart(2, "0");
+  $("schedH").innerHTML = `<option value="">時</option>` + Array.from({ length: 24 }, (_, h) => `<option value="${pad(h)}">${pad(h)}</option>`).join("");
+  const fillM = extra => { const ms = Array.from({ length: 12 }, (_, i) => i * 5); if (extra != null && !ms.includes(extra)) ms.push(extra); ms.sort((a, b) => a - b);
+    $("schedM").innerHTML = `<option value="">分</option>` + ms.map(m => `<option value="${pad(m)}">${pad(m)}</option>`).join(""); };
+  fillM();
+  function setSched(ms) {
+    if (!ms) { $("schedDate").value = ""; $("schedH").value = ""; fillM(); $("schedM").value = ""; return; }
+    const d = new Date(ms); fillM(d.getMinutes());
+    $("schedDate").value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; $("schedH").value = pad(d.getHours()); $("schedM").value = pad(d.getMinutes());
+  }
+  const schedMs = () => {
+    const dv = $("schedDate").value; if (!dv) return 0;
+    const [y, mo, da] = dv.split("-").map(Number); return new Date(y, mo - 1, da, +($("schedH").value || 9), +($("schedM").value || 0)).getTime();
+  };
   function schedUI() {
     const t = schedMs(), future = t > Date.now();
     $("schedHint").textContent = future ? `會在 ${fmtTime(t)} 自動出現在網站上` : (t ? "這個時間已經過了，按下就立刻上線" : "留空＝按下就立刻上線；選了時間＝到時間自動上線");
     $("publish").textContent = future ? "⏰ 預定發布" : (cur.status === "published" && isLive(cur) ? "更新已發布文章" : "立即發布");
   }
-  $("schedAt").addEventListener("input", schedUI);
-  $("schedClear").onclick = () => { $("schedAt").value = ""; dirty = true; schedUI(); };
+  ["schedDate", "schedH", "schedM"].forEach(id => $(id).addEventListener("input", () => {
+    if (id === "schedDate" && $("schedDate").value && !$("schedH").value) { $("schedH").value = "09"; $("schedM").value = "00"; }   // 只選日期時，預設 09:00
+    dirty = true; schedUI();
+  }));
+  $("schedClear").onclick = () => { setSched(0); dirty = true; schedUI(); };
   // 狀態下拉：選「已預定發布」就跳到下方的定時欄位；選「已發布」清掉定時（真正存檔還是按下方按鈕）
   $("status").addEventListener("change", () => {
     const v = $("status").value; dirty = true;
-    if (v === "scheduled") { const el = $("schedAt"); el.scrollIntoView({ behavior: "smooth", block: "center" }); el.focus(); el.showPicker?.(); toast("選好時間後，按「⏰ 預定發布」"); }
-    else if (v === "published") { $("schedAt").value = ""; toast("按下方「立即發布」就會上線"); }
+    if (v === "scheduled") { const el = $("schedDate"); el.scrollIntoView({ behavior: "smooth", block: "center" }); el.focus(); try { el.showPicker?.(); } catch (e) { } toast("選好時間後，按「⏰ 預定發布」"); }
+    else if (v === "published") { setSched(0); toast("按下方「立即發布」就會上線"); }
     else toast("按下方「存成草稿」就會存成草稿");
     schedUI();
   });
