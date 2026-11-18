@@ -8,8 +8,8 @@
 <meta name="description" content="每天 3 分鐘，看懂今天的財經大事與為什麼重要。">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261118093353">
-<script src="config.js?v=20261118093353"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261118093715">
+<script src="config.js?v=20261118093715"></script>
 </head>
 <body>
 <main><div class="wrap narrow article">
@@ -18,9 +18,9 @@
   <div class="bf-pager"><a id="prev" class="btn ghost sm" hidden>‹ 前一天</a><a id="next" class="btn ghost sm" hidden>後一天 ›</a></div>
 </div></main>
 <script type="module">
-import { store } from "./assets/store.js?v=20261118093353";
-import { header, footer } from "./assets/ui.js?v=20261118093353";
-import { loadIndex, loadRaw, merge, visible, renderBrief, fmtDay } from "./assets/brief.js?v=20261118093353";
+import { store } from "./assets/store.js?v=20261118093715";
+import { header, footer, toast } from "./assets/ui.js?v=20261118093715";
+import { loadIndex, loadRaw, merge, visible, renderBrief, fmtDay } from "./assets/brief.js?v=20261118093715";
 header("brief"); footer();
 const el = document.getElementById("bf");
 store.onAuth(async u => {
@@ -45,7 +45,24 @@ store.onAuth(async u => {
   const b = merge(cur.raw, cur.ov);
   document.title = `${fmtDay(b.date)} 每日財經早報｜Edward 的 Blog`;
   renderBrief(el, b);
-  if (!cur.ok) el.insertAdjacentHTML("afterbegin", `<p class="msgbox">這份還沒公開（草稿或還沒到 10:00），只有你看得到。到「📰早報後台」勾選、發布。</p>`);
+  if (!cur.ok) {
+    const sch = cur.ov?.status === "scheduled";
+    const at10 = Date.parse(`${cur.d}T10:00:00+08:00`);
+    el.insertAdjacentHTML("afterbegin", `<div class="msgbox brief-pub"><span>${sch ? `⏰ 已排定 ${cur.d.replace(/-/g, "/")} 10:00 自動上線，只有你看得到。` : "這份還沒公開（草稿或還沒到 10:00），只有你看得到。"}看完沒問題就按右邊；要改內容到「<a href="brief-admin.html?d=${cur.d}">📰早報後台</a>」。</span>
+      ${sch ? "" : `<button type="button" class="btn gold sm" id="pub10">⏰ 存檔並 10:00 發布</button>`}</div>`);
+    const btn = document.getElementById("pub10");
+    if (btn) btn.onclick = async () => {
+      if (Date.now() >= at10 && !confirm("這一天的 10:00 已經過了，按確定會「立刻」上線。要繼續嗎？")) return;
+      const raw = cur.raw, ov = cur.ov || {};
+      const d = { picks: ov.picks || raw.picks || raw.candidates.filter(c => c.recommend).map(c => c.id), edits: ov.edits || {},
+        headline: ov.headline ?? raw.headline ?? "", knowledge: { ...(raw.knowledge || {}), ...(ov.knowledge || {}) },
+        status: "scheduled", publishAt: at10, updatedAt: Date.now() };
+      if (!d.picks.length) return toast("至少要勾一則，請到早報後台勾選", true);
+      btn.disabled = true; btn.textContent = "存檔中…";
+      try { await store.setDoc("briefs", cur.d, d); toast(Date.now() >= at10 ? "已發布 ✓（10:00 已過，所以立刻上線）" : "已存檔 ✓ 10:00 會自動上線"); setTimeout(() => location.reload(), 1200); }
+      catch (e) { toast("存檔失敗：" + e.message, true); btn.disabled = false; btn.textContent = "⏰ 存檔並 10:00 發布"; }
+    };
+  }
 });
 </script>
 </body>

@@ -670,3 +670,5 @@ body.resizing { cursor: col-resize; user-select: none; }
 .cand-ta { width: 100%; font: inherit; font-size: 15px; line-height: 1.7; border: 1px solid var(--gold); border-radius: 8px; padding: 8px 10px; background: var(--field); color: var(--ink); resize: vertical; overflow: hidden; }
 /* 早報：Edward 在後台換的行，前台照樣顯示 */
 .bf-facts, .bf-why p, .bf-sec p { white-space: pre-line; }
+.brief-pub { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.brief-pub .btn { flex: none; }
