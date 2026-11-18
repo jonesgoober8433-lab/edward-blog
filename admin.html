@@ -92,7 +92,7 @@
           <button type="button" class="btn ghost sm" id="tidyUndo" hidden>↩ 復原斷句</button>
           <button type="button" class="btn ghost sm" id="copyAi" title="複製全文＋審閱指令，直接貼給 AI">🤖 複製給 AI 審閱</button>
         </span>
-        <div class="seg" role="group" aria-label="編輯模式"><button type="button" data-mode="md" class="on">Markdown（給 AI 貼大綱）</button><button type="button" data-mode="visual">視覺編輯（顏色、字級）</button></div>
+        <div class="seg" role="group" aria-label="編輯模式"><button type="button" data-mode="md" class="on">Markdown<span class="sub">給 AI 貼大綱</span></button><button type="button" data-mode="visual">視覺編輯<span class="sub">顏色、字級</span></button></div>
       </div>
       <div id="mdPane">
         <div class="toolbar">
@@ -113,7 +113,6 @@
         <p class="stamp" style="margin:0 0 6px">圖片大小：在說明後面加 <code>|小</code> <code>|中</code> <code>|大</code>，例如 <code>![填表範例|中](…)</code>；兩張以上連在一起會自動並排。</p>
         <div class="editor">
           <textarea id="body" placeholder="從這裡開始寫…（AI 給的 Markdown 大綱直接整段貼上）"></textarea>
-          <div class="preview prose" id="preview"></div>
         </div>
       </div>
       <div id="visPane" hidden>
@@ -366,7 +365,7 @@ function start() {
     const pub = !cur.publishedAt || cur.status !== "published" ? "尚未發布" : (cur.publishedAt > Date.now() ? "已預定 " : "") + fmtTime(cur.publishedAt);
     $("stamps").textContent = cur.id ? `建立：${fmtTime(cur.createdAt)}　｜　發布：${pub}　｜　最後更新：${fmtTime(cur.updatedAt)}` : "還沒儲存";
   }
-  function preview() { $("preview").innerHTML = md($("body").value) || `<p class="stamp">預覽會出現在這裡</p>`; hydrateMedia($("preview")); }
+  function preview() { if (!$("preview")) return; $("preview").innerHTML = md($("body").value) || `<p class="stamp">預覽會出現在這裡</p>`; hydrateMedia($("preview")); }
   root.addEventListener("input", e => { if (e.target.closest(".panel") && e.target.id !== "filter") { dirty = true; if (e.target.id === "body") preview(); } });
   window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
 
