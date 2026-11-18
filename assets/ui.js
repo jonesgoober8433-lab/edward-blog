@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=20261118081817";
+import { store, MODE } from "./store.js?v=20261118082041";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -86,7 +86,7 @@ export function header(active = "") {
   el.className = "site-header";
   el.innerHTML = `
     <div class="wrap bar">
-      <a class="brand" href="index.html"><span class="mark">E</span><span><b>${esc(CFG.siteName)}</b><small>${esc(CFG.authorTitle || "")}</small></span></a>
+      <a class="brand" href="index.html"><span class="mark"><img src="assets/brand/mark-64.png" alt=""></span><span><b>${esc(CFG.siteName)}</b><small>${esc(CFG.authorTitle || "")}</small></span></a>
       <nav id="nav" aria-label="主選單"></nav>
       <div class="hdr-tools" id="hdrTools"></div>
     </div>
