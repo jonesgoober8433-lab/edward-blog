@@ -8,8 +8,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261118092841">
-<script src="config.js?v=20261118092841"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261118092935">
+<script src="config.js?v=20261118092935"></script>
 </head>
 <body>
 <main><div class="wrap wide" id="root"><div class="empty">載入中…</div></div></main>
@@ -34,6 +34,7 @@
         <button class="btn danger sm" id="reset">恢復小Edward 的原始版</button>
         <span style="flex:1"></span>
         <button class="btn ghost" id="saveDraft">存檔（先不公開）</button>
+        <button class="btn gold" id="publishAt10" title="現在先存好，當天台灣時間 10:00 自動上線">⏰ 存檔並 10:00 發布</button>
         <button class="btn" id="publish">存檔並發布</button>
       </div>
     </section>
@@ -45,7 +46,7 @@
       <h2 style="font-size:18px;margin:20px 0 6px">怎麼運作</h2>
       <ol class="stamp" style="padding-left:18px;margin:0">
         <li>每天 09:00 雲端自動找新聞、寫好候選、預設勾好</li>
-        <li>你在 10:00 前勾選／微調，按「存檔並發布」</li>
+        <li>你在 10:00 前勾選／微調，按「⏰ 存檔並 10:00 發布」（或「存檔並發布」立刻上線）</li>
         <li>沒時間看也沒關係：10:00 會照預設勾選自動上線</li>
         <li id="draftNote"></li>
         <li>早報只保留一年，舊的自動刪除</li>
@@ -54,9 +55,9 @@
   </div>
 </template>
 <script type="module">
-import { store } from "./assets/store.js?v=20261118092841";
-import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261118092841";
-import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE } from "./assets/brief.js?v=20261118092841";
+import { store } from "./assets/store.js?v=20261118092935";
+import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261118092935";
+import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE } from "./assets/brief.js?v=20261118092935";
 const CFG = window.BLOG_CONFIG;
 header("badmin"); footer();
 const root = document.getElementById("root");
@@ -141,7 +142,7 @@ async function start() {
     const live = visible(raw, ov);
     const draftDays = raw.date <= CFG.briefDraftUntil;
     $("status").textContent = (live ? "🟢 讀者看得到" : "⚪ 讀者還看不到")
-      + (ov ? `・你在 ${fmtTime(ov.updatedAt)} 改過（${ov.status === "published" ? "已發布" : "草稿"}）` : "・目前是小Edward 的原始版")
+      + (ov ? `・你在 ${fmtTime(ov.updatedAt)} 改過（${ov.status === "published" ? "已發布" : ov.status === "scheduled" ? `排定 ${fmtTime(ov.publishAt)} 上線` : "草稿"}）` : "・目前是小Edward 的原始版")
       + (draftDays ? "・前 5 天：要你按發布" : `・沒按發布的話 ${CFG.briefPublishTime} 自動上線`)
       + `・產生時間 ${fmtTime(Date.parse(raw.generatedAt))}`;
   }
@@ -156,12 +157,20 @@ async function start() {
   }
   async function save(st) {
     const d = collect(st);
-    if (st === "published" && !d.picks.length) return toast("至少勾一則再發布", true);
-    try { await store.setDoc("briefs", raw.date, d); ov = d; status(); toast(st === "published" ? "已發布 ✓ 讀者現在看得到了" : "已存檔（讀者看不到）"); }
+    if (st !== "draft" && !d.picks.length) return toast("至少勾一則再發布", true);
+    if (st === "scheduled") {
+      d.publishAt = Date.parse(`${raw.date}T10:00:00+08:00`);
+      if (Date.now() >= d.publishAt && !confirm("這一天的 10:00 已經過了，按確定會「立刻」上線。要繼續嗎？")) return;
+    }
+    const msg = st === "published" ? "已發布 ✓ 讀者現在看得到了"
+      : st === "scheduled" ? (Date.now() >= d.publishAt ? "已發布 ✓（10:00 已過，所以立刻上線）" : `已存檔 ✓ 會在 ${raw.date.replace(/-/g, "/")} 10:00 自動上線`)
+      : "已存檔（讀者看不到）";
+    try { await store.setDoc("briefs", raw.date, d); ov = d; status(); toast(msg); }
     catch (e) { toast("存檔失敗：" + e.message, true); }
   }
   $("saveDraft").onclick = () => save("draft");
   $("publish").onclick = () => save("published");
+  $("publishAt10").onclick = () => save("scheduled");
   $("reset").onclick = async () => {
     if (!confirm("清掉你的勾選與修改，回到小Edward 的原始版？")) return;
     await store.deleteDoc("briefs", raw.date); ov = null; load(raw.date); toast("已恢復原始版");
