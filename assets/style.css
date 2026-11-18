@@ -684,3 +684,12 @@ body.resizing { cursor: col-resize; user-select: none; }
 .article h1 .t-sub { display: block; margin-top: 6px; font-size: .6em; line-height: 1.45; color: color-mix(in srgb, var(--ink) 72%, var(--mu)); font-weight: 600; text-wrap: balance; }
 /* 段落與標示框：避免最後一行只剩一兩個字（2026-11-18） */
 .prose p, .prose li, .prose blockquote { text-wrap: pretty; }
+
+/* 後台：文章狀態標籤＋最下方的定時發布列（2026-11-18） */
+.st { display: inline-block; border-radius: 6px; padding: 0 6px; font-weight: 600; }
+.st-draft { background: color-mix(in srgb, var(--mu) 18%, var(--card)); color: var(--mu); }
+.st-sched { background: color-mix(in srgb, #2f6fb0 16%, var(--card)); color: #2f6fb0; }
+.st-pub { background: color-mix(in srgb, #3f7a4b 16%, var(--card)); color: #3f7a4b; }
+.pub-row { display: flex; gap: 10px; align-items: center; justify-content: flex-end; flex-wrap: wrap; margin-top: 10px; }
+.pub-row .sched { margin: 0; }
+.pub-row .sched label { font-weight: 600; white-space: nowrap; }

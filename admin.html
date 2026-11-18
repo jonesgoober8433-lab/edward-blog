@@ -8,8 +8,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261118164543">
-<script src="config.js?v=20261118164543"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261118165145">
+<script src="config.js?v=20261118165145"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"></script>
@@ -74,11 +74,9 @@
       </div>
       <div class="row3" style="margin-top:12px">
         <div><label for="visibility">誰能看</label><select id="visibility"><option value="public">所有人（公開）</option><option value="members">VIP（只有核准的會員）</option></select></div>
-        <div><label for="status">狀態</label><select id="status"><option value="draft">草稿（只有你看得到）</option><option value="published">已發布</option></select></div>
+        <div><label for="status">狀態</label><select id="status"><option value="draft">📝 草稿（只有你看得到）</option><option value="scheduled">⏰ 已預定發布（到時間自動上線）</option><option value="published">✅ 已發布</option></select></div>
         <div><label>&nbsp;</label><label class="check"><input type="checkbox" id="pinned"> 置頂（排在首頁最前面、大張顯示）</label></div>
       </div>
-      <label for="schedAt">定時發布（留空＝按下發布就立刻上線）</label>
-      <div class="sched"><input type="datetime-local" id="schedAt"><button class="btn ghost sm" id="schedClear" type="button">清除</button><span class="stamp" id="schedHint"></span></div>
 
       <div class="modebar">
         <label style="margin:0">內文</label>
@@ -145,8 +143,12 @@
         <span style="flex:1"></span>
         <a class="btn ghost" id="view" target="_blank">看文章頁</a>
         <button class="btn ghost" id="saveDraft">存成草稿</button>
-        <button class="btn" id="publish">發布</button>
       </div>
+      <div class="pub-row">
+        <div class="sched"><label for="schedAt" style="margin:0">⏰ 定時發布</label><input type="datetime-local" id="schedAt"><button class="btn ghost sm" id="schedClear" type="button">清除</button></div>
+        <button class="btn" id="publish">立即發布</button>
+      </div>
+      <p class="stamp" id="schedHint" style="text-align:right;margin:6px 0 0">留空＝按下就立刻上線；選了時間＝到時間自動上線</p>
     </section>
   </div>
 
@@ -229,10 +231,10 @@
 </template>
 
 <script type="module">
-import { store, MODE, newId, isLive } from "./assets/store.js?v=20261118164543";
-import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261118164543";
-import { tidyLines } from "./assets/tidy.js?v=20261118164543";
-import { initMedia } from "./assets/media.js?v=20261118164543";
+import { store, MODE, newId, isLive } from "./assets/store.js?v=20261118165145";
+import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261118165145";
+import { tidyLines } from "./assets/tidy.js?v=20261118165145";
+import { initMedia } from "./assets/media.js?v=20261118165145";
 const CFG = window.BLOG_CONFIG;
 header("admin"); footer();
 const root = document.getElementById("root");
@@ -247,7 +249,9 @@ store.onAuth(u => {
 function start() {
   root.innerHTML = document.getElementById("tplAdmin").innerHTML;
   const $ = id => document.getElementById(id);
-  const F = ["title", "summary", "category", "tags", "cover", "visibility", "status", "body"];
+  const F = ["title", "summary", "category", "tags", "cover", "visibility", "body"];
+  const stateOf = p => p.status !== "published" ? "draft" : isLive(p) ? "published" : "scheduled";
+  const STATE_LABEL = p => ({ draft: `<span class="st st-draft">📝 草稿</span>`, scheduled: `<span class="st st-sched">⏰ 已預定發布 ${fmtTime(p.publishedAt)}</span>`, published: `<span class="st st-pub">✅ 已發布</span>` })[stateOf(p)];
   $("category").innerHTML = CFG.categories.map(c => `<option>${esc(c)}</option>`).join("");
   let posts = [], cur = null, dirty = false;
 
@@ -266,7 +270,7 @@ function start() {
       <li draggable="true" data-id="${esc(p.id)}" class="${cur?.id === p.id ? "sel" : ""}">
         <span class="grip" title="拖曳排序">⠿</span>
         <div class="t"><b>${p.pinned ? "📌 " : ""}${esc(p.title || "（未命名）")}</b>
-          <small>${p.status !== "published" ? "草稿" : isLive(p) ? "已發布" : "⏰ 排程 " + fmtTime(p.publishedAt)}${p.visibility === "members" ? "・會員" : ""}・更新 ${fmtTime(p.updatedAt)}</small></div>
+          <small>${STATE_LABEL(p)}${p.visibility === "members" ? "・會員" : ""}・更新 ${fmtTime(p.updatedAt)}</small></div>
         <span class="mv"><button data-mv="-1" title="往上">▲</button><button data-mv="1" title="往下">▼</button></span>
       </li>`).join("") || `<li class="stamp" style="cursor:default">還沒有文章</li>`;
   }
@@ -308,7 +312,8 @@ function start() {
     $("edTitle").textContent = cur.id ? "編輯文章" : "新文章";
     $("del").hidden = !cur.id; $("view").hidden = !cur.id;
     if (cur.id) $("view").href = "post.html?id=" + encodeURIComponent(cur.id);
-    $("schedAt").value = cur.publishedAt && cur.publishedAt > Date.now() ? toLocal(cur.publishedAt) : "";
+    $("schedAt").value = cur.status === "published" && cur.publishedAt && cur.publishedAt > Date.now() ? toLocal(cur.publishedAt) : "";
+    $("status").value = stateOf(cur);
     if (mode === "visual") toVisual();
     stamps(); preview(); schedUI(); dirty = false; drawList();
     window.__ebPushPreview?.();
@@ -317,13 +322,21 @@ function start() {
   const schedMs = () => $("schedAt").value ? new Date($("schedAt").value).getTime() : 0;
   function schedUI() {
     const t = schedMs(), future = t > Date.now();
-    $("schedHint").textContent = future ? `會在 ${fmtTime(t)} 自動出現在網站上` : (t ? "這個時間已經過了，按發布會立刻上線" : "");
-    $("publish").textContent = future ? "⏰ 排程發布" : (cur.status === "published" && isLive(cur) ? "更新已發布文章" : "發布");
+    $("schedHint").textContent = future ? `會在 ${fmtTime(t)} 自動出現在網站上` : (t ? "這個時間已經過了，按下就立刻上線" : "留空＝按下就立刻上線；選了時間＝到時間自動上線");
+    $("publish").textContent = future ? "⏰ 預定發布" : (cur.status === "published" && isLive(cur) ? "更新已發布文章" : "立即發布");
   }
   $("schedAt").addEventListener("input", schedUI);
   $("schedClear").onclick = () => { $("schedAt").value = ""; dirty = true; schedUI(); };
+  // 狀態下拉：選「已預定發布」就跳到下方的定時欄位；選「已發布」清掉定時（真正存檔還是按下方按鈕）
+  $("status").addEventListener("change", () => {
+    const v = $("status").value; dirty = true;
+    if (v === "scheduled") { const el = $("schedAt"); el.scrollIntoView({ behavior: "smooth", block: "center" }); el.focus(); el.showPicker?.(); toast("選好時間後，按「⏰ 預定發布」"); }
+    else if (v === "published") { $("schedAt").value = ""; toast("按下方「立即發布」就會上線"); }
+    else toast("按下方「存成草稿」就會存成草稿");
+    schedUI();
+  });
   function stamps() {
-    const pub = !cur.publishedAt || cur.status !== "published" ? "尚未發布" : (cur.publishedAt > Date.now() ? "排程 " : "") + fmtTime(cur.publishedAt);
+    const pub = !cur.publishedAt || cur.status !== "published" ? "尚未發布" : (cur.publishedAt > Date.now() ? "已預定 " : "") + fmtTime(cur.publishedAt);
     $("stamps").textContent = cur.id ? `建立：${fmtTime(cur.createdAt)}　｜　發布：${pub}　｜　最後更新：${fmtTime(cur.updatedAt)}` : "還沒儲存";
   }
   function preview() { $("preview").innerHTML = md($("body").value) || `<p class="stamp">預覽會出現在這裡</p>`; hydrateMedia($("preview")); }
@@ -483,7 +496,7 @@ function start() {
       const vis = lane.dataset.vis, list = posts.filter(p => (p.visibility || "public") === vis);
       lane.querySelector(".lane-n").textContent = list.length;
       lane.querySelector(".lane-body").innerHTML = list.map(p => `<div class="bcard" draggable="true" data-id="${esc(p.id)}">
-        <b>${esc(p.title || "（未命名）")}</b><small>${esc(p.category || "")}・${p.status === "published" ? "已發布" : "草稿"}</small>
+        <b>${esc(p.title || "（未命名）")}</b><small>${esc(p.category || "")}・${STATE_LABEL(p)}</small>
         <button type="button" class="btn ghost sm bmove" data-to="${vis === "public" ? "members" : "public"}">移到 ${vis === "public" ? "🔒 VIP" : "🌐 公開"} →</button></div>`).join("") || `<p class="stamp" style="text-align:center;padding:20px 0">把文章拖到這裡</p>`;
     });
   }
@@ -654,7 +667,7 @@ ${currentMd()}`, "已複製給 AI 審閱 ✓（貼給 ChatGPT／Gemini／Claude 
     if (!dvReady || !document.body.classList.contains("dv-open")) return;
     const body = mode === "visual" ? td.turndown($("visual").innerHTML) : $("body").value;
     const p = { ...cur, title: $("title").value, summary: $("summary").value, category: $("category").value, cover: $("cover").value,
-      tags: $("tags").value.split(/[,，、]/).map(s => s.trim()).filter(Boolean), visibility: $("visibility").value, status: $("status").value, body, locked: false };
+      tags: $("tags").value.split(/[,，、]/).map(s => s.trim()).filter(Boolean), visibility: $("visibility").value, status: $("status").value === "draft" ? "draft" : "published", body, locked: false };
     const live = posts.filter(x => x.status === "published");
     const i = live.findIndex(x => x.id === cur?.id), nx = live.length ? live[(i + 1) % live.length] : null;
     $("dvFrame").contentWindow.postMessage({ type: "eb-preview", post: p, next: nx && nx.id !== cur?.id ? { id: nx.id, title: nx.title } : null }, location.origin);
