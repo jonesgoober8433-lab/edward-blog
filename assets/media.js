@@ -1,6 +1,6 @@
 // 照片庫：上傳（剪貼簿／照片 App 拖曳／選檔）→ 壓縮 → 檢查重複 → 插入文章
 // 重複判斷兩層：①檔案完全一樣（SHA-256）②看起來一樣（縮圖指紋 dHash，抓得到「同一張照片另存、縮放過」）
-import { esc, fmtTime, toast, rememberMedia, mediaUrl } from "./ui.js?v=20261118081642";
+import { esc, fmtTime, toast, rememberMedia, mediaUrl } from "./ui.js?v=20261118081817";
 
 const MAX_SIDE = 1600, MAX_B64 = 700000, THUMB = 360;
 

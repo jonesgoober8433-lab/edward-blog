@@ -6,8 +6,8 @@
 <meta name="description" content="每天 3 分鐘，看懂今天的財經大事與為什麼重要。">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261118081642">
-<script src="config.js?v=20261118081642"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261118081817">
+<script src="config.js?v=20261118081817"></script>
 </head>
 <body>
 <main><div class="wrap narrow article">
@@ -16,9 +16,9 @@
   <div class="bf-pager"><a id="prev" class="btn ghost sm" hidden>‹ 前一天</a><a id="next" class="btn ghost sm" hidden>後一天 ›</a></div>
 </div></main>
 <script type="module">
-import { store } from "./assets/store.js?v=20261118081642";
-import { header, footer } from "./assets/ui.js?v=20261118081642";
-import { loadIndex, loadRaw, merge, visible, renderBrief, fmtDay } from "./assets/brief.js?v=20261118081642";
+import { store } from "./assets/store.js?v=20261118081817";
+import { header, footer } from "./assets/ui.js?v=20261118081817";
+import { loadIndex, loadRaw, merge, visible, renderBrief, fmtDay } from "./assets/brief.js?v=20261118081817";
 header("brief"); footer();
 const el = document.getElementById("bf");
 store.onAuth(async u => {
@@ -43,7 +43,7 @@ store.onAuth(async u => {
   const b = merge(cur.raw, cur.ov);
   document.title = `${fmtDay(b.date)} 每日財經早報｜Edward 的 Blog`;
   renderBrief(el, b);
-  if (!cur.ok) el.insertAdjacentHTML("afterbegin", `<p class="msgbox">這份還沒公開（草稿或還沒到 08:00），只有你看得到。到「📰早報後台」勾選、發布。</p>`);
+  if (!cur.ok) el.insertAdjacentHTML("afterbegin", `<p class="msgbox">這份還沒公開（草稿或還沒到 10:00），只有你看得到。到「📰早報後台」勾選、發布。</p>`);
 });
 </script>
 </body>

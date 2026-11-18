@@ -1,6 +1,6 @@
 // 每日財經早報（給客戶看）：資料＝雲端排程產生的 briefs/data/日期.json ＋ Edward 在後台的勾選與微調（Firestore briefs/日期）
-import { store } from "./store.js?v=20261118081642";
-import { esc } from "./ui.js?v=20261118081642";
+import { store } from "./store.js?v=20261118081817";
+import { esc } from "./ui.js?v=20261118081817";
 
 const CFG = window.BLOG_CONFIG || {};
 export const CAT_STYLE = {
@@ -27,7 +27,7 @@ export function visible(raw, ov, now = new Date()) {
   if (ov?.status === "published") return true;
   if (ov?.status === "draft" || ov?.status === "hidden") return false;
   if (raw.date <= (CFG.briefDraftUntil || "")) return false;            // 前 5 天是草稿
-  const at = Date.parse(`${raw.date}T${CFG.briefPublishTime || "08:00"}:00+08:00`);   // 以台灣時間為準
+  const at = Date.parse(`${raw.date}T${CFG.briefPublishTime || "10:00"}:00+08:00`);   // 以台灣時間為準
   return now.getTime() >= at;
 }
 export async function latestVisible(dates) {
