@@ -660,3 +660,13 @@ body.resizing { cursor: col-resize; user-select: none; }
 .prose blockquote.note { font-size: 13.5px; line-height: 1.75; color: var(--mu); padding: 8px 14px; background: transparent; border: 1px dashed var(--ln); }
 .prose blockquote.note p { margin: 0; }
 @media (max-width: 640px) { .prose blockquote.note { font-size: 12.5px; padding: 6px 10px; } }
+
+/* 早報後台：每則的編輯按鈕 */
+.cand-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cand-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.cand .pre { white-space: pre-line; }
+.cand.editing { opacity: 1; border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-soft); background: var(--card); }
+.cand-lbl { display: block; margin: 10px 0 4px; font-size: 13px; font-weight: 700; color: var(--mu); }
+.cand-ta { width: 100%; font: inherit; font-size: 15px; line-height: 1.7; border: 1px solid var(--gold); border-radius: 8px; padding: 8px 10px; background: var(--field); color: var(--ink); resize: vertical; overflow: hidden; }
+/* 早報：Edward 在後台換的行，前台照樣顯示 */
+.bf-facts, .bf-why p, .bf-sec p { white-space: pre-line; }

@@ -8,8 +8,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261118084436">
-<script src="config.js?v=20261118084436"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261118092608">
+<script src="config.js?v=20261118092608"></script>
 </head>
 <body>
 <main><div class="wrap wide" id="root"><div class="empty">載入中…</div></div></main>
@@ -25,7 +25,7 @@
       </div>
       <label for="headline">今日一句話重點（顯示在最上面）</label><input id="headline">
       <h3 style="margin:18px 0 6px">候選新聞：勾選今天要上的（建議 3～4 則）</h3>
-      <p class="stamp" style="margin:0 0 8px">每則都附「放的好處／壞處」。點標題、內文可以直接改字。已勾 <b id="nPick">0</b> 則。</p>
+      <p class="stamp" style="margin:0 0 8px">每則都附「放的好處／壞處」。想改內容就按每則右上角的「✏️ 編輯」，改完按「✓ 完成編輯」，最後再存檔。已勾 <b id="nPick">0</b> 則。</p>
       <div id="cands"></div>
       <h3 style="margin:18px 0 6px">📚 今日財經小知識</h3>
       <div class="row2"><div><label for="kTerm">名詞</label><input id="kTerm"></div><div><label for="kEx">例子</label><input id="kEx"></div></div>
@@ -54,9 +54,9 @@
   </div>
 </template>
 <script type="module">
-import { store } from "./assets/store.js?v=20261118084436";
-import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261118084436";
-import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE } from "./assets/brief.js?v=20261118084436";
+import { store } from "./assets/store.js?v=20261118092608";
+import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261118092608";
+import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE } from "./assets/brief.js?v=20261118092608";
 const CFG = window.BLOG_CONFIG;
 header("badmin"); footer();
 const root = document.getElementById("root");
@@ -91,21 +91,48 @@ async function start() {
     $("headline").value = ov?.headline ?? raw.headline ?? "";
     const k = { ...raw.knowledge, ...(ov?.knowledge || {}) };
     $("kTerm").value = k.term || ""; $("kExp").value = k.explain || ""; $("kEx").value = k.example || "";
-    $("cands").innerHTML = raw.candidates.map(c0 => {
-      const c = { ...c0, ...(ov?.edits?.[c0.id] || {}) }, [icon, color] = CAT_STYLE[c.category] || ["📰", "#4A3426"];
-      return `<div class="cand ${picks.has(c.id) ? "on" : ""}" data-id="${c.id}">
-        <label class="cand-chk"><input type="checkbox" ${picks.has(c.id) ? "checked" : ""}><span class="cand-cat" style="--c:${color}">${icon} ${esc(c.category || "")}</span>${c0.recommend ? `<span class="badge pin">小Edward 推薦</span>` : ""}${c.score ? `<span class="stamp">重要度 ${"★".repeat(c.score)}${"☆".repeat(5 - c.score)}</span>` : ""}</label>
-        <h4 contenteditable="true" data-f="title">${esc(c.title)}</h4>
-        <p contenteditable="true" data-f="facts">${esc(c.facts)}</p>
-        <div class="cand-sec"><b>🔍 交叉比對：</b><span contenteditable="true" data-f="crossCheck">${esc(c.crossCheck || "")}</span></div>
-        <div class="cand-why"><b>💡 簡單分析：</b><span contenteditable="true" data-f="why">${esc(c.why)}</span></div>
-        <div class="cand-sec"><b>🔮 推估可能：</b><span contenteditable="true" data-f="outlook">${esc(c.outlook || "")}</span></div>
+    E = JSON.parse(JSON.stringify(ov?.edits || {}));
+    $("cands").innerHTML = raw.candidates.map(c0 => cardHtml(c0, picks.has(c0.id))).join("");
+    count(); status();
+  }
+  // 每則候選：平常是閱讀模式；按「✏️ 編輯」變成輸入框，改完按「✓ 完成編輯」
+  let E = {};
+  const FIELDS = [["title", "標題"], ["facts", "📰 新聞資訊"], ["crossCheck", "🔍 交叉比對"], ["why", "💡 簡單分析"], ["outlook", "🔮 推估可能"]];
+  function cardHtml(c0, on, editing = false) {
+    const c = { ...c0, ...(E[c0.id] || {}) }, [icon, color] = CAT_STYLE[c.category] || ["📰", "#4A3426"];
+    const changed = E[c0.id] && Object.keys(E[c0.id]).length;
+    const head = `<div class="cand-top"><label class="cand-chk"><input type="checkbox" ${on ? "checked" : ""}><span class="cand-cat" style="--c:${color}">${icon} ${esc(c.category || "")}</span>${c0.recommend ? `<span class="badge pin">小Edward 推薦</span>` : ""}${c.score ? `<span class="stamp">重要度 ${"★".repeat(c.score)}${"☆".repeat(5 - c.score)}</span>` : ""}${changed ? `<span class="badge draft">✏️ 你改過</span>` : ""}</label>
+        <span class="cand-acts">${editing
+          ? `${changed ? `<button type="button" class="btn ghost sm" data-act="revert">↩ 還原原稿</button>` : ""}<button type="button" class="btn ghost sm" data-act="cancel">取消</button><button type="button" class="btn sm" data-act="done">✓ 完成編輯</button>`
+          : `<button type="button" class="btn ghost sm" data-act="edit">✏️ 編輯</button>`}</span></div>`;
+    const body = editing
+      ? FIELDS.map(([f, label]) => `<label class="cand-lbl">${label}</label><textarea class="cand-ta" data-f="${f}" rows="${f === "title" ? 1 : 3}">${esc(c[f] || "")}</textarea>`).join("")
+      : `<h4>${esc(c.title)}</h4>
+        <p class="pre">${esc(c.facts)}</p>
+        <div class="cand-sec"><b>🔍 交叉比對：</b><span class="pre">${esc(c.crossCheck || "")}</span></div>
+        <div class="cand-why"><b>💡 簡單分析：</b><span class="pre">${esc(c.why)}</span></div>
+        <div class="cand-sec"><b>🔮 推估可能：</b><span class="pre">${esc(c.outlook || "")}</span></div>`;
+    return `<div class="cand ${on ? "on" : ""} ${editing ? "editing" : ""}" data-id="${c0.id}">${head}${body}
         <div class="cand-pc"><div class="pro"><b>👍 放的好處</b>${esc(c.pros || "")}</div><div class="con"><b>⚠️ 放的壞處</b>${esc(c.cons || "")}</div></div>
         <p class="stamp" style="margin:6px 0 0">來源：${(c.sources || []).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}${s.date ? "（" + esc(s.date) + "）" : ""}</a>`).join("、") || "—"}</p>
       </div>`;
-    }).join("");
-    count(); status();
   }
+  const fit = ta => { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + 2 + "px"; };
+  $("cands").addEventListener("input", e => { if (e.target.classList.contains("cand-ta")) fit(e.target); });
+  $("cands").addEventListener("click", e => {
+    const b = e.target.closest("[data-act]"); if (!b) return;
+    const card = b.closest(".cand"), id = card.dataset.id, c0 = raw.candidates.find(x => x.id === id), on = card.querySelector("input").checked;
+    const redraw = editing => { card.outerHTML = cardHtml(c0, on, editing); const nc = document.querySelector(`.cand[data-id="${id}"]`); nc.querySelectorAll(".cand-ta").forEach(fit); if (editing) nc.querySelector(".cand-ta")?.focus(); count(); };
+    if (b.dataset.act === "edit") return redraw(true);
+    if (b.dataset.act === "cancel") return redraw(false);
+    if (b.dataset.act === "revert") { delete E[id]; toast("已還原成小Edward 原稿（記得存檔）"); return redraw(false); }
+    if (b.dataset.act === "done") {
+      const e2 = {};
+      card.querySelectorAll(".cand-ta").forEach(t => { const v = t.value.trim(); if (v !== (c0[t.dataset.f] || "").trim()) e2[t.dataset.f] = v; });
+      if (Object.keys(e2).length) E[id] = e2; else delete E[id];
+      toast("改好了 ✓ 最後記得按「存檔」或「存檔並發布」"); redraw(false);
+    }
+  });
   function count() {
     const n = document.querySelectorAll(".cand input:checked").length;
     $("nPick").textContent = n;
@@ -124,12 +151,8 @@ async function start() {
 
   function collect(st) {
     const picks = [...document.querySelectorAll(".cand")].filter(c => c.querySelector("input").checked).map(c => c.dataset.id);
-    const edits = {};
-    document.querySelectorAll(".cand").forEach(c => {
-      const orig = raw.candidates.find(x => x.id === c.dataset.id), e = {};
-      c.querySelectorAll("[data-f]").forEach(f => { const v = f.innerText.trim(); if (v !== (orig[f.dataset.f] || "")) e[f.dataset.f] = v; });
-      if (Object.keys(e).length) edits[c.dataset.id] = e;
-    });
+    if (document.querySelector(".cand.editing")) toast("有一則還在編輯中，沒按「✓ 完成編輯」的部分不會存進去", true);
+    const edits = JSON.parse(JSON.stringify(E));
     return { picks, edits, headline: $("headline").value.trim(), knowledge: { term: $("kTerm").value.trim(), explain: $("kExp").value.trim(), example: $("kEx").value.trim() }, status: st, updatedAt: Date.now() };
   }
   async function save(st) {
