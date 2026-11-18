@@ -2,7 +2,9 @@
 name: 收盤數字
 on:
   schedule:
-    - cron: "0 22 * * *"   # UTC 22:00 = 台灣 06:00
+    # GitHub 免費排程在整點常延遲或跳過，所以避開整點、跑兩次（台灣 05:17、05:47）
+    - cron: "17 21 * * *"
+    - cron: "47 21 * * *"
   workflow_dispatch:
 permissions:
   contents: write
