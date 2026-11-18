@@ -1,12 +1,16 @@
 // 每日財經早報（給客戶看）：資料＝雲端排程產生的 briefs/data/日期.json ＋ Edward 在後台的勾選與微調（Firestore briefs/日期）
-import { store } from "./store.js?v=20261118092935";
-import { esc } from "./ui.js?v=20261118092935";
+import { store } from "./store.js?v=20261118093353";
+import { esc } from "./ui.js?v=20261118093353";
 
 const CFG = window.BLOG_CONFIG || {};
 export const CAT_STYLE = {
   台股: ["📈", "#B23B3B"], 美股: ["🇺🇸", "#1F3A68"], 總經: ["🌐", "#2E5A4C"], 利率: ["🏦", "#7A5530"],
   匯率: ["💱", "#3E6E8E"], 產業: ["🏭", "#5B4A8A"], 政策: ["📜", "#6E2836"], 國際: ["🌏", "#2A7F7A"], 原物料: ["🛢️", "#8A6A1F"], 加密貨幣: ["🪙", "#A9773F"],
+  貴金屬: ["🥇", "#B08D2E"], 科技產業: ["💻", "#34557A"], AI產業: ["🤖", "#4B3F8F"], AI新功能: ["✨", "#7A3F8F"],
 };
+// 有行情小表格（index）時，facts 裡「指數 YYYY.MM.DD，開盤…收在…點。」那句已經畫成表格，就不再重複顯示（Edward 11/18）
+const IDX_LINE = /[^。\n]*?\d{4}\.\d{2}\.\d{2}，?開盤[^。]*?收在[\d,.]+\s*點。?\s*/g;
+export function factsText(c) { return (c.index || []).length ? (c.facts || "").replace(IDX_LINE, "").trim() : (c.facts || ""); }
 
 export async function loadIndex() {
   try { return (await (await fetch("briefs/index.json", { cache: "no-store" })).json()).dates || []; } catch (e) { return []; }
@@ -79,7 +83,7 @@ export function renderBrief(el, b) {
         ${cover(c)}
         <div class="bf-txt">
           <span class="bf-no">${i + 1}</span><h2>${esc(c.title)}</h2>
-          <p class="bf-facts">${esc(c.facts)}</p>
+          ${factsText(c) ? `<p class="bf-facts">${esc(factsText(c))}</p>` : ""}
           ${(c.index || []).map(indexTable).join("")}
           ${(c.sources || []).length ? `<div class="bf-sec bf-cross"><b>🔍 交叉比對（出處）</b><p>${(c.sources || []).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}${s.date ? "（" + esc(s.date) + "）" : ""}</a>`).join("、")}</p></div>` : ""}
           <div class="bf-why"><b>💡 簡單分析：為什麼重要？</b><p>${esc(c.why)}</p></div>

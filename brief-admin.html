@@ -8,8 +8,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261118092935">
-<script src="config.js?v=20261118092935"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261118093353">
+<script src="config.js?v=20261118093353"></script>
 </head>
 <body>
 <main><div class="wrap wide" id="root"><div class="empty">載入中…</div></div></main>
@@ -55,9 +55,9 @@
   </div>
 </template>
 <script type="module">
-import { store } from "./assets/store.js?v=20261118092935";
-import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261118092935";
-import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE } from "./assets/brief.js?v=20261118092935";
+import { store } from "./assets/store.js?v=20261118093353";
+import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261118093353";
+import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE, factsText } from "./assets/brief.js?v=20261118093353";
 const CFG = window.BLOG_CONFIG;
 header("badmin"); footer();
 const root = document.getElementById("root");
@@ -107,9 +107,10 @@ async function start() {
           ? `${changed ? `<button type="button" class="btn ghost sm" data-act="revert">↩ 還原原稿</button>` : ""}<button type="button" class="btn ghost sm" data-act="cancel">取消</button><button type="button" class="btn sm" data-act="done">✓ 完成編輯</button>`
           : `<button type="button" class="btn ghost sm" data-act="edit">✏️ 編輯</button>`}</span></div>`;
     const body = editing
-      ? FIELDS.map(([f, label]) => `<label class="cand-lbl">${label}</label><textarea class="cand-ta" data-f="${f}" rows="${f === "title" ? 1 : 3}">${esc(c[f] || "")}</textarea>`).join("")
+      ? FIELDS.map(([f, label]) => `<label class="cand-lbl">${label}</label><textarea class="cand-ta" data-f="${f}" rows="${f === "title" ? 1 : 3}">${esc(f === "facts" ? factsText(c) : (c[f] || ""))}</textarea>`).join("")
       : `<h4>${esc(c.title)}</h4>
-        <p class="pre">${esc(c.facts)}</p>
+        ${(c.index || []).length ? `<p class="stamp" style="margin:4px 0">📊 行情數字（${c.index.map(x => esc(x.name)).join("、")}）網站會用表格顯示，這裡不重複</p>` : ""}
+        <p class="pre">${esc(factsText(c))}</p>
         <div class="cand-sec"><b>🔍 交叉比對（出處）：</b>${(c.sources || []).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}${s.date ? "（" + esc(s.date) + "）" : ""}</a>`).join("、") || "—"}</div>
         <div class="cand-why"><b>💡 簡單分析：</b><span class="pre">${esc(c.why)}</span></div>
         <div class="cand-sec"><b>🔮 推估可能：</b><span class="pre">${esc(c.outlook || "")}</span></div>`;
@@ -128,7 +129,7 @@ async function start() {
     if (b.dataset.act === "revert") { delete E[id]; toast("已還原成小Edward 原稿（記得存檔）"); return redraw(false); }
     if (b.dataset.act === "done") {
       const e2 = {};
-      card.querySelectorAll(".cand-ta").forEach(t => { const v = t.value.trim(); if (v !== (c0[t.dataset.f] || "").trim()) e2[t.dataset.f] = v; });
+      card.querySelectorAll(".cand-ta").forEach(t => { const v = t.value.trim(); if (v !== (t.dataset.f === "facts" ? factsText(c0) : (c0[t.dataset.f] || "")).trim()) e2[t.dataset.f] = v; });
       if (Object.keys(e2).length) E[id] = e2; else delete E[id];
       toast("改好了 ✓ 最後記得按「存檔」或「存檔並發布」"); redraw(false);
     }
