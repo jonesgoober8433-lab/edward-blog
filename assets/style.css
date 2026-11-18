@@ -655,3 +655,8 @@ body.resizing { cursor: col-resize; user-select: none; }
 .sort-info { list-style: none; margin: 10px 0 0; padding: 8px 10px; border-radius: 10px; background: var(--gold-soft); border: 1px dashed var(--gold); font-size: 13px; line-height: 1.7; color: var(--ink); }
 .sort-info .soon { color: #B4532A; font-weight: 600; }
 @media (max-width: 640px) { .hero-sort { top: -10px; right: 12px; padding: 6px 10px; font-size: 13px; } .hero-sort svg { width: 18px; height: 18px; } }
+
+/* 小字備註框（次要資訊，Edward 11/18：要縮小）；一般標示框＝重要內文，不縮 */
+.prose blockquote.note { font-size: 13.5px; line-height: 1.75; color: var(--mu); padding: 8px 14px; background: transparent; border: 1px dashed var(--ln); }
+.prose blockquote.note p { margin: 0; }
+@media (max-width: 640px) { .prose blockquote.note { font-size: 12.5px; padding: 6px 10px; } }

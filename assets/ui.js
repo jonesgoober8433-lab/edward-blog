@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=20261118082403";
+import { store, MODE } from "./store.js?v=20261118083037";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -36,6 +36,8 @@ export function md(text, { embed = true } = {}) {
   let html = window.marked ? window.marked.parse(text || "", { breaks: true }) : esc(text);
   html = html.replace(/<img([^>]*?)src="media\/([A-Za-z0-9_-]+)"/g, `<img$1src="${PIXEL}" data-media="$2" class="media-loading"`);
   html = window.DOMPurify ? window.DOMPurify.sanitize(html) : html;
+  // 次要資訊的標示框（例：「本文寫於…」、開頭寫【備註】）＝小字備註；其他標示框是重要內文，維持原本大小
+  html = html.replace(/<blockquote>(\s*<p>\s*)(本文寫於|【備註】|ℹ️)/g, (m, sp, k) => `<blockquote class="note">${sp}${k === "【備註】" ? "" : k}`);
   // 圖片大小：說明文字最後加 |小 |中 |大（例：![填表範例|小](...)）
   html = html.replace(/<img([^>]*?)alt="([^"]*?)\|(小|中|大)"/g, (m, a, alt, s) => `<img${a}alt="${alt}" class="img-${{ 小: "s", 中: "m", 大: "l" }[s]}"`)
              .replace(/class="media-loading"([^>]*?)class="(img-[sml])"/g, 'class="media-loading $2"$1');
