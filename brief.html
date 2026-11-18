@@ -6,8 +6,8 @@
 <meta name="description" content="每天 3 分鐘，看懂今天的財經大事與為什麼重要。">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261118081545">
-<script src="config.js?v=20261118081545"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261118081642">
+<script src="config.js?v=20261118081642"></script>
 </head>
 <body>
 <main><div class="wrap narrow article">
@@ -16,9 +16,9 @@
   <div class="bf-pager"><a id="prev" class="btn ghost sm" hidden>‹ 前一天</a><a id="next" class="btn ghost sm" hidden>後一天 ›</a></div>
 </div></main>
 <script type="module">
-import { store } from "./assets/store.js?v=20261118081545";
-import { header, footer } from "./assets/ui.js?v=20261118081545";
-import { loadIndex, loadRaw, merge, visible, renderBrief, fmtDay } from "./assets/brief.js?v=20261118081545";
+import { store } from "./assets/store.js?v=20261118081642";
+import { header, footer } from "./assets/ui.js?v=20261118081642";
+import { loadIndex, loadRaw, merge, visible, renderBrief, fmtDay } from "./assets/brief.js?v=20261118081642";
 header("brief"); footer();
 const el = document.getElementById("bf");
 store.onAuth(async u => {
@@ -32,7 +32,7 @@ store.onAuth(async u => {
     if (ok || u?.isAdmin) shown.push({ d, raw, ov, ok });
     if (shown.length >= 400) break;
   }
-  if (!shown.length) { el.innerHTML = `<div class="empty">早報準備中，明天早上 8 點見！</div>`; return; }
+  if (!shown.length) { el.innerHTML = `<div class="empty">早報準備中，每天早上 10 點見！</div>`; return; }
   const cur = shown.find(x => x.d === want) || shown[0];
   document.getElementById("pick").innerHTML = shown.map(x => `<option value="${x.d}" ${x === cur ? "selected" : ""}>${fmtDay(x.d)}${x.ok ? "" : "（草稿，只有你看得到）"}</option>`).join("");
   document.getElementById("pick").onchange = e => location.search = "?d=" + e.target.value;

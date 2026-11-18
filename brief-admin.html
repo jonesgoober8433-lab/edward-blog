@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261118081545">
-<script src="config.js?v=20261118081545"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261118081642">
+<script src="config.js?v=20261118081642"></script>
 </head>
 <body>
 <main><div class="wrap wide" id="root"><div class="empty">載入中…</div></div></main>
@@ -37,14 +37,14 @@
     </section>
     <aside class="panel">
       <h2 style="font-size:18px;margin:0 0 6px">🧭 給小Edward 的方向建議</h2>
-      <p class="stamp" style="margin:0 0 6px">寫下你希望早報多放／少放什麼，雲端排程每天產生候選時都會照這裡調整。</p>
+      <p class="stamp" style="margin:0 0 6px">寫下你希望早報多放／少放什麼，雲端排程每天 09:00 產生候選時都會照這裡調整。</p>
       <textarea id="direction" rows="7" placeholder="例如：多放跟台灣上班族有關的（勞保、房貸利率）；美股個股少放；每天至少一則匯率。"></textarea>
       <button class="btn sm" id="saveDir" style="margin-top:8px">儲存方向</button>
       <h2 style="font-size:18px;margin:20px 0 6px">怎麼運作</h2>
       <ol class="stamp" style="padding-left:18px;margin:0">
-        <li>每天 06:30 雲端自動找新聞、寫好候選、預設勾好</li>
-        <li>你在 08:00 前勾選／微調，按「存檔並發布」</li>
-        <li>沒時間看也沒關係：08:00 會照預設勾選自動上線</li>
+        <li>每天 09:00 雲端自動找新聞、寫好候選、預設勾好</li>
+        <li>你在 10:00 前勾選／微調，按「存檔並發布」</li>
+        <li>沒時間看也沒關係：10:00 會照預設勾選自動上線</li>
         <li id="draftNote"></li>
         <li>早報只保留一年，舊的自動刪除</li>
       </ol>
@@ -52,9 +52,9 @@
   </div>
 </template>
 <script type="module">
-import { store } from "./assets/store.js?v=20261118081545";
-import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261118081545";
-import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE } from "./assets/brief.js?v=20261118081545";
+import { store } from "./assets/store.js?v=20261118081642";
+import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261118081642";
+import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE } from "./assets/brief.js?v=20261118081642";
 const CFG = window.BLOG_CONFIG;
 header("badmin"); footer();
 const root = document.getElementById("root");
@@ -75,7 +75,7 @@ async function start() {
     const cut = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10);
     for (const d of await store.listDocs("briefs")) if (d.id < cut) await store.deleteDoc("briefs", d.id);
   } catch (e) { }
-  if (!dates.length) { $("cands").innerHTML = `<p class="empty">還沒有任何早報。雲端排程每天 06:30 會產生第一份。</p>`; return; }
+  if (!dates.length) { $("cands").innerHTML = `<p class="empty">還沒有任何早報。雲端排程每天 09:00 會產生。</p>`; return; }
   $("date").innerHTML = dates.map(d => `<option value="${d}">${fmtDay(d)}</option>`).join("");
   const s = await store.getDoc("settings", "brief"); $("direction").value = s?.direction || "";
   $("saveDir").onclick = async () => { await store.setDoc("settings", "brief", { direction: $("direction").value.trim(), updatedAt: Date.now() }); toast("方向已儲存 ✓ 明天的候選就會照這個調整"); };

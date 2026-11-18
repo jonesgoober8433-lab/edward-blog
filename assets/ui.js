@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=20261118081545";
+import { store, MODE } from "./store.js?v=20261118081642";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
