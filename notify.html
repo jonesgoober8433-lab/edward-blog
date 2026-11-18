@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="assets/brand/icon-192.png"><link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png"><meta name="theme-color" content="#FFFAF0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>通知大掃除｜Edward 的 Blog</title>
+<meta name="description" content="手機、電腦一直跳奇怪的通知？截一張圖給 ChatGPT 或 Gemini，5 分鐘清乾淨。">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css?v=20261118093715">
+<script src="config.js?v=20261118093715"></script>
+<style>
+.nc-steps { display: grid; gap: 18px; }
+.nc-num { display: inline-flex; width: 30px; height: 30px; border-radius: 50%; align-items: center; justify-content: center; background: var(--gold); color: #fff; font-weight: 700; margin-right: 8px; flex: none; }
+.nc-h { display: flex; align-items: center; margin: 0 0 10px; font-size: 20px; }
+.nc-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 14px; }
+.nc-tabs button { border: 1px solid var(--ln); background: var(--card); color: var(--ink); border-radius: 99px; padding: 6px 14px; font: 500 15px var(--sans); cursor: pointer; }
+.nc-tabs button.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+.nc-dev ol { margin: 0; padding-left: 1.4em; line-height: 1.9; }
+.nc-dev .tip { margin-top: 12px; }
+.nc-url { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0 4px; }
+.nc-url code { background: var(--gold-soft); border-radius: 8px; padding: 6px 10px; font-size: 14px; word-break: break-all; }
+.nc-prompt { white-space: pre-wrap; background: var(--gold-soft); border-radius: 12px; padding: 14px 16px; font-size: 15px; line-height: 1.75; margin: 10px 0; max-height: 320px; overflow: auto; }
+.nc-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.nc-auto { font-size: 14px; color: var(--muted, #7a6b5e); margin: 0; }
+.nc-lock { margin: 60px auto; max-width: 520px; text-align: center; }
+</style>
+</head>
+<body>
+<main id="root"><div class="wrap narrow" style="padding:40px 16px"><p class="stamp">載入中…</p></div></main>
+<script type="module">
+import { header, footer, toast, esc } from "./assets/ui.js?v=20261118093715";
+import { store } from "./assets/store.js?v=20261118093715";
+header(""); footer();
+const root = document.getElementById("root");
+
+// ====== 還沒公開：只有管理員看得到（Edward 2026-11-18：先不要公開）======
+const PUBLIC = false;
+
+// ====== 給 AI 的指令（ChatGPT、Gemini 通用）======
+const PROMPT = `請當我的「通知大掃除」小幫手。我等一下會貼上手機或電腦的「通知設定」截圖。
+
+1. 先問我用的是哪一種裝置：iPhone、Android 手機、電腦 Chrome、電腦 Edge，或 Mac Safari。
+2. 看完截圖後，把所有「允許傳送通知」的網站或 App 列成表格並編號：
+   編號｜名稱｜它大概是什麼｜建議保留或取消｜理由
+   看起來像中獎、領獎、假防毒、成人、借貸、投資保證獲利、或是我看不懂的網站，標 ⚠️ 並建議取消。
+3. 問我要刪哪些。我可以回「刪 1、3、5」或「全部刪」或「只留 2」。
+4. 依我的裝置，一步一步教我把它們刪掉或關掉。一次只講一步，用最白話的說法，等我回「好了」再講下一步。
+5. 我刪完會再截一次圖，請幫我檢查是不是都清乾淨了。
+6. 最後教我怎麼讓網站「以後不要再跳出要求通知的視窗」。
+
+安全規則：不要叫我下載任何東西、不要叫我輸入任何密碼或驗證碼、不要叫我點截圖裡的任何連結。`;
+
+const DEV = {
+  chrome: { label: "電腦 Chrome", note: "Windows 和 Mac 上的 Chrome 操作一樣。",
+    url: "chrome://settings/content/notifications",
+    steps: ["打開 Chrome，點右上角「⋮」→「設定」", "左邊點「隱私權和安全性」→「網站設定」", "往下找到「通知」點進去", "「可以傳送通知」底下就是你允許過的網站，截圖這一頁"],
+    tip: "想讓網站以後都不要再問：在同一頁選「禁止網站傳送通知」。這只會擋掉以後的詢問，已經允許的網站還是要一個一個移除。" },
+  edge: { label: "電腦 Edge", note: "Windows 內建的瀏覽器。",
+    url: "edge://settings/content/notifications",
+    steps: ["打開 Edge，點右上角「…」→「設定」", "左邊點「Cookie 和網站權限」（有些版本叫「網站權限」）", "找到「通知」點進去", "「允許」底下就是你允許過的網站，截圖這一頁"],
+    tip: "想讓網站以後都不要再問：把最上面的「傳送前先詢問」關掉。已經在「允許」清單裡的網站，還是要一個一個移除。" },
+  safari: { label: "Mac Safari", note: "Mac 內建的瀏覽器。",
+    steps: ["打開 Safari，點左上角選單列的「Safari」→「設定…」", "上方點「網站」分頁", "左邊點「通知」", "右邊列出的網站，標「允許」的就是你允許過的，截圖這一頁"],
+    tip: "想讓網站以後都不要再問：在同一頁下方，取消勾選「允許網站要求傳送通知的權限」。" },
+  iphone: { label: "iPhone", note: "iPhone 的網頁很少能傳通知，一直跳通知的通常是 App。",
+    steps: ["打開「設定」App", "點「通知」", "往下滑，「通知樣式」底下列出所有會傳通知的 App（加入主畫面的網站也在這裡）", "截圖這個清單（太長就分兩、三張截）"],
+    tip: "iPhone 上，只有你把網站「加入主畫面」後才收得到它的通知。所以清單裡看到不認識的，大多是 App，可以直接跟 AI 說要關哪些。" },
+  android: { label: "Android", note: "要清兩個地方：Chrome 的網站通知，和手機的 App 通知。",
+    steps: ["打開 Chrome，點右上角「⋮」→「設定」", "點「網站設定」→「通知」（有些版本要先點「隱私權和安全性」）", "截圖「允許」的網站清單", "接著打開手機的「設定」→「通知」→「App 通知」，再截一張"],
+    tip: "選單名稱每家手機（三星、小米、OPPO 等）可能有點不一樣，找不到就把畫面截給 AI，請它帶你找。" },
+};
+
+function guess() {
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)) return "iphone";
+  if (/Android/.test(ua)) return "android";
+  if (/Edg\//.test(ua)) return "edge";
+  if (/Chrome\//.test(ua)) return "chrome";
+  if (/Safari\//.test(ua) && /Macintosh/.test(ua)) return "safari";
+  return "chrome";
+}
+
+async function copy(text, btn) {
+  try { await navigator.clipboard.writeText(text); toast("已複製 ✓"); }
+  catch (e) { const t = document.createElement("textarea"); t.value = text; document.body.append(t); t.select(); try { document.execCommand("copy"); toast("已複製 ✓"); } catch (e2) { toast("複製失敗，請手動選取", true); } t.remove(); }
+  if (btn) { const o = btn.textContent; btn.textContent = "✓ 已複製"; setTimeout(() => btn.textContent = o, 1600); }
+}
+
+function devHtml(k) {
+  const d = DEV[k];
+  return `<p class="nc-auto">${esc(d.note)}</p>
+    <ol>${d.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
+    ${d.url ? `<div class="nc-url"><span>或直接把這串貼到網址列：</span><code>${esc(d.url)}</code><button class="btn ghost sm" data-copy="${esc(d.url)}">📋 複製</button></div>
+      <p class="nc-auto">這種網址不能用點的，要複製後貼到網址列再按 Enter。</p>` : ""}
+    <p class="msgbox tip">💡 ${esc(d.tip)}</p>`;
+}
+
+function render() {
+  let cur = guess();
+  root.innerHTML = `
+  <section class="hero"><div class="wrap narrow">
+    <div class="rule"></div>
+    <h1>通知大掃除</h1>
+    <p>手機、電腦一直跳出奇怪的通知？<br>截一張圖給 ChatGPT 或 Gemini，5 分鐘清乾淨！</p>
+  </div></section>
+  <div class="wrap narrow nc-steps" style="padding:28px 16px 48px">
+    ${PUBLIC ? "" : `<p class="msgbox">🔒 這一頁還沒公開，只有管理員看得到。</p>`}
+    <div class="panel">
+      <h2 class="nc-h"><span class="nc-num">1</span>打開「通知」清單，截一張圖</h2>
+      <p class="nc-auto" id="ncAuto"></p>
+      <div class="nc-tabs" role="tablist">${Object.entries(DEV).map(([k, d]) => `<button type="button" data-dev="${k}" role="tab">${esc(d.label)}</button>`).join("")}</div>
+      <div class="nc-dev" id="ncDev"></div>
+    </div>
+
+    <div class="panel">
+      <h2 class="nc-h"><span class="nc-num">2</span>把指令和截圖，一起貼給 AI</h2>
+      <p>先按「複製指令」，打開 ChatGPT 或 Gemini，貼上指令，再把剛剛的截圖一起傳過去。</p>
+      <div class="nc-prompt" id="ncPrompt"></div>
+      <div class="nc-row">
+        <button class="btn" id="copyPrompt">📋 複製指令</button>
+        <a class="btn ghost" href="https://chatgpt.com/" target="_blank" rel="noopener">開啟 ChatGPT ↗</a>
+        <a class="btn ghost" href="https://gemini.google.com/" target="_blank" rel="noopener">開啟 Gemini ↗</a>
+      </div>
+      <p class="nc-auto" style="margin-top:10px">兩個按鈕都會另開分頁，這一頁會留著，方便你回來看步驟。</p>
+    </div>
+
+    <div class="panel">
+      <h2 class="nc-h"><span class="nc-num">3</span>照 AI 的表格刪除，刪完再截圖檢查</h2>
+      <ul>
+        <li>AI 會幫每個網站編號，你回「刪 1、3、5」或「全部刪」就好。</li>
+        <li>照 AI 一步一步的說明去刪，一次做一步。</li>
+        <li>刪完再截一次圖給 AI，請它確認都清乾淨了。</li>
+      </ul>
+      <p class="msgbox">🛡️ 記住：清通知<b>不需要</b>下載任何東西，也<b>不需要</b>輸入密碼。有人或網站這樣要求你，就是詐騙！</p>
+    </div>
+
+    <div class="panel">
+      <h2 class="nc-h"><span class="nc-num">4</span>（選擇性）留下一個有用的通知</h2>
+      <p>清完之後，如果想收到 Edward 的新文章和每日財經早報，可以訂閱網站通知。要不要訂閱，完全由你決定。</p>
+      <button class="btn gold" disabled>🔔 訂閱新文章與早報通知（即將推出）</button>
+    </div>
+  </div>`;
+
+  const show = k => {
+    cur = k;
+    root.querySelectorAll("[data-dev]").forEach(b => { const on = b.dataset.dev === k; b.classList.toggle("on", on); b.setAttribute("aria-selected", String(on)); });
+    root.querySelector("#ncDev").innerHTML = devHtml(k);
+  };
+  root.querySelector("#ncAuto").textContent = `看起來你正在用「${DEV[cur].label}」，已經幫你選好了；不對的話點下面換一個。`;
+  root.querySelectorAll("[data-dev]").forEach(b => b.onclick = () => show(b.dataset.dev));
+  root.querySelector("#ncPrompt").textContent = PROMPT;
+  root.querySelector("#copyPrompt").onclick = e => copy(PROMPT, e.currentTarget);
+  root.addEventListener("click", e => { const b = e.target.closest("[data-copy]"); if (b) copy(b.dataset.copy, b); });
+  show(cur);
+}
+
+store.onAuth(u => {
+  if (PUBLIC || u?.isAdmin) return render();
+  root.innerHTML = `<div class="paywall nc-lock"><h3>🧹 通知大掃除</h3><p>這一頁還在準備中，敬請期待！</p><a class="btn" href="index.html">回文章列表</a></div>`;
+});
+</script>
+</body>
+</html>
