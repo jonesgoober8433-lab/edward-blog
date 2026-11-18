@@ -677,3 +677,8 @@ body.resizing { cursor: col-resize; user-select: none; }
 .prose pre { position: relative; white-space: pre-wrap; word-break: break-word; background: var(--gold-soft); color: var(--ink); border-radius: 12px; padding: 44px 16px 14px; font-size: 15px; line-height: 1.75; overflow-x: auto; }
 .prose pre code { background: none; padding: 0; font: inherit; white-space: inherit; }
 .prose pre .pre-copy { position: absolute; top: 8px; right: 8px; }
+
+/* 文章大標題：每行長度平均；有冒號就拆主標＋副標（2026-11-18） */
+.article h1 { text-wrap: balance; }
+.article h1 .t-main { display: block; }
+.article h1 .t-sub { display: block; margin-top: 6px; font-size: .6em; line-height: 1.45; color: color-mix(in srgb, var(--ink) 72%, var(--mu)); font-weight: 600; text-wrap: balance; }

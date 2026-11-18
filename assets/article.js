@@ -1,8 +1,15 @@
 // 文章頁畫面（正式文章頁 post.html 與後台裝置預覽 preview.html 共用）
-import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js?v=20261118153512";
+import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js?v=20261118164244";
 
 const ICON_TOC = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 6h2M4 12h2M4 18h2M9 6h11M9 12h11M9 18h11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>`;
 const ICON_ARROW = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
+
+// 大標題：有「：」或「｜」就拆成主標＋副標（Edward 2026-11-18：標題斷行很醜）
+export function titleHtml(t) {
+  t = t || "（還沒有標題）";
+  const m = t.match(/^(.{2,22}?)\s*[：｜]\s*(.{4,})$/);
+  return m ? `<span class="t-main">${esc(m[1])}</span><span class="t-sub">${esc(m[2])}</span>` : esc(t);
+}
 
 export function renderArticle(art, p, { CFG, next = null, loginNext = "", user = null } = {}) {
   art.innerHTML = `
@@ -10,7 +17,7 @@ export function renderArticle(art, p, { CFG, next = null, loginNext = "", user =
     <div style="margin-top:14px"><span class="tag">${esc(p.category || "")}</span>
       ${p.status && p.status !== "published" ? `<span class="badge draft">草稿（只有你看得到）</span>` : ""}
       ${p.visibility === "members" ? `<span class="badge lock">VIP</span>` : ""}</div>
-    <h1>${esc(p.title || "（還沒有標題）")}</h1>
+    <h1>${titleHtml(p.title)}</h1>
     <div class="dates">
       <span>✍️ ${esc(CFG.author)}</span>
       <span>發布：${fmtDate(p.publishedAt || p.createdAt || Date.now())}</span>
