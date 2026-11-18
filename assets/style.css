@@ -589,3 +589,37 @@ body.sorting .card { position: relative; }
 .sort-ctl button { background: none; border: 0; cursor: pointer; font-size: 14px; padding: 2px 6px; color: var(--ink); }
 .sort-ctl .grip { color: var(--mu); padding: 0 4px; }
 body.sorting .filters, body.sorting .search { opacity: .4; pointer-events: none; }
+
+/* ===== 頂部選單（2026-11-18 重排）：左品牌、中選單、右工具；手機兩列 ===== */
+html, body { overflow-x: clip; max-width: 100%; }   /* 全站只能上下捲，不能左右滑 */
+.bar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; flex-wrap: nowrap; }
+.bar nav { justify-content: flex-end; flex-wrap: nowrap; }
+.hdr-tools { display: flex; align-items: center; gap: 6px; }
+.hdr-tools .who { color: var(--mu); font-size: 13px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-tabs { display: flex; gap: 6px; padding-bottom: 8px; }
+.admin-tabs a { text-decoration: none; color: var(--mu); border: 1px solid var(--ln); background: var(--card); border-radius: 999px; padding: 4px 14px; font-size: 14px; }
+.admin-tabs a.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+:root[data-theme="dark"] .admin-tabs a.on { color: #14110D; }
+@media (max-width: 760px) {
+  .bar { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "brand tools" "nav nav"; row-gap: 4px; min-height: 0; padding-top: 8px; padding-bottom: 4px; }
+  .bar .brand { grid-area: brand; min-width: 0; }
+  .bar .hdr-tools { grid-area: tools; }
+  .bar nav { grid-area: nav; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px; justify-content: stretch; border-top: 1px solid var(--ln); padding-top: 4px; }
+  .bar nav a:not(.btn) { text-align: center; padding: 6px 0; font-size: 14.5px; white-space: nowrap; }
+  .hdr-tools .who { display: none; }
+  .admin-tabs { padding: 0 12px 8px; }
+  .admin-tabs a { flex: 1; text-align: center; padding: 5px 0; font-size: 13.5px; }
+}
+/* 後台：中間拉 Bar 調整左右寬度 */
+.wide .admin { grid-template-columns: var(--side-w, 320px) 10px minmax(0, 1fr); gap: 10px; }
+.splitter { cursor: col-resize; align-self: stretch; position: relative; border-radius: 6px; min-height: 200px; }
+.splitter::before { content: ""; position: absolute; left: 3px; right: 3px; top: 0; bottom: 0; border-radius: 3px; background: var(--ln); transition: background .15s; }
+.splitter::after { content: "⋮"; position: sticky; top: 45vh; display: block; text-align: center; color: var(--mu); font-size: 18px; line-height: 1; padding-top: 40vh; }
+.splitter:hover::before, .splitter.drag::before { background: var(--gold); }
+body.resizing { cursor: col-resize; user-select: none; }
+@media (max-width: 900px) { .wide .admin { grid-template-columns: 1fr; } .splitter { display: none; } }
+/* 首頁排序按鈕：不再浮動，放在文章數量旁 */
+.count-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 6px 0 14px; }
+.count-row .count { margin: 0; }
+.sort-inline { border: 1px solid var(--gold); background: var(--card); color: var(--gold); border-radius: 999px; padding: 3px 12px; font: 600 13px var(--sans); cursor: pointer; white-space: nowrap; }
+.sort-inline[hidden] { display: none; }

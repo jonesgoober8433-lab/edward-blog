@@ -6,8 +6,8 @@
 <meta name="description" content="財務顧問 Edward 用白話整理投資理財、退休傳承與社會保險。">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261117174036">
-<script src="config.js?v=20261117174036"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261118080651">
+<script src="config.js?v=20261118080651"></script>
 </head>
 <body>
 <main>
@@ -23,7 +23,7 @@
       <a class="today-brief" id="todayBrief" href="brief.html" hidden></a>
     </div>
     <div class="filters" id="filters"></div>
-    <div class="count" id="count"></div>
+    <div class="count-row"><div class="count" id="count"></div><button type="button" class="sort-inline" id="sortInline" hidden>↕ 調整文章順序</button></div>
     <div class="sortbar" id="sortbar" hidden>
       <span>↕ 排序模式：拖曳文章卡片調整順序（手機請按卡片上的 ▲▼）。置頂文章永遠排最前面。</span>
       <span style="display:flex;gap:6px"><button class="btn ghost sm" id="sortCancel">取消</button><button class="btn sm" id="sortSave">完成並儲存</button></span>
@@ -32,10 +32,10 @@
   </div>
 </main>
 <script type="module">
-import { store } from "./assets/store.js?v=20261117174036";
-import { header, footer, esc, fmtDate, toast } from "./assets/ui.js?v=20261117174036";
-import { mountMarket } from "./assets/market.js?v=20261117174036";
-import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261117174036";
+import { store } from "./assets/store.js?v=20261118080651";
+import { header, footer, esc, fmtDate, toast } from "./assets/ui.js?v=20261118080651";
+import { mountMarket } from "./assets/market.js?v=20261118080651";
+import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261118080651";
 mountMarket(document.getElementById("mkt"));
 loadIndex().then(latestVisible).then(b => {
   if (!b) return;
@@ -99,9 +99,7 @@ function render() {
 }
 // ---------- 管理員專用：在首頁直接拖曳文章順序 ----------
 let sorting = false;
-const sortBtn = document.createElement("button");
-sortBtn.className = "sort-fab"; sortBtn.type = "button"; sortBtn.hidden = true;
-sortBtn.innerHTML = "↕ 調整文章順序"; document.body.append(sortBtn);
+const sortBtn = document.getElementById("sortInline");
 function setSort(on) {
   sorting = on; document.body.classList.toggle("sorting", on);
   document.getElementById("sortbar").hidden = !on; sortBtn.hidden = on || !isAdmin;

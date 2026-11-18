@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=20261117174036";
+import { store, MODE } from "./store.js?v=20261118080651";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -87,15 +87,20 @@ export function header(active = "") {
   el.innerHTML = `
     <div class="wrap bar">
       <a class="brand" href="index.html"><span class="mark">E</span><span><b>${esc(CFG.siteName)}</b><small>${esc(CFG.authorTitle || "")}</small></span></a>
-      <nav id="nav"></nav>
+      <nav id="nav" aria-label="主選單"></nav>
+      <div class="hdr-tools" id="hdrTools"></div>
     </div>
+    ${active === "admin" || active === "badmin" ? `<div class="wrap admin-tabs"><a href="admin.html" class="${active === "admin" ? "on" : ""}">📝 文章後台</a><a href="brief-admin.html" class="${active === "badmin" ? "on" : ""}">📰 早報後台</a></div>` : ""}
     ${MODE === "demo" ? `<div class="demo-bar">${LOCAL ? "示範模式：資料只存在這台電腦的瀏覽器，別人看不到。接上 Firebase 後才是正式網站。" : "網站建置中：目前是示範文章，正式內容即將上線。"}</div>` : ""}`;
   document.body.prepend(el);
   store.onAuth(u => {
-    const links = [["index.html", "文章", "home"], ["brief.html", "早報", "brief"], ["about.html", "關於我", "about"]];
+    // 順序：早報、文章、VIP、關於我、後台（後台裡再分文章後台／早報後台）
+    const links = [["brief.html", "早報", "brief"], ["index.html", "文章", "home"]];
     if (CFG.membersEnabled) links.push(["member.html", "VIP", "member"]);
-    if (u?.isAdmin) links.push(["admin.html", "後台", "admin"], ["brief-admin.html", "📰早報後台", "badmin"]);
-    el.querySelector("#nav").innerHTML = links.map(([h, t, k]) => `<a href="${h}" class="${k === active ? "on" : ""}">${t}</a>`).join("") + themeBtn() +
+    links.push(["about.html", "關於我", "about"]);
+    if (u?.isAdmin) links.push(["admin.html", "後台", active === "badmin" ? "badmin" : "admin"]);
+    el.querySelector("#nav").innerHTML = links.map(([h, t, k]) => `<a href="${h}" class="${k === active || (k === "badmin" && active === "badmin") ? "on" : ""}">${t}</a>`).join("");
+    el.querySelector("#hdrTools").innerHTML = themeBtn() +
       (u ? `<span class="who" title="${esc(u.email)}">${esc(u.name)}</span><button class="btn ghost sm" id="logout">登出</button>`
          : (MODE === "demo" && !LOCAL ? "" : `<a class="btn sm" href="login.html">登入</a>`));
     el.querySelector("#themeBtn").onclick = toggleTheme;

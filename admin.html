@@ -6,8 +6,8 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261117174036">
-<script src="config.js?v=20261117174036"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261118080651">
+<script src="config.js?v=20261118080651"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"></script>
@@ -46,6 +46,7 @@
         <div id="members"></div>
       </div>
     </aside>
+    <div class="splitter" id="splitter" role="separator" aria-orientation="vertical" title="左右拖曳調整寬度（點兩下恢復預設）"></div>
 
     <section class="panel">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
@@ -219,9 +220,9 @@
 </template>
 
 <script type="module">
-import { store, MODE, newId, isLive } from "./assets/store.js?v=20261117174036";
-import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261117174036";
-import { initMedia } from "./assets/media.js?v=20261117174036";
+import { store, MODE, newId, isLive } from "./assets/store.js?v=20261118080651";
+import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261118080651";
+import { initMedia } from "./assets/media.js?v=20261118080651";
 const CFG = window.BLOG_CONFIG;
 header("admin"); footer();
 const root = document.getElementById("root");
@@ -490,6 +491,19 @@ function start() {
   board.addEventListener("dragover", e => { const l = e.target.closest(".lane"); if (!l) return; e.preventDefault(); document.querySelectorAll(".lane").forEach(x => x.classList.toggle("over", x === l)); });
   board.addEventListener("drop", e => { const l = e.target.closest(".lane"); if (!l || !dragPost) return; e.preventDefault(); moveVis(dragPost, l.dataset.vis); dragPost = null; });
   board.addEventListener("click", e => { const b = e.target.closest(".bmove"); if (b) moveVis(b.closest(".bcard").dataset.id, b.dataset.to); });
+
+  // ---------- 中間拉 Bar：調整左側清單寬度（會記住）----------
+  {
+    const adminEl = document.querySelector(".admin"), sp = $("splitter");
+    const setW = w => { w = Math.max(220, Math.min(w, adminEl.clientWidth * .6)); adminEl.style.setProperty("--side-w", w + "px"); return w; };
+    try { const w = +localStorage.getItem("eb-side-w"); if (w) setW(w); } catch (e) { }
+    let startX = 0, startW = 0;
+    const move = e => { const x = (e.touches ? e.touches[0].clientX : e.clientX); setW(startW + x - startX); };
+    const up = () => { sp.classList.remove("drag"); document.body.classList.remove("resizing"); removeEventListener("pointermove", move); removeEventListener("pointerup", up);
+      try { localStorage.setItem("eb-side-w", parseInt(getComputedStyle(adminEl).getPropertyValue("--side-w"))); } catch (e) { } };
+    sp.addEventListener("pointerdown", e => { e.preventDefault(); startX = e.clientX; startW = document.querySelector(".side").getBoundingClientRect().width; sp.classList.add("drag"); document.body.classList.add("resizing"); addEventListener("pointermove", move); addEventListener("pointerup", up); });
+    sp.addEventListener("dblclick", () => { adminEl.style.removeProperty("--side-w"); try { localStorage.removeItem("eb-side-w"); } catch (e) { } });
+  }
 
   // ---------- 會員申請：核准／拒絕 ----------
   async function drawMembers() {
