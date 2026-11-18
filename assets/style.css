@@ -682,3 +682,5 @@ body.resizing { cursor: col-resize; user-select: none; }
 .article h1 { text-wrap: balance; }
 .article h1 .t-main { display: block; }
 .article h1 .t-sub { display: block; margin-top: 6px; font-size: .6em; line-height: 1.45; color: color-mix(in srgb, var(--ink) 72%, var(--mu)); font-weight: 600; text-wrap: balance; }
+/* 段落與標示框：避免最後一行只剩一兩個字（2026-11-18） */
+.prose p, .prose li, .prose blockquote { text-wrap: pretty; }
