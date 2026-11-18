@@ -703,3 +703,10 @@ body.resizing { cursor: col-resize; user-select: none; }
 .stf button.on i { opacity: .85; }
 .pub-row .sched input[type=date] { width: auto; }
 .pub-row .sched select { width: auto; min-width: 64px; }
+/* 手機後台：左右留白縮小、編輯模式按鈕撐滿 */
+@media (max-width: 600px) {
+  .wrap.wide { padding: 0 6px; }
+  .wide .admin .panel { padding: 14px 10px; border-radius: 12px; }
+  .wide .admin .seg { display: flex; width: 100%; }
+  .wide .admin .seg button { flex: 1; }
+}
