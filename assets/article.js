@@ -1,5 +1,5 @@
 // 文章頁畫面（正式文章頁 post.html 與後台裝置預覽 preview.html 共用）
-import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js?v=20261118093715";
+import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js?v=20261118153512";
 
 const ICON_TOC = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 6h2M4 12h2M4 18h2M9 6h11M9 12h11M9 18h11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>`;
 const ICON_ARROW = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
@@ -31,6 +31,20 @@ export function renderArticle(art, p, { CFG, next = null, loginNext = "", user =
         <span class="np-txt"><small>下一篇文章</small><b>${esc(next.title)}</b></span>
         <span class="np-ico">${ICON_ARROW}</span></a>` : ""}`;
   hydrateMedia(art);
+  // 文章裡連到別的網站的連結一律另開分頁（Edward 2026-11-18：點連結不要直接導走）
+  art.querySelectorAll(".prose a[href]").forEach(a => {
+    try { const u = new URL(a.getAttribute("href"), location.href); if (u.origin !== location.origin) { a.target = "_blank"; a.rel = "noopener"; } } catch (e) { }
+  });
+  // 程式碼框（例如給 AI 的指令）右上角加「複製」按鈕
+  art.querySelectorAll(".prose pre").forEach(pre => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "btn sm pre-copy"; b.textContent = "📋 複製";
+    b.onclick = async () => {
+      const t = pre.innerText.replace(/📋 複製|✓ 已複製$/, "").trim();
+      try { await navigator.clipboard.writeText(t); } catch (e) { const r = document.createRange(); r.selectNodeContents(pre.querySelector("code") || pre); getSelection().removeAllRanges(); getSelection().addRange(r); document.execCommand("copy"); }
+      b.textContent = "✓ 已複製"; setTimeout(() => b.textContent = "📋 複製", 1600);
+    };
+    pre.classList.add("has-copy"); pre.append(b);
+  });
   art.querySelectorAll(".prose img").forEach(img => !img.closest(".bookmark") && img.addEventListener("click", () => {
     const box = document.createElement("div"); box.className = "lightbox";
     box.innerHTML = `<img src="${img.src}" alt=""><p>${esc(img.alt || "")}　點一下關閉</p>`;

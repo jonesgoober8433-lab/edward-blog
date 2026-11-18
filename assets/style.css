@@ -672,3 +672,8 @@ body.resizing { cursor: col-resize; user-select: none; }
 .bf-facts, .bf-why p, .bf-sec p { white-space: pre-line; }
 .brief-pub { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .brief-pub .btn { flex: none; }
+
+/* 文章裡的程式碼框（例如給 AI 的指令）：自動換行、右上角複製鈕（2026-11-18） */
+.prose pre { position: relative; white-space: pre-wrap; word-break: break-word; background: var(--gold-soft); color: var(--ink); border-radius: 12px; padding: 44px 16px 14px; font-size: 15px; line-height: 1.75; overflow-x: auto; }
+.prose pre code { background: none; padding: 0; font: inherit; white-space: inherit; }
+.prose pre .pre-copy { position: absolute; top: 8px; right: 8px; }
