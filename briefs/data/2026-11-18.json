@@ -3,12 +3,91 @@
   "generatedAt": "2026-11-18T01:15:48Z",
   "headline": "輝達CEO風暴未歇，台股美股同步收低",
   "market": [
-    { "name": "台股加權", "open": 40546.64, "openChg": -493.44, "high": 41533.84, "low": 39786.45, "close": 40092.11, "prevClose": 41040.08, "chg": -947.97, "pct": -2.31, "date": "11/17", "roc": "2026.11.17", "src": "證交所", "asOf": "台股 11/17" },
-    { "name": "S&P 500", "open": 7411.02, "openChg": -5.57, "high": 7415.37, "low": 7288.34, "close": 7340.53, "prevClose": 7416.59, "chg": -76.06, "pct": -1.03, "date": "11/17", "roc": "2026.11.17", "asOf": "美股 11/17" },
-    { "name": "那斯達克", "open": 24528.06, "openChg": 18.3, "high": 24547.66, "low": 23989.09, "close": 24328.38, "prevClose": 24509.76, "chg": -181.38, "pct": -0.74, "date": "11/17", "roc": "2026.11.17", "asOf": "美股 11/17" },
-    { "name": "道瓊", "open": 51386.98, "openChg": -221.19, "high": 51463.53, "low": 50566.98, "close": 50759.42, "prevClose": 51608.17, "chg": -848.75, "pct": -1.64, "date": "11/17", "roc": "2026.11.17", "asOf": "美股 11/17" },
-    { "name": "費城半導體", "open": 9698.26, "openChg": 87.61, "high": 9745.95, "low": 9295.01, "close": 9642.88, "prevClose": 9610.65, "chg": 32.23, "pct": 0.34, "date": "11/17", "roc": "2026.11.17", "asOf": "美股 11/17" },
-    { "name": "美元/台幣", "open": 32.92, "openChg": -0.05, "high": 32.94, "low": 32.91, "close": 32.91, "prevClose": 32.96, "chg": -0.05, "pct": -0.16, "date": "11/18", "roc": "2026.11.18", "asOf": "匯率 11/18" }
+    {
+      "name": "台股加權",
+      "open": 40546.64,
+      "openChg": -493.44,
+      "high": 41533.84,
+      "low": 39786.45,
+      "close": 40092.11,
+      "prevClose": 41040.08,
+      "chg": -947.97,
+      "pct": -2.31,
+      "date": "11/17",
+      "roc": "2026.11.17",
+      "src": "證交所",
+      "asOf": "台股 11/17"
+    },
+    {
+      "name": "S&P 500",
+      "open": 7411.02,
+      "openChg": -5.57,
+      "high": 7415.37,
+      "low": 7288.34,
+      "close": 7340.53,
+      "prevClose": 7416.59,
+      "chg": -76.06,
+      "pct": -1.03,
+      "date": "11/17",
+      "roc": "2026.11.17",
+      "asOf": "美股 11/17"
+    },
+    {
+      "name": "那斯達克",
+      "open": 24528.06,
+      "openChg": 18.3,
+      "high": 24547.66,
+      "low": 23989.09,
+      "close": 24328.38,
+      "prevClose": 24509.76,
+      "chg": -181.38,
+      "pct": -0.74,
+      "date": "11/17",
+      "roc": "2026.11.17",
+      "asOf": "美股 11/17"
+    },
+    {
+      "name": "道瓊",
+      "open": 51386.98,
+      "openChg": -221.19,
+      "high": 51463.53,
+      "low": 50566.98,
+      "close": 50759.42,
+      "prevClose": 51608.17,
+      "chg": -848.75,
+      "pct": -1.64,
+      "date": "11/17",
+      "roc": "2026.11.17",
+      "asOf": "美股 11/17"
+    },
+    {
+      "name": "費城半導體",
+      "open": 9698.26,
+      "openChg": 87.61,
+      "high": 9745.95,
+      "low": 9295.01,
+      "close": 9642.88,
+      "prevClose": 9610.65,
+      "chg": 32.23,
+      "pct": 0.34,
+      "date": "11/17",
+      "roc": "2026.11.17",
+      "asOf": "美股 11/17"
+    },
+    {
+      "name": "美元/台幣",
+      "open": 32.92,
+      "openChg": -0.05,
+      "high": 32.94,
+      "low": 32.91,
+      "close": 32.91,
+      "prevClose": 32.96,
+      "chg": -0.05,
+      "pct": -0.16,
+      "date": "11/18",
+      "roc": "2026.11.18",
+      "asOf": "匯率 11/18"
+    }
   ],
   "candidates": [
     {
@@ -16,17 +95,45 @@
       "title": "台股連兩日重挫 收盤守住4萬點關卡",
       "facts": "台股 2026.11.17，開盤下跌493.44點（開在40,546.64點），收盤下跌947.97點、跌幅2.31%，收在40,092.11點。這已是台股連續第二個交易日重挫，前一個交易日(16日)台股收盤跌點達2,635.04點，是台股史上收盤跌點第二大的一天。",
       "index": [
-        { "name": "台股加權", "open": 40546.64, "openChg": -493.44, "high": 41533.84, "low": 39786.45, "close": 40092.11, "prevClose": 41040.08, "chg": -947.97, "pct": -2.31, "date": "11/17", "roc": "2026.11.17", "src": "證交所" }
+        {
+          "name": "台股加權",
+          "open": 40546.64,
+          "openChg": -493.44,
+          "high": 41533.84,
+          "low": 39786.45,
+          "close": 40092.11,
+          "prevClose": 41040.08,
+          "chg": -947.97,
+          "pct": -2.31,
+          "date": "11/17",
+          "roc": "2026.11.17",
+          "src": "證交所"
+        }
       ],
       "crossCheck": "中央社與華視新聞網（轉載中央社稿）都報導17日台股收盤下跌947.97點、跌幅2.31%，收在40,092.11點，兩者數字一致；中央社另一則報導則指出，前一個交易日(16日)台股重挫2,635.04點，是史上收盤跌點第二大的一天，顯示近期台股波動明顯放大，並非單日個案。",
       "why": "台股加權指數是把台積電、鴻海等大型權值股的股價依市值加權平均算出來的，這些大型股股價下跌，指數就會同步下滑。對一般讀者來說，這會直接影響追蹤大盤的ETF（例如0050）、勞退基金，以及保單中股票部位的淨值，短期帳面數字可能出現較大波動。",
       "outlook": "仍待觀察：如果接下來幾個交易日台股能站穩4萬點、不再出現單日大跌，市場信心可能逐步回穩；但如果美股和半導體供應鏈相關消息持續偏空，台股後續仍有可能跟著震盪，要看國際股市與台積電等權值股的表現。",
       "category": "台股",
-      "number": { "value": "-2.31%", "label": "台股加權指數單日跌幅" },
+      "number": {
+        "value": "-2.31%",
+        "label": "台股加權指數單日跌幅"
+      },
       "sources": [
-        { "name": "中央社", "url": "https://www.cna.com.tw/news/afe/202611170136.aspx", "date": "11/17" },
-        { "name": "華視新聞網(轉載中央社稿)", "url": "https://news.cts.com.tw/cna/money/202611/202611173101991.html", "date": "11/17" },
-        { "name": "中央社", "url": "https://www.cna.com.tw/news/afe/202611160118.aspx", "date": "11/16" }
+        {
+          "name": "中央社",
+          "url": "https://www.cna.com.tw/news/afe/202611170136.aspx",
+          "date": "11/17"
+        },
+        {
+          "name": "華視新聞網(轉載中央社稿)",
+          "url": "https://news.cts.com.tw/cna/money/202611/202611173101991.html",
+          "date": "11/17"
+        },
+        {
+          "name": "中央社",
+          "url": "https://www.cna.com.tw/news/afe/202611160118.aspx",
+          "date": "11/16"
+        }
       ],
       "pros": "跟讀者的退休金、ETF淨值直接相關",
       "cons": "連續幾天都在下跌，內容與前幾天的早報可能有些重複",
@@ -38,19 +145,78 @@
       "title": "美股三大指數同步收低 道瓊重挫848點",
       "facts": "美股S&P 500 2026.11.17，開盤下跌5.57點（開在7,411.02點），收盤下跌76.06點、跌幅1.03%，收在7,340.53點。美股道瓊 2026.11.17，開盤下跌221.19點（開在51,386.98點），收盤下跌848.75點、跌幅1.64%，收在50,759.42點。美股那斯達克 2026.11.17，開盤上漲18.30點（開在24,528.06點），收盤下跌181.38點、跌幅0.74%，收在24,328.38點。",
       "index": [
-        { "name": "S&P 500", "open": 7411.02, "openChg": -5.57, "high": 7415.37, "low": 7288.34, "close": 7340.53, "prevClose": 7416.59, "chg": -76.06, "pct": -1.03, "date": "11/17", "roc": "2026.11.17" },
-        { "name": "道瓊", "open": 51386.98, "openChg": -221.19, "high": 51463.53, "low": 50566.98, "close": 50759.42, "prevClose": 51608.17, "chg": -848.75, "pct": -1.64, "date": "11/17", "roc": "2026.11.17" },
-        { "name": "那斯達克", "open": 24528.06, "openChg": 18.3, "high": 24547.66, "low": 23989.09, "close": 24328.38, "prevClose": 24509.76, "chg": -181.38, "pct": -0.74, "date": "11/17", "roc": "2026.11.17" },
-        { "name": "費城半導體", "open": 9698.26, "openChg": 87.61, "high": 9745.95, "low": 9295.01, "close": 9642.88, "prevClose": 9610.65, "chg": 32.23, "pct": 0.34, "date": "11/17", "roc": "2026.11.17" }
+        {
+          "name": "S&P 500",
+          "open": 7411.02,
+          "openChg": -5.57,
+          "high": 7415.37,
+          "low": 7288.34,
+          "close": 7340.53,
+          "prevClose": 7416.59,
+          "chg": -76.06,
+          "pct": -1.03,
+          "date": "11/17",
+          "roc": "2026.11.17"
+        },
+        {
+          "name": "道瓊",
+          "open": 51386.98,
+          "openChg": -221.19,
+          "high": 51463.53,
+          "low": 50566.98,
+          "close": 50759.42,
+          "prevClose": 51608.17,
+          "chg": -848.75,
+          "pct": -1.64,
+          "date": "11/17",
+          "roc": "2026.11.17"
+        },
+        {
+          "name": "那斯達克",
+          "open": 24528.06,
+          "openChg": 18.3,
+          "high": 24547.66,
+          "low": 23989.09,
+          "close": 24328.38,
+          "prevClose": 24509.76,
+          "chg": -181.38,
+          "pct": -0.74,
+          "date": "11/17",
+          "roc": "2026.11.17"
+        },
+        {
+          "name": "費城半導體",
+          "open": 9698.26,
+          "openChg": 87.61,
+          "high": 9745.95,
+          "low": 9295.01,
+          "close": 9642.88,
+          "prevClose": 9610.65,
+          "chg": 32.23,
+          "pct": 0.34,
+          "date": "11/17",
+          "roc": "2026.11.17"
+        }
       ],
       "crossCheck": "CNBC與《華盛頓郵報》都證實17日標普500收跌約1%、收在7,340.53點，那斯達克跌0.74%、收在24,328.38點，兩家數字一致；對道瓊跌幅的描述則略有差異，CNBC精確寫出下跌848.75點(1.64%)，《華盛頓郵報》則概述為下跌約1.6%，方向和幅度相近。",
       "why": "美股三大指數同步收低，代表大型美國企業(尤其科技股)當天評價同步下修，這會直接影響持有美股ETF、跨國基金，以及退休金帳戶中配置美股部位的人。道瓊跌幅大於那斯達克，顯示這次賣壓不只集中在AI科技股，傳統產業與金融股同樣承壓。",
       "outlook": "仍待觀察：輝達當天收盤後公布財報，如果財報與展望優於預期，有可能緩解市場對AI供應鏈的疑慮，帶動後續美股回穩；但如果輝達執行長人事變動的後續效應持續發酵，美股短期波動可能維持偏高，要看接下來幾天的法人動向。",
       "category": "美股",
-      "number": { "value": "-1.64%", "label": "道瓊工業指數單日跌幅" },
+      "number": {
+        "value": "-1.64%",
+        "label": "道瓊工業指數單日跌幅"
+      },
       "sources": [
-        { "name": "CNBC", "url": "https://www.cnbc.com/2026/11/16/stock-market-today-live-updates.html", "date": "11/17" },
-        { "name": "The Washington Post", "url": "https://www.washingtonpost.com/business/2026/11/17/wall-street-stocks-dow-nasdaq/9f975f00-e2cf-11f1-a99e-b3e3805c6b8b_story.html", "date": "11/17" }
+        {
+          "name": "CNBC",
+          "url": "https://www.cnbc.com/2026/11/16/stock-market-today-live-updates.html",
+          "date": "11/17"
+        },
+        {
+          "name": "The Washington Post",
+          "url": "https://www.washingtonpost.com/business/2026/11/17/wall-street-stocks-dow-nasdaq/9f975f00-e2cf-11f1-a99e-b3e3805c6b8b_story.html",
+          "date": "11/17"
+        }
       ],
       "pros": "跟持有美股ETF、海外基金的讀者直接相關",
       "cons": "牽涉較多國際財經名詞，對新手讀者稍微吃力",
@@ -65,19 +231,170 @@
       "why": "輝達是全球AI晶片龍頭，也是台積電等台灣半導體供應鏈最重要的下單客戶之一。執行長職位出現不確定性，會讓市場重新評估公司未來的技術路線與下單節奏，進而牽動台積電等相關台股個股的股價，以及追蹤這些個股的基金、ETF淨值。",
       "outlook": "仍待觀察：如果輝達董事會最終決定讓黃仁勳回任，市場對AI供應鏈訂單穩定性的疑慮可能緩解；但如果董事會持續對外部或內部人選進行遴選、過程拉長，輝達與台灣供應鏈廠商之間的訂單溝通和擴產計畫，短期內可能維持較高的不確定性。",
       "category": "產業",
-      "number": { "value": "33年", "label": "黃仁勳擔任輝達執行長年數" },
+      "number": {
+        "value": "33年",
+        "label": "黃仁勳擔任輝達執行長年數"
+      },
       "sources": [
-        { "name": "NVIDIA 8-K公告(美國證管會SEC)", "url": "https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000082/nvidiaannouncesceotransiti.htm", "date": "11/12" },
-        { "name": "Bloomberg", "url": "https://www.bloomberg.com/news/articles/2026-11-17/huang-is-willing-to-return-as-nvidia-ceo-if-board-allows-it", "date": "11/17" },
-        { "name": "NBC News", "url": "https://www.nbcnews.com/business/corporations/jensen-huang-agrees-house-interview-nvidias-chip-smuggling-rcna609803", "date": "11/17" }
+        {
+          "name": "NVIDIA 8-K公告(美國證管會SEC)",
+          "url": "https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000082/nvidiaannouncesceotransiti.htm",
+          "date": "11/12"
+        },
+        {
+          "name": "Bloomberg",
+          "url": "https://www.bloomberg.com/news/articles/2026-11-17/huang-is-willing-to-return-as-nvidia-ceo-if-board-allows-it",
+          "date": "11/17"
+        },
+        {
+          "name": "NBC News",
+          "url": "https://www.nbcnews.com/business/corporations/jensen-huang-agrees-house-interview-nvidias-chip-smuggling-rcna609803",
+          "date": "11/17"
+        }
       ],
       "pros": "跟輝達、台積電相關個股及AI基金投資人直接相關",
       "cons": "屬於國外公司人事變動，與一般讀者生活關聯較間接",
       "score": 4,
       "recommend": true
+    },
+    {
+      "id": "c4",
+      "category": "貴金屬",
+      "title": "金價跌到 2025 年 9 月以來低點 每盎司約 3,850 美元",
+      "facts": "國際金價 11 月 17 日（美國時間）持續走弱\n現貨價約在每盎司 3,840～3,850 美元\n期貨開盤價是 2025 年 9 月 29 日以來最低",
+      "crossCheck": "",
+      "why": "黃金本身不會配息\n當美元變強、美國公債殖利率升高，抱著黃金的「機會成本」就變高\n資金比較願意去拿有利息的資產\n所以金價就被壓下來",
+      "outlook": "如果美元和利率繼續維持高檔，金價可能還會在低檔整理，因為持有黃金的成本沒有下降\n仍待觀察：要看聯準會 12 月的利率決定",
+      "number": {
+        "value": "約 3,850",
+        "label": "美元／盎司"
+      },
+      "sources": [
+        {
+          "name": "Yahoo Finance",
+          "url": "https://finance.yahoo.com/personal-finance/investing/article/gold-price-today-tuesday-november-17-2026-gold-opens-at-lowest-price-since-september-29-2025-121421264.html",
+          "date": "11/17"
+        },
+        {
+          "name": "USAGold",
+          "url": "https://www.usagold.com/daily-precious-metals-market-report-november-17-2026/",
+          "date": "11/17"
+        },
+        {
+          "name": "Fortune",
+          "url": "https://fortune.com/article/current-price-of-gold-11-17-2026/",
+          "date": "11/17"
+        }
+      ],
+      "pros": "很多客戶有黃金存摺或金飾，關心度高",
+      "cons": "各家報價時間不同，數字只能寫大概",
+      "score": 4,
+      "recommend": true
+    },
+    {
+      "id": "c5",
+      "category": "科技產業",
+      "title": "美國證實調查新加坡 Megaspeed 涉嫌轉運 AI 晶片",
+      "facts": "美國商務部和司法部 11 月 16 日發聯合聲明\n證實正在對新加坡雲端公司 Megaspeed 進行刑事調查\n調查從 2024 年就開始，涉及輝達 AI 晶片可能違反出口管制\n目前還沒有起訴，Megaspeed 否認違法",
+      "crossCheck": "",
+      "why": "先進 AI 晶片是美國管制出口的重點\n如果晶片被轉到受管制的地方，美國可能把規定訂得更嚴\n規定一變，晶片公司的客戶和出貨就會受影響\n台灣的半導體供應鏈也跟著被牽動",
+      "outlook": "如果調查後美國加強出口管制，晶片相關公司的海外銷售可能受限，因為審查和限制會增加\n仍待觀察：要看司法部是否起訴，以及國會聽證的結果",
+      "number": null,
+      "sources": [
+        {
+          "name": "CNBC",
+          "url": "https://www.cnbc.com/2026/11/17/megaspeed-investigation-nvidia-jensen-huang.html",
+          "date": "11/17"
+        },
+        {
+          "name": "The Washington Times",
+          "url": "https://www.washingtontimes.com/news/2026/nov/17/megaspeed-probe-began-2024-commerce-justice-departments-say/",
+          "date": "11/17"
+        },
+        {
+          "name": "Malay Mail",
+          "url": "https://malaymail.com/amp/news/singapore/2026/11/17/us-confirms-criminal-probe-into-singapore-cloud-firm-megaspeed-over-nvidia-ai-chips/243584",
+          "date": "11/17"
+        }
+      ],
+      "pros": "跟輝達風暴、台灣半導體都有關",
+      "cons": "牽涉政治與調查，細節還在發展",
+      "score": 3,
+      "recommend": false
+    },
+    {
+      "id": "c6",
+      "category": "AI產業",
+      "title": "Anthropic 預計本週在那斯達克上市 代號 ANT",
+      "facts": "AI 公司 Anthropic（Claude 的開發商）預計在那斯達克上市，股票代號 ANT\n公開文件寫的發行價區間是每股 70～78 美元，約 8.25 億股\n多家媒體報導預計 11 月 19 日（美國時間）開始交易，正式價格還沒公布\nTechCrunch 報導上市後亞馬遜和 Google 合計持股接近 30%",
+      "crossCheck": "",
+      "why": "AI 公司要上市，代表市場願意拿真金白銀幫 AI 定價\n上市後的股價表現，會影響投資人對整個 AI 產業的信心\n也會牽動輝達、雲端公司這些「賣鏟子」的公司",
+      "outlook": "如果上市後股價表現強，AI 相關股票的氣氛可能跟著回溫，因為市場會覺得 AI 公司值得高價\n仍待觀察：要看最終定價和第一天的交易",
+      "number": {
+        "value": "70～78",
+        "label": "美元／股 發行價區間"
+      },
+      "sources": [
+        {
+          "name": "CNBC",
+          "url": "https://www.cnbc.com/2026/11/10/anthropic-sets-price-range-of-70-to-78-in-upcoming-ipo.html",
+          "date": "11/10"
+        },
+        {
+          "name": "TechCrunch",
+          "url": "https://techcrunch.com/2026/11/17/amazon-and-google-will-together-own-nearly-30-of-anthropic-after-its-ipo",
+          "date": "11/17"
+        },
+        {
+          "name": "Bloomberg",
+          "url": "https://bloomberg.com/news/newsletters/2026-11-17/anthropic-ipo-huang-nvidia-gta-6-australia-briefing",
+          "date": "11/17"
+        }
+      ],
+      "pros": "今年最受關注的 AI 上市案，話題性高",
+      "cons": "日期和價格都還沒正式確定；不能寫成要不要買",
+      "score": 4,
+      "recommend": true
+    },
+    {
+      "id": "c7",
+      "category": "AI新功能",
+      "title": "Google 地圖 AI 會幫你排行程、打電話預約",
+      "facts": "Google 地圖的 AI 助理「Ask Maps」約 11 月 16 日推出新功能\n可以產生一天一天的旅遊行程，並在地圖上標好順序\n在美國還能幫你上網找、甚至打電話預約美髮、寵物美容、修車等服務",
+      "crossCheck": "",
+      "why": "AI 從「回答問題」走到「幫你把事情做完」\n一般人可以怎麼用：出國前請它排行程，再匯出到 Google 文件跟家人分享\n預約功能目前只在美國，台灣暫時用不到",
+      "outlook": "如果這類「幫你辦事」的 AI 普及，訂位、預約的流程可能越來越多交給 AI，因為省時間\n仍待觀察：要看何時開放到台灣",
+      "number": null,
+      "sources": [
+        {
+          "name": "Phandroid",
+          "url": "https://phandroid.com/2026/11/16/new-google-maps-update-adds-ai-trip-planning-and-appointment-booking/",
+          "date": "11/16"
+        },
+        {
+          "name": "Inside AI News",
+          "url": "https://insideai.news/news/agentic-ai/google-maps-ask-maps-ai-trip-planning/15361/",
+          "date": "11/16"
+        },
+        {
+          "name": "Mobile World Live",
+          "url": "https://www.mobileworldlive.com/google/google-maps-taps-agentic-ai-for-trip-planning/",
+          "date": "11/16"
+        }
+      ],
+      "pros": "生活化，客戶馬上懂、出國用得到",
+      "cons": "預約功能台灣還不能用",
+      "score": 3,
+      "recommend": false
     }
   ],
-  "picks": ["c1", "c2", "c3"],
+  "picks": [
+    "c1",
+    "c2",
+    "c3",
+    "c4",
+    "c6"
+  ],
   "knowledge": {
     "term": "權值股",
     "explain": "權值股是在「加權指數」裡佔比特別大的股票，股價一漲一跌，對大盤指數的影響也特別大。像台股的台積電、美股的輝達、蘋果，都是典型的權值股。",
