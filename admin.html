@@ -375,7 +375,7 @@ function start() {
     try {
       const isNew = !cur.id;
       cur = await store.savePost(collect(status)); dirty = false;
-      toast(status !== "published" ? "草稿已儲存 ✓" : isLive(cur) ? "已發布 ✓" : `已排程，${fmtTime(cur.publishedAt)} 自動上線 ✓`);
+      toast(status !== "published" ? "草稿已儲存 ✓" : isLive(cur) ? "已發布 ✓" : `已預定發布，${fmtTime(cur.publishedAt)} 自動上線 ✓`);
       await refresh();
       if (isNew) { const ids = posts.map(p => p.id); await store.reorder(ids); }
       open(cur.id);
