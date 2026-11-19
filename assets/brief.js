@@ -10,7 +10,7 @@ export const CAT_STYLE = {
 };
 // 有行情小表格（index）時，facts 裡「指數 YYYY.MM.DD，開盤…收在…點。」那句已經畫成表格，就不再重複顯示（Edward 11/18）
 const IDX_LINE = /[^。\n]*?\d{4}\.\d{2}\.\d{2}，?開盤[^。]*?收在[\d,.]+\s*點。?\s*/g;
-export function factsText(c) { return (c.index || []).length ? (c.facts || "").replace(IDX_LINE, "").trim() : (c.facts || ""); }
+export function factsText(c) { return ((c.index || []).length || c.category === "台股" || c.category === "美股") ? (c.facts || "").replace(IDX_LINE, "").trim() : (c.facts || ""); }
 
 export async function loadIndex() {
   try { return (await (await fetch("briefs/index.json", { cache: "no-store" })).json()).dates || []; } catch (e) { return []; }
@@ -79,17 +79,25 @@ export function marketTables(m = []) {
   if (!rows.length) return "";
   return `<section class="bf-ixs"><h2 class="bf-ixs-h">📊 今日大盤</h2><div class="bf-ixs-g">${rows.map(indexTable).join("")}</div></section>`;
 }
+// 台股、美股的新聞一定附「現價／開盤／漲跌／收盤」表格（Edward 2026-11-19：放在文章內，不要全部擠在最上面）
+// 數字一律取 market（每天會被收盤防呆更新成最新），名稱以新聞的 index 為準；沒有 index 就依分類自動補
+const AUTO_IDX = { 台股: ["台股加權"], 美股: ["S&P 500", "那斯達克", "道瓊"] };
+export function itemTables(c, market = []) {
+  const want = (c.index || []).length ? c.index.map(x => x.name) : (AUTO_IDX[c.category] || []);
+  return want.map(n => (market || []).find(m => m.name === n) || (c.index || []).find(x => x.name === n)).filter(x => x && x.close != null);
+}
 export function renderBrief(el, b) {
   el.innerHTML = `
     <div class="bf-head"><span class="tag">每日財經早報</span><h1>${fmtDay(b.date)}</h1>
       ${b.headline ? `<p class="bf-lead">${esc(b.headline)}</p>` : ""}</div>
-    ${marketTables(b.market)}
+    ${marketStrip(b.market)}
     <div class="bf-items">${b.items.map((c, i) => `
       <article class="bf-item">
         ${cover(c)}
         <div class="bf-txt">
           <span class="bf-no">${i + 1}</span><h2>${esc(c.title)}</h2>
           ${factsText(c) ? `<p class="bf-facts">${esc(factsText(c))}</p>` : ""}
+          ${itemTables(c, b.market).map(indexTable).join("")}
           ${(c.sources || []).length ? `<div class="bf-sec bf-cross"><b>🔍 交叉比對（出處）</b><p>${(c.sources || []).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}${s.date ? "（" + esc(s.date) + "）" : ""}</a>`).join("、")}</p></div>` : ""}
           <div class="bf-why"><b>💡 簡單分析：為什麼重要？</b><p>${esc(c.why)}</p></div>
           ${c.outlook ? `<div class="bf-sec bf-out"><b>🔮 推估可能</b><span class="bf-tag">推估，非預測</span><p>${esc(c.outlook)}</p></div>` : ""}
