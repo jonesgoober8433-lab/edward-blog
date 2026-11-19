@@ -2,6 +2,7 @@
 輸出：
   briefs/market/latest.json  6 檔最新收盤與漲跌（早報用）
   briefs/market/twii.json    台股加權：近一年每日收盤＋長期每月收盤（首頁 3M／6M／1Y／MAX 用）
+  briefs/market/us.json      美股 5 檔：最近一個交易日 5 分鐘走勢＋近一年每日＋長期每月（首頁小卡自己畫圖用，2026-11-19 起取代 TradingView）
 用法：python3 briefs/tools/market.py          （只印出來）
       python3 briefs/tools/market.py --write  （寫檔）
 """
@@ -61,11 +62,27 @@ try:
     tw["monthly"] = [[d.strftime("%Y-%m"), round(c, 2)] for d, c, *_ in chart("^TWII", "max", "1mo")]
 except Exception as e:
     tw["error"] = str(e)[:80]
+# 首頁「市場行情」美股小卡：跟台股一樣自己畫（Edward 2026-11-19：只能看、不能點）
+US = [("spx", "^GSPC"), ("ndx", "^NDX"), ("dji", "^DJI"), ("sox", "^SOX"), ("tsm", "TSM")]
+us = {}
+for key, s in US:
+    try:
+        u = f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(s)}?range=1d&interval=5m"
+        r = json.load(urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=30))["chart"]["result"][0]
+        tz = datetime.timezone(datetime.timedelta(seconds=r["meta"].get("gmtoffset", 0)))
+        intra = [[datetime.datetime.fromtimestamp(t, tz).strftime("%m/%d %H:%M"), round(c, 2)] for t, c in zip(r["timestamp"], r["indicators"]["quote"][0]["close"]) if c is not None]
+        us[key] = {"intraday": intra, "prevClose": r["meta"].get("chartPreviousClose") or r["meta"].get("previousClose"),
+                   "daily": [[d.strftime("%Y-%m-%d"), round(c, 2)] for d, c, *_ in chart(s, "1y", "1d")],
+                   "monthly": [[d.strftime("%Y-%m"), round(c, 2)] for d, c, *_ in chart(s, "max", "1mo")]}
+    except Exception as e:
+        us[key] = {"error": str(e)[:80]}
 now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).isoformat(timespec="minutes")
 if "--write" in sys.argv:
     os.makedirs("briefs/market", exist_ok=True)
     json.dump({"updatedAt": now, "items": latest}, open("briefs/market/latest.json", "w"), ensure_ascii=False, indent=1)
     if "daily" in tw: json.dump({"updatedAt": now, **tw}, open("briefs/market/twii.json", "w"), ensure_ascii=False)
+    if any("daily" in v for v in us.values()): json.dump({"updatedAt": now, **us}, open("briefs/market/us.json", "w"), ensure_ascii=False)
+    print("us:", {k: len(v.get("daily", [])) for k, v in us.items()})
     print("written", len(latest), "items;", len(tw.get("daily", [])), "daily;", len(tw.get("monthly", [])), "monthly")
 else:
     print(json.dumps(latest, ensure_ascii=False, indent=1))
