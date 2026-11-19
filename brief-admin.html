@@ -25,7 +25,7 @@
       </div>
       <label for="headline">今日一句話重點（顯示在最上面）</label><input id="headline">
       <h3 style="margin:18px 0 6px">候選新聞：勾選今天要上的（建議 3～4 則）</h3>
-      <p class="stamp" style="margin:0 0 8px">每則都附「放的好處／壞處」。想改內容就按每則右上角的「✏️ 編輯」，改完按「✓ 完成編輯」，最後再存檔。已勾 <b id="nPick">0</b> 則。</p>
+      <p class="stamp" style="margin:0 0 8px">每則都附「放的好處／壞處」。想改內容就按每則右上角的「✏️ 編輯」，改完按「✓ 完成編輯」，最後再存檔。打勾／取消勾選會自動存檔。已勾 <b id="nPick">0</b> 則。</p>
       <div id="cands"></div>
       <h3 style="margin:18px 0 6px">📚 今日財經小知識</h3>
       <div class="row2"><div><label for="kTerm">名詞</label><input id="kTerm"></div><div><label for="kEx">例子</label><input id="kEx"></div></div>
@@ -148,6 +148,19 @@ async function start() {
       + `・產生時間 ${fmtTime(Date.parse(raw.generatedAt))}`;
   }
   $("cands").addEventListener("change", count);
+  // 打勾／取消勾選就自動存檔（維持原本的發布狀態），讀者畫面重新整理就看得到
+  let autoT;
+  $("cands").addEventListener("change", e => {
+    if (e.target.type !== "checkbox") return;
+    clearTimeout(autoT); autoT = setTimeout(async () => {
+      const d = collect(ov?.status);
+      if (d.status === undefined) delete d.status;
+      if (ov?.status === "scheduled") d.publishAt = ov.publishAt;
+      if (!d.picks.length && visible(raw, ov)) return toast("讀者看得到這天的早報，至少要留一則；這次沒有存檔", true);
+      try { await store.setDoc("briefs", raw.date, d); ov = d; status(); toast(`已自動存檔 ✓ 勾了 ${d.picks.length} 則，讀者畫面重新整理就會更新`); }
+      catch (err) { toast("自動存檔失敗：" + err.message, true); }
+    }, 600);
+  });
   $("date").onchange = e => load(e.target.value);
 
   function collect(st) {
