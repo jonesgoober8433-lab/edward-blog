@@ -24,7 +24,7 @@ export function renderArticle(art, p, { CFG, next = null, loginNext = "", user =
       <span title="${fmtTime(p.updatedAt)}">最後更新：${fmtDate(p.updatedAt || Date.now())}</span>
       ${p.body ? `<span>約 ${readMins(p.body)} 分鐘讀完</span>` : ""}
     </div>
-    ${p.cover ? `<img src="${esc(p.cover)}" alt="" style="width:100%;border-radius:14px;margin-bottom:20px">` : ""}
+    ${p.cover && !(p.body || "").includes(p.cover) ? `<img src="${esc(p.cover)}" alt="" style="width:100%;border-radius:14px;margin-bottom:20px">` : ""}
     ${p.locked
       ? `<p class="prose">${esc(p.summary || "")}</p>
          <div class="paywall">${user && !user.approved
