@@ -1,18 +1,19 @@
 // 首頁「市場行情」小卡：6 檔、可左右滑動翻頁、1D／1W／1M 切換
 // 台股加權指數：用證交所官方公開資料自己畫（TradingView 免費版不提供台股）
-// 美股：2026-11-19 起不用 TradingView（Edward：全部做成台股這種只能看、不能點的樣子）
-//       改讀 briefs/market/us.json（GitHub Actions 每天早上從 Yahoo Finance 抓），用同一套小圖自己畫
+// 美股：TradingView 免費小圖（S&P 500、那斯達克、道瓊用追蹤指數的差價合約報價；費半用 SOXX ETF 代表）
+// Edward 2026-11-19：要數字跳動，但只能看不能點 → 每張卡蓋一層透明保護層（.mkt-body::after），點了不會跳去 TradingView
 import { esc } from "./ui.js?v=20261118165907";
 
 const CARDS = [
   { key: "twii", name: "台股加權指數", note: "證交所官方資料" },
-  { key: "spx", name: "S&P 500", note: "美股收盤" },
-  { key: "ndx", name: "那斯達克 100", note: "美股收盤" },
-  { key: "dji", name: "道瓊工業", note: "美股收盤" },
-  { key: "sox", name: "費城半導體", note: "美股收盤" },
-  { key: "tsm", name: "台積電 ADR", note: "美股掛牌" },
+  { key: "PEPPERSTONE:US500", name: "S&P 500", note: "追蹤報價" },
+  { key: "FOREXCOM:NSXUSD", name: "那斯達克 100", note: "追蹤報價" },
+  { key: "FOREXCOM:DJI", name: "道瓊工業", note: "追蹤報價" },
+  { key: "NASDAQ:SOXX", name: "費城半導體", note: "SOXX ETF 代表" },
+  { key: "NYSE:TSM", name: "台積電 ADR", note: "美股掛牌" },
 ];
 const RANGES = ["1D", "1W", "1M", "3M", "6M", "1Y", "ALL"];
+const TV_RANGE = { "1D": "1D", "1W": "5D", "1M": "1M", "3M": "3M", "6M": "6M", "1Y": "12M", "ALL": "ALL" };
 
 export function mountMarket(el) {
   let range = "1D";
@@ -53,7 +54,11 @@ export function mountMarket(el) {
     el.querySelectorAll(".mkt-card").forEach(card => {
       const body = card.querySelector(".mkt-body"), key = card.dataset.key;
       if (key === "twii") return twii(body, range);
-      usCard(body, key, range);
+      body.innerHTML = `<div class="tradingview-widget-container"><div class="tradingview-widget-container__widget"></div></div>`;
+      const sc = document.createElement("script");
+      sc.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js"; sc.async = true;
+      sc.text = JSON.stringify({ symbol: key, width: "100%", height: 150, locale: "zh_TW", dateRange: TV_RANGE[range], colorTheme: document.documentElement.dataset.theme === "dark" ? "dark" : "light", isTransparent: true, autosize: false, largeChartUrl: "", noTimeScale: false });
+      body.firstChild.append(sc);
     });
     setTimeout(drawDots, 50);
   }
@@ -62,6 +67,7 @@ export function mountMarket(el) {
     range = b.dataset.r; try { localStorage.setItem("eb-mkt-range", range); } catch (e) { } render();
   });
   render();
+  addEventListener("eb-theme", render);   // 切換黑暗／日光模式時，美股小圖跟著換色
   // 台股：開盤時間每分鐘更新一次
   setInterval(() => { if (range === "1D" && !document.hidden) twii(el.querySelector('[data-key="twii"] .mkt-body'), "1D", true); }, 60000);
 }
@@ -126,40 +132,15 @@ async function twii(body, range, quiet = false) {
         sub = `${a.getFullYear()}/${a.getMonth() + 1}/${a.getDate()}～${b.getMonth() + 1}/${b.getDate()}`;
       }
     }
-    body.innerHTML = view(pts, prevClose, `${sub}・資料：${["1D", "1W", "1M"].includes(range) ? "臺灣證券交易所" : "Yahoo Finance＋證交所"}`);
+    const last = pts.at(-1), chg = last - prevClose, pct = chg / prevClose * 100, up = chg >= 0;
+    const old = body.querySelector(".tw-num b")?.textContent;
+    body.innerHTML = `<div class="tw-num"><b>${last.toLocaleString("zh-TW", { maximumFractionDigits: 2 })}</b>
+      <span class="${up ? "up" : "down"}">${up ? "▲" : "▼"} ${Math.abs(chg).toFixed(2)}（${up ? "+" : "−"}${Math.abs(pct).toFixed(2)}%）</span></div>
+      ${spark(pts, up, prevClose)}<div class="tw-sub">${sub}・資料：${["1D", "1W", "1M"].includes(range) ? "臺灣證券交易所" : "Yahoo Finance＋證交所"}</div>`;
+    const nb = body.querySelector(".tw-num b");
+    if (old && old !== nb.textContent) { nb.classList.add(up ? "flash-up" : "flash-down"); setTimeout(() => nb.classList.remove("flash-up", "flash-down"), 1200); }
   } catch (e) {
     if (!quiet) body.innerHTML = `<div class="mkt-loading">暫時抓不到證交所資料，稍後再試<br><a href="https://www.twse.com.tw/zh/indices/taiex/mi-5min-hist.html" target="_blank" rel="noopener">到證交所看</a></div>`;
-  }
-}
-function view(pts, prevClose, sub) {
-  const last = pts.at(-1), chg = last - prevClose, pct = chg / prevClose * 100, up = chg >= 0;
-  return `<div class="tw-num"><b>${last.toLocaleString("zh-TW", { maximumFractionDigits: 2 })}</b>
-      <span class="${up ? "up" : "down"}">${up ? "▲" : "▼"} ${Math.abs(chg).toFixed(2)}（${up ? "+" : "−"}${Math.abs(pct).toFixed(2)}%）</span></div>
-      ${spark(pts, up, prevClose)}<div class="tw-sub">${sub}</div>`;
-}
-
-// ---------- 美股（briefs/market/us.json，每天早上更新）----------
-const md = s => { const [, m, d] = s.split("-"); return `${+m}/${+d}`; };
-async function usCard(body, key, range) {
-  body.innerHTML = `<div class="mkt-loading">載入中…</div>`;
-  try {
-    const x = (await twJson("briefs/market/us.json"))[key];
-    if (!x?.daily?.length) throw new Error();
-    let pts, prevClose, sub;
-    if (range === "1D" && x.intraday?.length) {
-      pts = x.intraday.map(p => p[1]); prevClose = x.prevClose ?? pts[0];
-      sub = `美東 ${x.intraday.at(-1)[0]} 收盤`;
-    } else if (range === "ALL") {
-      pts = x.monthly.map(p => p[1]); prevClose = pts[0];
-      sub = `${x.monthly[0][0].slice(0, 4)} 年至今（每月收盤）`;
-    } else {
-      const n = { "1D": 2, "1W": 6, "1M": 23, "3M": 63, "6M": 126, "1Y": 250 }[range];
-      const s = x.daily.slice(-n); pts = s.map(p => p[1]); prevClose = pts[0];
-      sub = `${["3M", "6M", "1Y"].includes(range) ? s[0][0].slice(0, 4) + "/" : ""}${md(s[0][0])}～${md(s.at(-1)[0])}`;
-    }
-    body.innerHTML = view(pts, prevClose, `${sub}・資料：Yahoo Finance`);
-  } catch (e) {
-    body.innerHTML = `<div class="mkt-loading">暫時抓不到資料，稍後再試</div>`;
   }
 }
 function spark(pts, up, base) {

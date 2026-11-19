@@ -422,6 +422,11 @@ body.dv-open #preview { display: none; }
 .mkt-title small { color: var(--mu); font-weight: 400; font-size: 11px; white-space: nowrap; }
 .mkt-body { height: 150px; position: relative; }
 .mkt-body iframe { border: 0; }
+/* 只能看不能點：透明保護層蓋住整張圖（Edward 2026-11-19） */
+.mkt-body::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.tw-num b { transition: background-color .3s; border-radius: 4px; }
+.tw-num b.flash-up { background: rgba(208,49,45,.18); }
+.tw-num b.flash-down { background: rgba(30,142,90,.18); }
 .mkt-loading { display: grid; place-items: center; height: 100%; color: var(--mu); font-size: 13px; text-align: center; }
 .tw-num { display: flex; flex-direction: column; margin-top: 6px; }
 .tw-num b { font-size: 20px; letter-spacing: .01em; }
