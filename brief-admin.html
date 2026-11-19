@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css?v=20261119123500">
-<script src="config.js?v=20261118165907"></script>
+<script src="config.js?v=20261119124000"></script>
 </head>
 <body>
 <main><div class="wrap wide" id="root"><div class="empty">載入中…</div></div></main>
@@ -71,7 +71,7 @@ store.onAuth(u => {
 async function start() {
   root.innerHTML = document.getElementById("tpl").innerHTML;
   const $ = id => document.getElementById(id);
-  $("draftNote").textContent = `${CFG.briefDraftUntil} 以前（前 5 天）是草稿：一定要你按「存檔並發布」才會上線`;
+  $("draftNote").textContent = `${CFG.briefDraftUntil} 以前是草稿：一定要你按「存檔並發布」才會上線；之後每天 10:00 自動上線，上線後一樣可以改`;
   const dates = (await loadIndex()).sort().reverse();
   // 一年前的早報：刪掉你的勾選紀錄（雲端排程會刪掉原始檔）
   try {

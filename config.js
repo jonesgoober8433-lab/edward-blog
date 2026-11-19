@@ -21,7 +21,7 @@ window.BLOG_CONFIG = {
   bookingUrl: "https://docs.google.com/forms/d/e/1FAIpQLSehdMad5-KkAoZYLd29rQkWDhNoBJK2A7HniB-DaaABEtqLjg/viewform",
   bookingNote: "免費 15-20 分鐘財務現況評估",
   // 每日財經早報：這天（含）以前是「草稿」，要你在後台按發布才上線；之後每天 10:00 自動上線（09:00 產生候選，給 Edward 一小時勾選）
-  briefDraftUntil: "2026-11-22",
+  briefDraftUntil: "2026-11-19",
   briefPublishTime: "10:00",
   // 會員功能開關：false＝先隱藏「會員專區」與註冊（Edward 2026-11-17：之後再想怎麼用）
   membersEnabled: true,
