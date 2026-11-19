@@ -143,7 +143,7 @@ async function start() {
     const live = visible(raw, ov);
     const draftDays = raw.date <= CFG.briefDraftUntil;
     $("status").textContent = (live ? "🟢 讀者看得到" : "⚪ 讀者還看不到")
-      + (ov ? `・你在 ${fmtTime(ov.updatedAt)} 改過（${ov.status === "published" ? "已發布" : ov.status === "scheduled" ? `排定 ${fmtTime(ov.publishAt)} 上線` : "草稿"}）` : "・目前是小Edward 的原始版")
+      + (ov ? `・你在 ${fmtTime(ov.updatedAt)} 改過（${ov.status === "published" ? "已發布" : ov.status === "scheduled" ? `排定 ${fmtTime(ov.publishAt)} 上線` : ov.status === "draft" ? "草稿" : "只改了勾選，還沒按發布"}）` : "・目前是小Edward 的原始版")
       + (draftDays ? "・前 5 天：要你按發布" : `・沒按發布的話 ${CFG.briefPublishTime} 自動上線`)
       + `・產生時間 ${fmtTime(Date.parse(raw.generatedAt))}`;
   }
