@@ -478,6 +478,8 @@ body.dv-open #preview { display: none; }
 .bf-ex { color: var(--mu); font-size: 14px; }
 .bf-fine { font-size: 12px; color: var(--mu); margin-top: 20px; }
 .bf-pager { display: flex; justify-content: space-between; margin-top: 16px; }
+.bf-pager [hidden] { display: none !important; }
+.bf-pager #next { margin-left: auto; }
 
 /* ===== 早報後台 ===== */
 .ba { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; padding: 22px 0 48px; align-items: start; }
