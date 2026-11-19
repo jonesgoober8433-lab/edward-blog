@@ -8,7 +8,7 @@
 <meta name="description" content="財務顧問 Edward 用白話整理投資理財、退休傳承與社會保險。">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261118234500">
+<link rel="stylesheet" href="assets/style.css?v=20261119123500">
 <script src="config.js?v=20261118165907"></script>
 </head>
 <body>
@@ -38,7 +38,7 @@
 import { store } from "./assets/store.js?v=20261118165907";
 import { header, footer, esc, fmtDate, fmtTime, toast } from "./assets/ui.js?v=20261118165907";
 import { mountMarket } from "./assets/market.js?v=20261118165907";
-import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261118165907";
+import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261119123500";
 mountMarket(document.getElementById("mkt"));
 loadIndex().then(latestVisible).then(b => {
   if (!b) return;

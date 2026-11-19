@@ -710,3 +710,10 @@ body.resizing { cursor: col-resize; user-select: none; }
   .wide .admin .seg { display: flex; width: 100%; }
   .wide .admin .seg button { flex: 1; }
 }
+
+/* 早報：台美股大盤表格固定在最上面 */
+.bf-ixs { margin: 12px 0 8px; }
+.bf-ixs-h { font-size: 18px; margin: 0 0 8px; }
+.bf-ixs-g { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 10px; }
+.bf-ixs-g .ix { margin: 0; }
+@media (max-width: 600px) { .bf-ixs-g { grid-template-columns: minmax(0, 1fr); } }

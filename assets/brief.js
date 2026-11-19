@@ -73,18 +73,23 @@ export function marketStrip(m = []) {
       <span class="${up ? "up" : "down"}">${up ? "▲" : "▼"} ${x.pct != null ? Math.abs(x.pct).toFixed(2) + "%" : ""}</span></div>`;
   }).join("")}</div>${m[0]?.asOf ? `<p class="bf-asof">收盤資料：${esc(m[0].asOf)}・來源 Yahoo Finance／臺灣證券交易所</p>` : ""}`;
 }
+// 台股、美股（加上匯率）每天固定放在最上面，用完整表格（現價／開盤／漲跌／收盤）——Edward 2026-11-19 指定一定要有
+export function marketTables(m = []) {
+  const rows = (m || []).filter(x => x && x.close != null);
+  if (!rows.length) return "";
+  return `<section class="bf-ixs"><h2 class="bf-ixs-h">📊 今日大盤</h2><div class="bf-ixs-g">${rows.map(indexTable).join("")}</div></section>`;
+}
 export function renderBrief(el, b) {
   el.innerHTML = `
     <div class="bf-head"><span class="tag">每日財經早報</span><h1>${fmtDay(b.date)}</h1>
       ${b.headline ? `<p class="bf-lead">${esc(b.headline)}</p>` : ""}</div>
-    ${marketStrip(b.market)}
+    ${marketTables(b.market)}
     <div class="bf-items">${b.items.map((c, i) => `
       <article class="bf-item">
         ${cover(c)}
         <div class="bf-txt">
           <span class="bf-no">${i + 1}</span><h2>${esc(c.title)}</h2>
           ${factsText(c) ? `<p class="bf-facts">${esc(factsText(c))}</p>` : ""}
-          ${(c.index || []).map(indexTable).join("")}
           ${(c.sources || []).length ? `<div class="bf-sec bf-cross"><b>🔍 交叉比對（出處）</b><p>${(c.sources || []).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}${s.date ? "（" + esc(s.date) + "）" : ""}</a>`).join("、")}</p></div>` : ""}
           <div class="bf-why"><b>💡 簡單分析：為什麼重要？</b><p>${esc(c.why)}</p></div>
           ${c.outlook ? `<div class="bf-sec bf-out"><b>🔮 推估可能</b><span class="bf-tag">推估，非預測</span><p>${esc(c.outlook)}</p></div>` : ""}

@@ -1,286 +1,291 @@
 {
-  "date": "2026-11-19",
-  "generatedAt": "2026-11-19T01:18:05Z",
-  "headline": "聯準會紀要暗示12月升息 AI公司史上最大IPO今日掛牌",
-  "market": [
-    {
-      "name": "台股加權",
-      "open": 40720.09,
-      "openChg": 627.98,
-      "high": 40938.2,
-      "low": 39260.99,
-      "close": 40194.91,
-      "prevClose": 40092.11,
-      "chg": 102.8,
-      "pct": 0.26,
-      "date": "11/18",
-      "roc": "2026.11.18",
-      "src": "證交所",
-      "asOf": "台股 11/18（資料時間 11/18 15:56）"
-    },
-    {
-      "name": "S&P 500",
-      "open": 7411.02,
-      "openChg": -5.57,
-      "high": 7415.37,
-      "low": 7288.34,
-      "close": 7340.53,
-      "prevClose": 7416.59,
-      "chg": -76.06,
-      "pct": -1.03,
-      "date": "11/17",
-      "roc": "2026.11.17",
-      "asOf": "美股 11/17（資料時間 11/18 15:56）"
-    },
-    {
-      "name": "那斯達克",
-      "open": 24528.06,
-      "openChg": 18.3,
-      "high": 24547.66,
-      "low": 23989.09,
-      "close": 24328.38,
-      "prevClose": 24509.76,
-      "chg": -181.38,
-      "pct": -0.74,
-      "date": "11/17",
-      "roc": "2026.11.17",
-      "asOf": "美股 11/17（資料時間 11/18 15:56）"
-    },
-    {
-      "name": "道瓊",
-      "open": 51386.98,
-      "openChg": -221.19,
-      "high": 51463.53,
-      "low": 50566.98,
-      "close": 50759.42,
-      "prevClose": 51608.17,
-      "chg": -848.75,
-      "pct": -1.64,
-      "date": "11/17",
-      "roc": "2026.11.17",
-      "asOf": "美股 11/17（資料時間 11/18 15:56）"
-    },
-    {
-      "name": "費城半導體",
-      "open": 9698.26,
-      "openChg": 87.61,
-      "high": 9745.95,
-      "low": 9295.02,
-      "close": 9642.88,
-      "prevClose": 9610.65,
-      "chg": 32.23,
-      "pct": 0.34,
-      "date": "11/17",
-      "roc": "2026.11.17",
-      "asOf": "美股 11/17（資料時間 11/18 15:56）"
-    },
-    {
-      "name": "美元/台幣",
-      "open": 32.92,
-      "openChg": -0.05,
-      "high": 33.02,
-      "low": 32.81,
-      "close": 32.93,
-      "prevClose": 32.96,
-      "chg": -0.04,
-      "pct": -0.11,
-      "date": "11/18",
-      "roc": "2026.11.18",
-      "asOf": "匯率 11/18（資料時間 11/18 15:56）"
-    }
-  ],
-  "candidates": [
-    {
-      "id": "c1",
-      "title": "台指期月結算尾盤拉抬 台股收漲102點站穩4萬點",
-      "facts": "11月18日是台指期月結算日，大盤當天盤中震盪逾1,677點；三大法人當日合計賣超63.07億元，其中外資與陸資賣超76.56億元；台積電尾盤遭4,869張大單買進，股價上漲5元收在2,175元，帶動大盤終場翻紅。",
-      "index": [
-        {
-          "name": "台股加權",
-          "open": 40720.09,
-          "openChg": 627.98,
-          "high": 40938.2,
-          "low": 39260.99,
-          "close": 40194.91,
-          "prevClose": 40092.11,
-          "chg": 102.8,
-          "pct": 0.26,
-          "date": "11/18",
-          "roc": "2026.11.18",
-          "src": "證交所"
-        }
-      ],
-      "crossCheck": "",
-      "why": "每月台指期結算日常常出現買方或賣方在尾盤集中下單、拉抬或打壓股價的情況，這跟公司實際賺不賺錢沒有直接關係，而是期貨和現貨要在同一天結算價格所造成的技術性波動。對一般投資人來說，這代表當天的漲跌不能完全反映公司基本面；但外資同一天還在賣超，顯示外資對台股後續看法仍偏保守，這會影響追蹤大盤的ETF和退休金帳戶的短期淨值。",
-      "outlook": "仍待觀察：如果外資賣超持續、尾盤大單效應消退，台股接下來的走勢可能比較貼近實際基本面；如果輝達等權值股財報帶動的AI投資熱度延續，台積電訂單能見度維持良好，大盤仍有機會守住4萬點，要看接下來幾天外資的買賣超動向。",
-      "category": "台股",
-      "number": {
-        "value": "+102.8點",
-        "label": "台股加權指數單日漲點(11/18)"
-      },
-      "sources": [
-        {
-          "name": "聯合新聞網",
-          "url": "https://udn.com/news/story/7251/9886487",
-          "date": "11/18"
-        },
-        {
-          "name": "ETtoday新聞雲",
-          "url": "https://finance.ettoday.net/news/3274276",
-          "date": "11/18"
-        },
-        {
-          "name": "Yahoo奇摩股市",
-          "url": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E8%82%A1%E7%9B%A4%E5%BE%8C-%E6%94%B6%E6%BC%B2102%E9%BB%9E-%E5%AE%88%E4%BD%8F40k-%E5%B9%B4%E7%B7%9A%E5%A4%B1%E8%80%8C%E5%BE%A9%E5%BE%97-074700515.html",
-          "date": "11/18"
-        }
-      ],
-      "pros": "跟追蹤大盤的ETF、退休金帳戶淨值有關",
-      "cons": "屬於月結算造成的技術性波動，隔天效應可能就消退",
-      "score": 3,
-      "recommend": false
-    },
-    {
-      "id": "c2",
-      "title": "Fed會議紀要18日公布 幾乎所有官員傾向12月再升息",
-      "facts": "聯準會11月18日公布10月會議紀要，顯示當時以10票比2票維持利率區間在3.75%至4%，兩位理事主張應立即升息；紀要提到「未來幾個月幾乎所有與會者」都認為還需要再升息，才能把通膨拉回2%的目標。芝商所(CME)FedWatch工具顯示，市場目前預期12月8至9日會議升息一碼(0.25個百分點)的機率約91.7%。",
-      "crossCheck": "",
-      "why": "聯準會升息，代表美元存款和美債的利息會提高，資金更容易被『鎖』在美元資產裡；這也是金價同一天走弱、美元走強的原因之一(詳見貴金屬那一則)。對一般讀者來說，如果12月真的升息，美元計價的進口成本可能上升，持有美元定存或債券的人利息收入增加，但股市、房市等對資金成本敏感的資產，估值可能承壓。",
-      "outlook": "如果12月8至9日會議真的升息一碼，因為市場已經大致反映在價格裡，衝擊可能有限；但如果接下來公布的通膨數據意外偏高，官員採用更大幅度(0.5個百分點)升息的機率會提高，市場波動可能放大，要看12月初公布的通膨與就業數據。",
-      "category": "利率",
-      "number": {
-        "value": "91.7%",
-        "label": "市場預期12月升息一碼的機率"
-      },
-      "sources": [
-        {
-          "name": "CNBC",
-          "url": "https://www.cnbc.com/2026/11/18/fed-minutes-october-2026.html",
-          "date": "11/18"
-        },
-        {
-          "name": "Bloomberg",
-          "url": "https://www.bloomberg.com/news/articles/2026-11-18/fed-minutes-show-almost-all-officials-expect-more-rate-hikes",
-          "date": "11/18"
-        },
-        {
-          "name": "Yahoo Finance",
-          "url": "https://finance.yahoo.com/economy/policy/articles/fed-minutes-higher-interest-rates-190932735.html",
-          "date": "11/18"
-        }
-      ],
-      "pros": "跟房貸、定存利率、美元資產都有關，影響很直接",
-      "cons": "牽涉較多金融專有名詞，對新手讀者稍微吃力",
-      "score": 5,
-      "recommend": true
-    },
-    {
-      "id": "c3",
-      "title": "輝達Q3營收1,158億美元 年增103%創新高",
-      "facts": "輝達(Nvidia)11月17日美股收盤後公布第三財季(至10月25日)財報，營收達1,158億美元，年增103%；其中資料中心(伺服器用AI晶片)營收達1,076億美元，年增110%。公司並預估下一季(第四財季)營收約1,300億美元(正負3%)，且這個預估完全不包含來自中國大陸的資料中心營收。",
-      "crossCheck": "",
-      "why": "輝達的資料中心營收主要來自各大科技公司採購AI晶片來建資料中心，這筆錢的規模直接反映全球AI投資的熱度；輝達營收和展望同步上修，代表下游雲端業者還在持續擴大投資，這會帶動台積電等代工廠的訂單，也是為什麼輝達財報常被當成觀察AI景氣的指標。",
-      "outlook": "如果輝達下一季真的達到1,300億美元的營收指引，顯示AI投資還沒有放緩，台積電等台灣供應鏈的訂單能見度可能維持良好；仍待觀察：要看接下來幾週各大雲端業者是否持續加碼資本支出，以及市場對輝達財報的實際反應。",
-      "category": "科技產業",
-      "number": {
-        "value": "1,158億美元",
-        "label": "輝達Q3營收(年增103%)"
-      },
-      "sources": [
-        {
-          "name": "NVIDIA官方新聞稿",
-          "url": "https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-third-quarter-fiscal-2027",
-          "date": "11/17"
-        },
-        {
-          "name": "Vested Finance",
-          "url": "https://vestedfinance.com/blog/us-stocks/nvidia-q3-earnings-fy2027/",
-          "date": "11/17"
-        },
-        {
-          "name": "itmunch",
-          "url": "https://itmunch.com/nvidia-q3-fy2027-revenue-data-center-q4-guidance/",
-          "date": "11/17"
-        }
-      ],
-      "pros": "台積電最大客戶之一，跟台灣半導體供應鏈訂單直接相關",
-      "cons": "輝達執行長人事變動還在延續，公司治理細節較複雜",
-      "score": 5,
-      "recommend": true
-    },
-    {
-      "id": "c4",
-      "title": "Anthropic IPO定價83美元 創史上最大規模上市",
-      "facts": "AI公司Anthropic(Claude開發商)11月18日美股收盤後公布IPO定價，確定每股83美元，由公司與7位共同創辦人合計出售9.8億股，募資約813億美元，是史上規模最大的IPO；公司市值約達1.5兆美元，股票預計11月19日起在那斯達克以代號ANT掛牌交易。",
-      "crossCheck": "",
-      "why": "IPO就是公司第一次把股份賣給一般大眾、讓股票公開掛牌買賣；Anthropic能以這麼高的價格籌到這麼多錢，代表市場現階段願意用真金白銀替AI公司的未來獲利能力定出高價。這會影響投資人對整個AI產業(包括輝達、台積電等供應鏈)的信心，也可能帶動更多AI公司考慮跟進上市。",
-      "outlook": "仍待觀察：如果掛牌首日股價表現強勢，市場對AI公司估值的信心可能延續，帶動相關AI概念股氣氛回溫；但如果首日表現不如預期，可能讓投資人重新檢視目前AI公司的估值是否過高，要看11月19日實際開盤後的交易狀況。",
-      "category": "AI產業",
-      "number": {
-        "value": "83美元/股",
-        "label": "Anthropic IPO定價"
-      },
-      "sources": [
-        {
-          "name": "Spectrum News",
-          "url": "https://spectrumlocalnews.com/us/snplus/business/2026/11/18/anthropic-ipo-price",
-          "date": "11/18"
-        },
-        {
-          "name": "Durango Herald(轉載AP)",
-          "url": "https://www.durangoherald.com/articles/associated-press/anthropic-prices-its-ipo-at-83-per-share-valuing-the-artificial-intelligence-giant-at-1-5-trillio",
-          "date": "11/18"
-        },
-        {
-          "name": "Al Jazeera",
-          "url": "https://www.aljazeera.com/economy/2026/11/19/anthropic-raises-81-3bn-in-biggest-ipo-of-all-time",
-          "date": "11/19"
-        }
-      ],
-      "pros": "今年最受關注的AI上市案，話題性高，也跟輝達、台積電供應鏈話題連動",
-      "cons": "掛牌首日股價表現還沒出來，不能寫成要不要買",
-      "score": 5,
-      "recommend": true
-    },
-    {
-      "id": "c5",
-      "title": "金價跌破3,800美元 創一年多來新低",
-      "facts": "國際金價11月18日(美國時間)盤中跌破每英兩3,800美元，較前一天(17日)收盤下跌約2%，是2025年9月以來的低點；多家媒體將這次下跌歸因於美元走強，以及市場對聯準會12月升息機率的預期升高(詳見另一則利率新聞)。",
-      "crossCheck": "",
-      "why": "黃金本身不會配息，當美元走強、市場預期利率會再往上走，持有黃金的『機會成本』(放著不賺利息的損失)就會變高，資金比較願意轉去買有利息的美元資產，金價因此被壓低。",
-      "outlook": "如果美元和升息預期繼續維持強勢，金價短期可能還會在低檔整理，因為持有黃金的機會成本沒有下降；仍待觀察：要看12月8至9日聯準會會議的實際決定。",
-      "category": "貴金屬",
-      "number": {
-        "value": "約3,780美元",
-        "label": "國際金價(11/18，每英兩)"
-      },
-      "sources": [
-        {
-          "name": "CNBC",
-          "url": "https://www.cnbc.com/select/the-price-of-gold-today-nov-18-2026/",
-          "date": "11/18"
-        },
-        {
-          "name": "USAGold",
-          "url": "https://www.usagold.com/daily-precious-metals-market-report-november-18-2026/",
-          "date": "11/18"
-        },
-        {
-          "name": "AOL",
-          "url": "https://www.aol.com/articles/gold-price-today-gold-falls-110928000.html",
-          "date": "11/18"
-        }
-      ],
-      "pros": "很多客戶有黃金存摺或金飾，關心度高",
-      "cons": "各家報價時間不同，數字只能寫大概",
-      "score": 4,
-      "recommend": true
-    }
-  ],
-  "picks": ["c2", "c3", "c4", "c5"],
-  "knowledge": {
-    "term": "IPO(首次公開發行)",
-    "explain": "IPO是公司第一次把股份賣給一般大眾、讓股票在交易所公開掛牌買賣的過程。公司通常是為了籌資擴張營運才選擇上市，上市後股價就由市場上的買賣雙方決定，不再是公司自己說了算。",
-    "example": "就像一家原本只跟熟人集資開的小吃店，決定對外招募股東、把股份賣給所有想投資的人，還讓大家可以自由買賣這些股份——這就是IPO。"
+ "date": "2026-11-19",
+ "generatedAt": "2026-11-19T01:18:05Z",
+ "headline": "聯準會紀要暗示12月升息 AI公司史上最大IPO今日掛牌",
+ "market": [
+  {
+   "name": "台股加權",
+   "open": 40720.09,
+   "openChg": 627.98,
+   "high": 40938.2,
+   "low": 39260.99,
+   "close": 40194.91,
+   "prevClose": 40092.11,
+   "chg": 102.8,
+   "pct": 0.26,
+   "date": "11/18",
+   "roc": "2026.11.18",
+   "src": "證交所",
+   "asOf": "台股 11/18、美股 11/18"
+  },
+  {
+   "name": "S&P 500",
+   "open": 7355.69,
+   "openChg": 15.16,
+   "high": 7367.68,
+   "low": 7285.76,
+   "close": 7323.63,
+   "prevClose": 7340.53,
+   "chg": -16.9,
+   "pct": -0.23,
+   "date": "11/18",
+   "roc": "2026.11.18",
+   "asOf": "台股 11/18、美股 11/18"
+  },
+  {
+   "name": "那斯達克",
+   "open": 24486.17,
+   "openChg": 157.79,
+   "high": 24538.78,
+   "low": 24225.3,
+   "close": 24429.88,
+   "prevClose": 24328.38,
+   "chg": 101.5,
+   "pct": 0.42,
+   "date": "11/18",
+   "roc": "2026.11.18",
+   "asOf": "台股 11/18、美股 11/18"
+  },
+  {
+   "name": "道瓊",
+   "open": 50627.36,
+   "openChg": -132.06,
+   "high": 50637.7,
+   "low": 50029.35,
+   "close": 50198.2,
+   "prevClose": 50759.42,
+   "chg": -561.22,
+   "pct": -1.11,
+   "date": "11/18",
+   "roc": "2026.11.18",
+   "asOf": "台股 11/18、美股 11/18"
+  },
+  {
+   "name": "費城半導體",
+   "open": 9788.63,
+   "openChg": 145.75,
+   "high": 9828.19,
+   "low": 9493.93,
+   "close": 9652.8,
+   "prevClose": 9642.88,
+   "chg": 9.92,
+   "pct": 0.1,
+   "date": "11/18",
+   "roc": "2026.11.18",
+   "asOf": "台股 11/18、美股 11/18"
+  },
+  {
+   "name": "美元/台幣",
+   "open": 32.93,
+   "openChg": 0.02,
+   "high": 33.03,
+   "low": 32.91,
+   "close": 32.95,
+   "prevClose": 32.91,
+   "chg": 0.04,
+   "pct": 0.11,
+   "date": "11/19",
+   "roc": "2026.11.19",
+   "asOf": "台股 11/18、美股 11/18"
   }
+ ],
+ "candidates": [
+  {
+   "id": "c1",
+   "title": "台指期月結算尾盤拉抬 台股收漲102點站穩4萬點",
+   "facts": "11月18日是台指期月結算日，大盤當天盤中震盪逾1,677點；三大法人當日合計賣超63.07億元，其中外資與陸資賣超76.56億元；台積電尾盤遭4,869張大單買進，股價上漲5元收在2,175元，帶動大盤終場翻紅。",
+   "index": [
+    {
+     "name": "台股加權",
+     "open": 40720.09,
+     "openChg": 627.98,
+     "high": 40938.2,
+     "low": 39260.99,
+     "close": 40194.91,
+     "prevClose": 40092.11,
+     "chg": 102.8,
+     "pct": 0.26,
+     "date": "11/18",
+     "roc": "2026.11.18",
+     "src": "證交所"
+    }
+   ],
+   "crossCheck": "",
+   "why": "每月台指期結算日常常出現買方或賣方在尾盤集中下單、拉抬或打壓股價的情況，這跟公司實際賺不賺錢沒有直接關係，而是期貨和現貨要在同一天結算價格所造成的技術性波動。對一般投資人來說，這代表當天的漲跌不能完全反映公司基本面；但外資同一天還在賣超，顯示外資對台股後續看法仍偏保守，這會影響追蹤大盤的ETF和退休金帳戶的短期淨值。",
+   "outlook": "仍待觀察：如果外資賣超持續、尾盤大單效應消退，台股接下來的走勢可能比較貼近實際基本面；如果輝達等權值股財報帶動的AI投資熱度延續，台積電訂單能見度維持良好，大盤仍有機會守住4萬點，要看接下來幾天外資的買賣超動向。",
+   "category": "台股",
+   "number": {
+    "value": "+102.8點",
+    "label": "台股加權指數單日漲點(11/18)"
+   },
+   "sources": [
+    {
+     "name": "聯合新聞網",
+     "url": "https://udn.com/news/story/7251/9886487",
+     "date": "11/18"
+    },
+    {
+     "name": "ETtoday新聞雲",
+     "url": "https://finance.ettoday.net/news/3274276",
+     "date": "11/18"
+    },
+    {
+     "name": "Yahoo奇摩股市",
+     "url": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E8%82%A1%E7%9B%A4%E5%BE%8C-%E6%94%B6%E6%BC%B2102%E9%BB%9E-%E5%AE%88%E4%BD%8F40k-%E5%B9%B4%E7%B7%9A%E5%A4%B1%E8%80%8C%E5%BE%A9%E5%BE%97-074700515.html",
+     "date": "11/18"
+    }
+   ],
+   "pros": "跟追蹤大盤的ETF、退休金帳戶淨值有關",
+   "cons": "屬於月結算造成的技術性波動，隔天效應可能就消退",
+   "score": 3,
+   "recommend": false
+  },
+  {
+   "id": "c2",
+   "title": "Fed會議紀要18日公布 幾乎所有官員傾向12月再升息",
+   "facts": "聯準會11月18日公布10月會議紀要，顯示當時以10票比2票維持利率區間在3.75%至4%，兩位理事主張應立即升息；紀要提到「未來幾個月幾乎所有與會者」都認為還需要再升息，才能把通膨拉回2%的目標。芝商所(CME)FedWatch工具顯示，市場目前預期12月8至9日會議升息一碼(0.25個百分點)的機率約91.7%。",
+   "crossCheck": "",
+   "why": "聯準會升息，代表美元存款和美債的利息會提高，資金更容易被『鎖』在美元資產裡；這也是金價同一天走弱、美元走強的原因之一(詳見貴金屬那一則)。對一般讀者來說，如果12月真的升息，美元計價的進口成本可能上升，持有美元定存或債券的人利息收入增加，但股市、房市等對資金成本敏感的資產，估值可能承壓。",
+   "outlook": "如果12月8至9日會議真的升息一碼，因為市場已經大致反映在價格裡，衝擊可能有限；但如果接下來公布的通膨數據意外偏高，官員採用更大幅度(0.5個百分點)升息的機率會提高，市場波動可能放大，要看12月初公布的通膨與就業數據。",
+   "category": "利率",
+   "number": {
+    "value": "91.7%",
+    "label": "市場預期12月升息一碼的機率"
+   },
+   "sources": [
+    {
+     "name": "CNBC",
+     "url": "https://www.cnbc.com/2026/11/18/fed-minutes-october-2026.html",
+     "date": "11/18"
+    },
+    {
+     "name": "Bloomberg",
+     "url": "https://www.bloomberg.com/news/articles/2026-11-18/fed-minutes-show-almost-all-officials-expect-more-rate-hikes",
+     "date": "11/18"
+    },
+    {
+     "name": "Yahoo Finance",
+     "url": "https://finance.yahoo.com/economy/policy/articles/fed-minutes-higher-interest-rates-190932735.html",
+     "date": "11/18"
+    }
+   ],
+   "pros": "跟房貸、定存利率、美元資產都有關，影響很直接",
+   "cons": "牽涉較多金融專有名詞，對新手讀者稍微吃力",
+   "score": 5,
+   "recommend": true
+  },
+  {
+   "id": "c3",
+   "title": "輝達Q3營收1,158億美元 年增103%創新高",
+   "facts": "輝達(Nvidia)11月17日美股收盤後公布第三財季(至10月25日)財報，營收達1,158億美元，年增103%；其中資料中心(伺服器用AI晶片)營收達1,076億美元，年增110%。公司並預估下一季(第四財季)營收約1,300億美元(正負3%)，且這個預估完全不包含來自中國大陸的資料中心營收。",
+   "crossCheck": "",
+   "why": "輝達的資料中心營收主要來自各大科技公司採購AI晶片來建資料中心，這筆錢的規模直接反映全球AI投資的熱度；輝達營收和展望同步上修，代表下游雲端業者還在持續擴大投資，這會帶動台積電等代工廠的訂單，也是為什麼輝達財報常被當成觀察AI景氣的指標。",
+   "outlook": "如果輝達下一季真的達到1,300億美元的營收指引，顯示AI投資還沒有放緩，台積電等台灣供應鏈的訂單能見度可能維持良好；仍待觀察：要看接下來幾週各大雲端業者是否持續加碼資本支出，以及市場對輝達財報的實際反應。",
+   "category": "科技產業",
+   "number": {
+    "value": "1,158億美元",
+    "label": "輝達Q3營收(年增103%)"
+   },
+   "sources": [
+    {
+     "name": "NVIDIA官方新聞稿",
+     "url": "https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-third-quarter-fiscal-2027",
+     "date": "11/17"
+    },
+    {
+     "name": "Vested Finance",
+     "url": "https://vestedfinance.com/blog/us-stocks/nvidia-q3-earnings-fy2027/",
+     "date": "11/17"
+    },
+    {
+     "name": "itmunch",
+     "url": "https://itmunch.com/nvidia-q3-fy2027-revenue-data-center-q4-guidance/",
+     "date": "11/17"
+    }
+   ],
+   "pros": "台積電最大客戶之一，跟台灣半導體供應鏈訂單直接相關",
+   "cons": "輝達執行長人事變動還在延續，公司治理細節較複雜",
+   "score": 5,
+   "recommend": true
+  },
+  {
+   "id": "c4",
+   "title": "Anthropic IPO定價83美元 創史上最大規模上市",
+   "facts": "AI公司Anthropic(Claude開發商)11月18日美股收盤後公布IPO定價，確定每股83美元，由公司與7位共同創辦人合計出售9.8億股，募資約813億美元，是史上規模最大的IPO；公司市值約達1.5兆美元，股票預計11月19日起在那斯達克以代號ANT掛牌交易。",
+   "crossCheck": "",
+   "why": "IPO就是公司第一次把股份賣給一般大眾、讓股票公開掛牌買賣；Anthropic能以這麼高的價格籌到這麼多錢，代表市場現階段願意用真金白銀替AI公司的未來獲利能力定出高價。這會影響投資人對整個AI產業(包括輝達、台積電等供應鏈)的信心，也可能帶動更多AI公司考慮跟進上市。",
+   "outlook": "仍待觀察：如果掛牌首日股價表現強勢，市場對AI公司估值的信心可能延續，帶動相關AI概念股氣氛回溫；但如果首日表現不如預期，可能讓投資人重新檢視目前AI公司的估值是否過高，要看11月19日實際開盤後的交易狀況。",
+   "category": "AI產業",
+   "number": {
+    "value": "83美元/股",
+    "label": "Anthropic IPO定價"
+   },
+   "sources": [
+    {
+     "name": "Spectrum News",
+     "url": "https://spectrumlocalnews.com/us/snplus/business/2026/11/18/anthropic-ipo-price",
+     "date": "11/18"
+    },
+    {
+     "name": "Durango Herald(轉載AP)",
+     "url": "https://www.durangoherald.com/articles/associated-press/anthropic-prices-its-ipo-at-83-per-share-valuing-the-artificial-intelligence-giant-at-1-5-trillio",
+     "date": "11/18"
+    },
+    {
+     "name": "Al Jazeera",
+     "url": "https://www.aljazeera.com/economy/2026/11/19/anthropic-raises-81-3bn-in-biggest-ipo-of-all-time",
+     "date": "11/19"
+    }
+   ],
+   "pros": "今年最受關注的AI上市案，話題性高，也跟輝達、台積電供應鏈話題連動",
+   "cons": "掛牌首日股價表現還沒出來，不能寫成要不要買",
+   "score": 5,
+   "recommend": true
+  },
+  {
+   "id": "c5",
+   "title": "金價跌破3,800美元 創一年多來新低",
+   "facts": "國際金價11月18日(美國時間)盤中跌破每英兩3,800美元，較前一天(17日)收盤下跌約2%，是2025年9月以來的低點；多家媒體將這次下跌歸因於美元走強，以及市場對聯準會12月升息機率的預期升高(詳見另一則利率新聞)。",
+   "crossCheck": "",
+   "why": "黃金本身不會配息，當美元走強、市場預期利率會再往上走，持有黃金的『機會成本』(放著不賺利息的損失)就會變高，資金比較願意轉去買有利息的美元資產，金價因此被壓低。",
+   "outlook": "如果美元和升息預期繼續維持強勢，金價短期可能還會在低檔整理，因為持有黃金的機會成本沒有下降；仍待觀察：要看12月8至9日聯準會會議的實際決定。",
+   "category": "貴金屬",
+   "number": {
+    "value": "約3,780美元",
+    "label": "國際金價(11/18，每英兩)"
+   },
+   "sources": [
+    {
+     "name": "CNBC",
+     "url": "https://www.cnbc.com/select/the-price-of-gold-today-nov-18-2026/",
+     "date": "11/18"
+    },
+    {
+     "name": "USAGold",
+     "url": "https://www.usagold.com/daily-precious-metals-market-report-november-18-2026/",
+     "date": "11/18"
+    },
+    {
+     "name": "AOL",
+     "url": "https://www.aol.com/articles/gold-price-today-gold-falls-110928000.html",
+     "date": "11/18"
+    }
+   ],
+   "pros": "很多客戶有黃金存摺或金飾，關心度高",
+   "cons": "各家報價時間不同，數字只能寫大概",
+   "score": 4,
+   "recommend": true
+  }
+ ],
+ "picks": [
+  "c2",
+  "c3",
+  "c4",
+  "c5"
+ ],
+ "knowledge": {
+  "term": "IPO(首次公開發行)",
+  "explain": "IPO是公司第一次把股份賣給一般大眾、讓股票在交易所公開掛牌買賣的過程。公司通常是為了籌資擴張營運才選擇上市，上市後股價就由市場上的買賣雙方決定，不再是公司自己說了算。",
+  "example": "就像一家原本只跟熟人集資開的小吃店，決定對外招募股東、把股份賣給所有想投資的人，還讓大家可以自由買賣這些股份——這就是IPO。"
+ }
 }
