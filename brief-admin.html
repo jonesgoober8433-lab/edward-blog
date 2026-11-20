@@ -7,9 +7,10 @@
 <title>早報後台｜Edward 的 Blog</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261119154816">
-<script src="config.js?v=20261119124000"></script>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"></noscript>
+<link rel="stylesheet" href="assets/style.css?v=20261120140209">
+<script src="config.js?v=20261120140209"></script>
 </head>
 <body>
 <main><div class="wrap wide" id="root"><div class="empty">載入中…</div></div></main>
@@ -55,9 +56,9 @@
   </div>
 </template>
 <script type="module">
-import { store } from "./assets/store.js?v=20261118165907";
-import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261118165907";
-import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE, factsText } from "./assets/brief.js?v=20261119140000";
+import { store } from "./assets/store.js?v=20261120140209";
+import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261120140209";
+import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE, factsText } from "./assets/brief.js?v=20261120140209";
 const CFG = window.BLOG_CONFIG;
 header("badmin"); footer();
 const root = document.getElementById("root");
