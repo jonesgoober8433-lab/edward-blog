@@ -2,6 +2,10 @@
 //   示範模式（config.firebase 為 null）→ 存在瀏覽器 localStorage
 //   正式模式（有填 Firebase 設定）     → Firebase 登入＋Firestore 資料庫
 // 頁面只呼叫這裡的函式，不用管資料實際放哪。
+// 正式模式另外把「公開已上線清單」寫進 eb-public-posts-v1（見 postcache.js）。
+// 草稿、排程、文章內文不會進那個快取，避免共用裝置把管理員畫面漏給下一個人。
+
+import { fetchPublicPosts, readPublicCache, writePublicCache } from "./postcache.js?v=20261120140209";
 
 const CFG = window.BLOG_CONFIG || {};
 export const MODE = CFG.firebase ? "firebase" : "demo";
@@ -133,9 +137,12 @@ function seed() {
 // ------------------------------------------------------------------
 async function firebaseStore() {
   const V = "10.12.2";
-  const appM = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
-  const authM = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-auth.js`);
-  const fs = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
+  // 三個套件一起抓。以前是一個等一個，手機上文章清單會多等好幾秒。
+  const [appM, authM, fs] = await Promise.all([
+    import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`),
+    import(`https://www.gstatic.com/firebasejs/${V}/firebase-auth.js`),
+    import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`),
+  ]);
   const app = appM.initializeApp(CFG.firebase);
   const auth = authM.getAuth(app);
   auth.languageCode = "zh-TW";   // Firebase 寄的驗證信、重設密碼信用中文
@@ -186,12 +193,16 @@ async function firebaseStore() {
     async resetPassword(email) { try { await authM.sendPasswordResetEmail(auth, email.trim()); } catch (e) { throw err(e); } },
     async resendVerification() { if (auth.currentUser) await authM.sendEmailVerification(auth.currentUser); },
     async listPosts({ all = false } = {}) {
-      await readyP;
+      // 公開清單不等角色文件（roles／members）。只有後台 all 才要先確認是管理員。
+      if (all) await readyP;
       const col = fs.collection(db, "posts");
-      const q = all && user?.isAdmin ? col : fs.query(col, fs.where("status", "==", "published"));
+      const asAdmin = all && !!user?.isAdmin;
+      const q = asAdmin ? col : fs.query(col, fs.where("status", "==", "published"));
       const snap = await fs.getDocs(q), now = Date.now();
       const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      return sortPosts(all && user?.isAdmin ? list : list.filter(p => isLive(p, now)));
+      // 快取只留公開已上線的；管理員這次就算把草稿一起抓回來，也不會寫進公開快取。
+      const live = writePublicCache(list, now);
+      return asAdmin ? sortPosts(list) : live;
     },
     async getPost(id) {
       await readyP;
@@ -207,11 +218,21 @@ async function firebaseStore() {
         const batch = fs.writeBatch(db);
         batch.set(fs.doc(db, "posts", post.id), pick(post, META_KEYS));
         batch.set(fs.doc(db, "bodies", post.id), { body: post.body || "", visibility: post.visibility, status: post.status, publishedAt: post.publishedAt || 0 });
-        await batch.commit(); return post;
+        await batch.commit();
+        // 用整篇（含內文）更新公開快取也沒關係：writePublicCache 會拿掉 body，草稿也不會留下。
+        syncPublicCache(cached => [...cached.filter(p => p.id !== post.id), post]);
+        return post;
       } catch (e) { throw err(e); }
     },
-    async deletePost(id) { const b = fs.writeBatch(db); b.delete(fs.doc(db, "posts", id)); b.delete(fs.doc(db, "bodies", id)); await b.commit(); },
-    async reorder(ids) { const b = fs.writeBatch(db); ids.forEach((id, i) => b.update(fs.doc(db, "posts", id), { order: i })); await b.commit(); },
+    async deletePost(id) {
+      const b = fs.writeBatch(db); b.delete(fs.doc(db, "posts", id)); b.delete(fs.doc(db, "bodies", id)); await b.commit();
+      syncPublicCache(cached => cached.filter(p => p.id !== id));
+    },
+    async reorder(ids) {
+      const b = fs.writeBatch(db); ids.forEach((id, i) => b.update(fs.doc(db, "posts", id), { order: i })); await b.commit();
+      const rank = new Map(ids.map((id, i) => [id, i]));
+      syncPublicCache(cached => cached.map(p => rank.has(p.id) ? { ...p, order: rank.get(p.id) } : p));
+    },
     async listTemplates() { const s = await fs.getDocs(fs.collection(db, "templates")); return s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.updatedAt - a.updatedAt); },
     async saveTemplate(t) { const { id, ...rest } = t; await fs.setDoc(fs.doc(db, "templates", id), rest); return t; },
     async deleteTemplate(id) { await fs.deleteDoc(fs.doc(db, "templates", id)); },
@@ -236,7 +257,45 @@ async function firebaseStore() {
   };
 }
 
-export const store = MODE === "firebase" ? await firebaseStore() : demoStore();
+// 還沒有公開清單快取時不要用單篇去蓋（否則首頁會暫時只剩這一篇）。
+function syncPublicCache(mutator) {
+  const cached = readPublicCache();
+  if (!cached) return;
+  writePublicCache(mutator(cached));
+}
+
+// 不要用頂層 await：否則首頁整個模組（連同快取先畫）都要等 Firebase SDK 下載完。
+let _fbReal = null, _fbErr = null;
+const _fbBoot = MODE === "firebase"
+  ? firebaseStore().then(s => { _fbReal = s; }, e => { _fbErr = e; })
+  : null;
+async function fbReady() {
+  if (_fbBoot) await _fbBoot;
+  if (_fbErr) throw _fbErr;
+  return _fbReal;
+}
+const FB_METHODS = ["signUp", "signIn", "signOut", "resetPassword", "resendVerification", "getPost", "searchText", "savePost", "deletePost", "reorder", "listTemplates", "saveTemplate", "deleteTemplate", "exists", "getDoc", "setDoc", "deleteDoc", "listDocs", "getSettings", "saveSettings", "listMembers", "decideMember", "resetDemo", "listMedia", "getMediaData", "saveMedia", "deleteMedia"];
+function firebaseFacade() {
+  const call = name => async (...args) => (await fbReady())[name](...args);
+  const api = {
+    onAuth(fn) {
+      let off = () => {};
+      let alive = true;
+      _fbBoot && _fbBoot.then(() => { if (alive && _fbReal) off = _fbReal.onAuth(fn); });
+      return () => { alive = false; off(); };
+    },
+    current() { return _fbReal ? _fbReal.current() : null; },
+    // 首頁、文章頁、會員頁的公開清單：不走 SDK、也不等登入。REST 失敗才退回 SDK。
+    async listPosts(opts = {}) {
+      if (opts && opts.all) return (await fbReady()).listPosts(opts);
+      try { return writePublicCache(await fetchPublicPosts(CFG)); }
+      catch (e) { return (await fbReady()).listPosts({}); }
+    },
+  };
+  for (const name of FB_METHODS) api[name] = call(name);
+  return api;
+}
+export const store = MODE === "firebase" ? firebaseFacade() : demoStore();
 // 內建模板（從 Edward 既有文章歸納，放在 templates/builtin.json，不能刪）
 const _listT = store.listTemplates.bind(store);
 store.listTemplates = async () => {

@@ -2,7 +2,7 @@
 // 台股加權指數：用證交所官方公開資料自己畫（TradingView 免費版不提供台股）
 // 美股：TradingView 免費小圖（S&P 500、那斯達克、道瓊用追蹤指數的差價合約報價；費半用 SOXX ETF 代表）
 // Edward 2026-11-19：要數字跳動，但只能看不能點 → 每張卡蓋一層透明保護層（.mkt-body::after），點了不會跳去 TradingView
-import { esc } from "./ui.js?v=20261118165907";
+import { esc } from "./ui.js?v=20261120140209";
 
 const CARDS = [
   { key: "twii", name: "台股加權指數", note: "證交所官方資料" },
@@ -22,12 +22,12 @@ export function mountMarket(el) {
   el.innerHTML = `
     <div class="mkt-head">
       <b>市場行情</b>
-      <span class="seg mkt-range">${RANGES.map(r => `<button type="button" data-r="${r}">${r}</button>`).join("")}</span>
+      <span class="seg mkt-range">${RANGES.map(r => `<button type="button" data-r="${r}" class="${r === range ? "on" : ""}">${r}</button>`).join("")}</span>
     </div>
     <div class="mkt-wrap">
       <button type="button" class="mkt-arrow prev" aria-label="上一頁">‹</button>
       <div class="mkt-track" tabindex="0" aria-label="市場行情，可左右滑動">${CARDS.map(c => `
-        <div class="mkt-card" data-key="${esc(c.key)}"><div class="mkt-title"><span>${esc(c.name)}</span><small>${esc(c.note)}</small></div><div class="mkt-body"></div></div>`).join("")}
+        <div class="mkt-card" data-key="${esc(c.key)}"><div class="mkt-title"><span>${esc(c.name)}</span><small>${esc(c.note)}</small></div><div class="mkt-body"><div class="mkt-loading">載入中…</div></div></div>`).join("")}
       </div>
       <button type="button" class="mkt-arrow next" aria-label="下一頁">›</button>
     </div>
@@ -62,14 +62,19 @@ export function mountMarket(el) {
     });
     setTimeout(drawDots, 50);
   }
+  // 外框先出來。TradingView 跟證交所要等首頁呼叫 startCharts，避免跟文章清單搶手機流量。
+  let chartsOn = false;
+  function startCharts() { if (chartsOn) return; chartsOn = true; render(); }
   el.querySelector(".mkt-range").addEventListener("click", e => {
     const b = e.target.closest("[data-r]"); if (!b || b.dataset.r === range) return;
-    range = b.dataset.r; try { localStorage.setItem("eb-mkt-range", range); } catch (e) { } render();
+    range = b.dataset.r; try { localStorage.setItem("eb-mkt-range", range); } catch (err) { }
+    chartsOn = true; render();
   });
-  render();
-  addEventListener("eb-theme", render);   // 切換黑暗／日光模式時，美股小圖跟著換色
-  // 台股：開盤時間每分鐘更新一次
-  setInterval(() => { if (range === "1D" && !document.hidden) twii(el.querySelector('[data-key="twii"] .mkt-body'), "1D", true); }, 60000);
+  addEventListener("eb-theme", () => { if (chartsOn) render(); });   // 切換黑暗／日光模式時，美股小圖跟著換色
+  // 台股：開盤時間每分鐘更新一次（圖表還沒開始就先不要打證交所）
+  setInterval(() => { if (chartsOn && range === "1D" && !document.hidden) twii(el.querySelector('[data-key="twii"] .mkt-body'), "1D", true); }, 60000);
+  setTimeout(drawDots, 50);
+  return startCharts;
 }
 
 // ---------- 台股加權指數（證交所公開資料）----------

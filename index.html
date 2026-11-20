@@ -6,10 +6,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Edward 的 Blog｜投資理財・退休傳承・社會保險</title>
 <meta name="description" content="財務顧問 Edward 用白話整理投資理財、退休傳承與社會保險。">
+<link rel="preconnect" href="https://firestore.googleapis.com">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=20261119154816">
-<script src="config.js?v=20261119124000"></script>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"></noscript>
+<link rel="stylesheet" href="assets/style.css?v=20261120140209">
+<script src="config.js?v=20261120140209"></script>
 </head>
 <body>
 <main>
@@ -35,32 +37,41 @@
   </div>
 </main>
 <script type="module">
-import { store } from "./assets/store.js?v=20261118165907";
-import { header, footer, esc, fmtDate, fmtTime, toast } from "./assets/ui.js?v=20261118165907";
-import { mountMarket } from "./assets/market.js?v=20261119154816";
-import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261119140000";
-mountMarket(document.getElementById("mkt"));
-loadIndex().then(latestVisible).then(b => {
-  if (!b) return;
-  const el = document.getElementById("todayBrief");
-  el.href = "brief.html?d=" + b.date; el.hidden = false;
-  el.innerHTML = `<span class="tb-tag">📰 每日財經早報・${fmtDay(b.date)}</span>
-    <b>${esc(b.headline || "今天的財經重點")}</b>
-    <ol>${b.items.slice(0, 4).map(c => `<li>${esc(c.title)}</li>`).join("")}</ol>
-    <span class="tb-more">看完整早報（3 分鐘）→</span>`;
-});
+import { store, MODE } from "./assets/store.js?v=20261120140209";
+import { readPublicCache } from "./assets/postcache.js?v=20261120140209";
+import { header, footer, esc, fmtDate, fmtTime, toast } from "./assets/ui.js?v=20261120140209";
+import { mountMarket } from "./assets/market.js?v=20261120140209";
+import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261120140209";
+const startCharts = mountMarket(document.getElementById("mkt"));
+function showBrief() {
+  loadIndex().then(latestVisible).then(b => {
+    if (!b) return;
+    const el = document.getElementById("todayBrief");
+    el.href = "brief.html?d=" + b.date; el.hidden = false;
+    el.innerHTML = `<span class="tb-tag">📰 每日財經早報・${fmtDay(b.date)}</span>
+      <b>${esc(b.headline || "今天的財經重點")}</b>
+      <ol>${b.items.slice(0, 4).map(c => `<li>${esc(c.title)}</li>`).join("")}</ol>
+      <span class="tb-more">看完整早報（3 分鐘）→</span>`;
+  }).catch(() => { });
+}
 const CFG = window.BLOG_CONFIG;
 header("home"); footer();
 document.getElementById("siteName").textContent = CFG.siteName;
 document.getElementById("tagline").textContent = CFG.tagline;
 
 let posts = [], cat = "全部", texts = {};
+let loadGen = 0, paintedSig = null, sorting = false, isAdmin = false, sideStarted = false;
 const q = document.getElementById("q");
 q.value = new URLSearchParams(location.search).get("q") || "";
 
-async function load() {
-  posts = await store.listPosts();
-  await Promise.all(posts.map(async p => { texts[p.id] = (await store.searchText(p.id)) || ""; }));
+function listSig(list) {
+  return list.map(p => [p.id, p.order, p.pinned ? 1 : 0, p.updatedAt, p.publishedAt, p.title, p.summary, p.cover, p.category, p.visibility, p.status, ...(p.tags || [])].join("\u0001")).join("\u0002");
+}
+function paint(list) {
+  posts = list;
+  const next = listSig(list);
+  if (paintedSig !== null && next === paintedSig) return;
+  paintedSig = next;
   const cats = ["全部", ...new Set([...CFG.categories, ...posts.map(p => p.category)].filter(Boolean))].filter(c => c === "全部" || posts.some(p => p.category === c));
   // 排版：「全部」自己一列；其餘每列最多 4 個、平均分配（5→3+2、7→4+3、9→3+3+3）
   const rest = cats.filter(c => c !== "全部");
@@ -68,6 +79,35 @@ async function load() {
   const chip = c => `<button class="chip ${c === cat ? "on" : ""}" data-c="${esc(c)}">${esc(c)}</button>`;
   document.getElementById("filters").innerHTML = chip("全部") + (rest.length ? `<div class="chip-grid" style="--cols:${cols}">${rest.map(chip).join("")}</div>` : "");
   render();
+}
+function startSide() {
+  if (sideStarted) return;
+  sideStarted = true;
+  startCharts();
+  showBrief();
+}
+async function load() {
+  const my = ++loadGen;
+  // 回訪：先畫上次的公開清單。第一次來沒有快取，維持「載入中…」。
+  if (MODE === "firebase") {
+    const cached = readPublicCache();
+    if (cached && cached.length) paint(cached);
+  }
+  try {
+    const fresh = await store.listPosts();
+    if (my !== loadGen || sorting) return;
+    // 正式模式搜尋只用標題／摘要／分類／標籤（searchText 一律是空的），不必逐篇再等一次。
+    if (MODE !== "firebase") {
+      await Promise.all(fresh.map(async p => { texts[p.id] = (await store.searchText(p.id)) || ""; }));
+      if (my !== loadGen || sorting) return;
+    }
+    paint(fresh);
+  } catch (e) {
+    if (my !== loadGen || posts.length) return;
+    document.getElementById("grid").innerHTML = `<div class="empty">文章暫時載入不到，請稍後再試。</div>`;
+  } finally {
+    if (my === loadGen) startSide();
+  }
 }
 document.getElementById("filters").addEventListener("click", e => {
   const b = e.target.closest(".chip"); if (!b) return;
@@ -111,7 +151,6 @@ function sortInfo(p) {
     : `<li>🚀 上線：${fmtTime(pub)}</li>`;
   return `<ul class="sort-info"><li>✍️ 完成：${fmtTime(p.createdAt)}</li>${live}<li>🔄 上次更新：${fmtTime(p.updatedAt || p.createdAt)}</li></ul>`;
 }
-let sorting = false;
 const sortFab = document.getElementById("sortFab");
 const sortBtn = document.getElementById("sortInline");
 function setSort(on) {
@@ -121,7 +160,6 @@ function setSort(on) {
   if (on) { cat = "全部"; q.value = ""; document.querySelectorAll(".chip").forEach(x => x.classList.toggle("on", x.dataset.c === "全部")); }
   render();
 }
-let isAdmin = false;
 sortBtn.onclick = () => setSort(true);
 sortFab.onclick = () => { setSort(true); const t = document.getElementById("sortbar"); scrollTo({ top: t.getBoundingClientRect().top + scrollY - 90, behavior: "smooth" }); };
 document.getElementById("sortCancel").onclick = () => setSort(false);
@@ -150,7 +188,9 @@ gridEl.addEventListener("dragover", e => {
   const r = over.getBoundingClientRect(), after = (e.clientY - r.top) / r.height > .5 || (e.clientX - r.left) / r.width > .5 && Math.abs(e.clientY - (r.top + r.height / 2)) < r.height / 3;
   gridEl.insertBefore(dragCard, after ? over.nextSibling : over);
 });
-store.onAuth(u => { isAdmin = !!u?.isAdmin; sortBtn.hidden = !isAdmin || sorting; sortFab.hidden = !isAdmin || sorting; load(); });
+// 文章清單自己載，不要等登入。onAuth 若連發兩次，也不要再把清單抓一遍。
+load();
+store.onAuth(u => { isAdmin = !!u?.isAdmin; sortBtn.hidden = !isAdmin || sorting; sortFab.hidden = !isAdmin || sorting; });
 </script>
 </body>
 </html>
