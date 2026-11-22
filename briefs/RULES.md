@@ -28,6 +28,11 @@
 
 取出 `fields.direction.stringValue`。有內容就照著調整選題方向；讀不到就當作沒有建議。
 
+### 1-1. Edward 指定要加的題材（2026-11-23 新增）
+- 如果 `briefs/requests/DATE.json` 存在：把裡面的 `candidates` **原封不動**加進今天的候選（id 接在後面編號），`recommend` 照檔案、`true` 的要放進 `picks`。這些數字已在本機向官方原始資料查證過，**不受「24 小時內」限制，也不要改數字**。
+- 檔案裡有 `knowledgeSuggestion`，而且最近 30 天沒用過這個名詞，就用它當今天的 `knowledge`。
+- 這一則不算進 6～10 則的上限。
+
 ### 2. 讀收盤數字
 雲端排程的網路連不到 Yahoo，所以收盤數字由 GitHub Actions 先抓好（台灣 07:37、08:17、08:47、09:23、10:53 各排一次；早報推上來後也會自動重抓一次，並把最新收盤補進今天的早報，所以就算這裡讀到舊數字也會被修正），存在 `briefs/market/latest.json`。這一步只要讀這個檔，**不要自己再去抓**。
 - 把 `items` 放進 `market`，每一筆加上 `asOf`，格式是「台股 MM/DD、美股 MM/DD」，日期取各自的 `date`。
