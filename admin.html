@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"></noscript>
-<link rel="stylesheet" href="assets/style.css?v=20261123114954">
-<script src="config.js?v=20261123114954"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261123171454">
+<script src="config.js?v=20261123171454"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/turndown/7.1.2/turndown.min.js"></script>
@@ -39,6 +39,12 @@
         <h2 style="font-size:16px;margin:12px 0 6px">深色風格（讀者手機是深色時）</h2>
         <div id="darks" class="palettes"></div>
         <p class="stamp" style="margin:6px 0 0"><a href="darkthemes.html" target="_blank">深色並排比較</a></p>
+      </div>
+      <div id="redateBox" hidden style="border-top:1px solid var(--ln);margin-top:12px;padding-top:10px">
+        <h2 style="font-size:16px;margin:0 0 4px">📅 文章日期重排（9 月初到現在）</h2>
+        <p class="stamp" style="margin:0 0 6px" id="redateInfo"></p>
+        <details style="margin:0 0 8px"><summary class="stamp" style="cursor:pointer">先看新日期清單</summary><ol id="redateList" style="margin:6px 0 0;padding-left:20px;font-size:14px;line-height:1.6"></ol></details>
+        <button class="btn gold sm" id="redateBtn">套用新日期</button>
       </div>
       <div id="optBox" hidden style="border-top:1px solid var(--ln);margin-top:12px;padding-top:10px">
         <h2 style="font-size:16px;margin:0 0 4px">✨ 優化版待你審核</h2>
@@ -237,10 +243,10 @@
 </template>
 
 <script type="module">
-import { store, MODE, newId, isLive } from "./assets/store.js?v=20261123114954";
-import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261123114954";
-import { tidyLines } from "./assets/tidy.js?v=20261123114954";
-import { initMedia } from "./assets/media.js?v=20261123114954";
+import { store, MODE, newId, isLive } from "./assets/store.js?v=20261123171454";
+import { header, footer, esc, fmtTime, md, toast, PALETTES, applyPalette, DARKS, applyDark, hydrateMedia, ytId, rememberMedia } from "./assets/ui.js?v=20261123171454";
+import { tidyLines } from "./assets/tidy.js?v=20261123171454";
+import { initMedia } from "./assets/media.js?v=20261123171454";
 const CFG = window.BLOG_CONFIG;
 header("admin"); footer();
 const root = document.getElementById("root");
@@ -797,6 +803,43 @@ ${currentMd()}`, "已複製給 AI 審閱 ✓（貼給 ChatGPT／Gemini／Claude 
   };
 
   // ---------- 從 Notion 匯入 ----------
+  // ---------- 文章日期重排（2026-11-23，import/redate.json）----------
+  let redate = null;
+  async function checkRedate() {
+    try { redate = await (await fetch("import/redate.json", { cache: "no-store" })).json(); } catch (e) { return; }
+    const byId = new Map(posts.map(p => [p.id, p]));
+    const need = redate.items.filter(it => byId.has(it.id) && byId.get(it.id).publishedAt !== it.ms).length
+      + redate.hide.filter(h => byId.get(h.id)?.status === "published").length;
+    $("redateBox").hidden = !need;
+    if (!need) return;
+    $("redateInfo").textContent = `${redate.items.length} 篇改成 9/1～11/23 發布（越後面越密集），首頁順序跟著日期排，置頂文不動；${redate.hide.length} 篇 2025 年時事文改成草稿（不刪除）；已預定的 11/24、11/27 兩篇不動。`;
+    $("redateList").innerHTML = redate.items.map(it => `<li>${esc(it.at.slice(5))}（${it.wd}）${esc(byId.get(it.id)?.title || it.id)}</li>`).join("")
+      + redate.hide.map(h => `<li style="list-style:none;margin-left:-20px">📝 改草稿：${esc(byId.get(h.id)?.title || h.id)}（${esc(h.why)}）</li>`).join("");
+  }
+  $("redateBtn").onclick = async () => {
+    if (!redate || !confirm("套用新的發布日期？文章內容不會變，只改日期、順序，2 篇舊時事文改成草稿。")) return;
+    $("redateBtn").disabled = true; let n = 0; const total = redate.items.length + redate.hide.length;
+    try {
+      for (const it of redate.items) {
+        const p = await store.getPost(it.id); if (!p) { n++; continue; }
+        delete p.locked;
+        await store.savePost({ ...p, publishedAt: it.ms, createdAt: it.ms });
+        $("redateInfo").textContent = `套用中… ${++n} / ${total}`;
+      }
+      for (const h of redate.hide) {
+        const p = await store.getPost(h.id); if (!p) { n++; continue; }
+        delete p.locked;
+        await store.savePost({ ...p, status: "draft" });
+        $("redateInfo").textContent = `套用中… ${++n} / ${total}`;
+      }
+      await refresh();
+      const ids = [...posts].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || (b.publishedAt || 0) - (a.publishedAt || 0)).map(p => p.id);
+      await saveOrder(ids);
+      toast("新日期已套用 ✓");
+    } catch (e) { toast(`第 ${n + 1} 篇失敗：${e.message}`, true); }
+    $("redateBtn").disabled = false; await refresh(); checkRedate();
+  };
+
   let importList = [];
   async function checkImport() {
     try { importList = await (await fetch("import/notion-posts.json", { cache: "no-store" })).json(); } catch (e) { return; }
@@ -817,7 +860,7 @@ ${currentMd()}`, "已複製給 AI 審閱 ✓（貼給 ChatGPT／Gemini／Claude 
 
   refresh().then(async () => {
     const q = new URLSearchParams(location.search);
-    open(q.get("id")); checkImport(); await checkOpt(); checkTidy();
+    open(q.get("id")); checkImport(); checkRedate(); await checkOpt(); checkTidy();
     // 網址帶 ?opt=文章ID：直接打開那篇的「原文 vs 優化版」對照
     const want = q.get("opt");
     if (want) { const b = document.querySelector(`[data-opt="${CSS.escape(want)}"]`); if (b) b.click(); else toast("這篇已經套用過優化版了 ✓"); }
