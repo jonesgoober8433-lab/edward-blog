@@ -8,33 +8,112 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"></noscript>
-<link rel="stylesheet" href="assets/style.css?v=20261123171454">
-<script src="config.js?v=20261123171454"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com">
+<link rel="stylesheet" href="assets/style.css?v=20261123105241">
+<script src="config.js?v=20261123105241"></script>
+<script defer src="assets/vendor/marked.min.js?v=20261123105241"></script>
+<script defer src="assets/vendor/purify.min.js?v=20261123105241"></script>
 </head>
 <body>
 <main><article class="wrap narrow article" id="art"><div class="empty">載入中…</div></article></main>
+<script>window.__ebDeferFirebase = true;</script>
 <script type="module">
-import { store, isLive } from "./assets/store.js?v=20261123171454";
-import { header, footer } from "./assets/ui.js?v=20261123171454";
-import { renderArticle } from "./assets/article.js?v=20261123171454";
+import { store, isLive } from "./assets/store.js?v=20261123105241";
+import { header, footer } from "./assets/ui.js?v=20261123105241";
+import { renderArticle } from "./assets/article.js?v=20261123105241";
 const CFG = window.BLOG_CONFIG;
-header("home"); footer();
 const id = new URLSearchParams(location.search).get("id");
 const art = document.getElementById("art");
+// 先把公開文章的請求送出去，再啟動 Firebase（登入鈕可以晚一點）。
+const postP = id ? store.getPublicPost(id) : Promise.resolve(null);
+const listP = store.listPosts().catch(() => []);
+header("home"); footer();
+let firebaseKicked = false;
+function kickAuth() { if (!firebaseKicked) { firebaseKicked = true; store.startFirebase(); } }
 
-async function render(user) {
-  const [p, list] = await Promise.all([id && store.getPost(id), store.listPosts().catch(() => [])]);
+let list = [], painted = undefined, authUser, fastState = "wait", epoch = 0, paintKey = "";
+const loginNext = location.pathname.split("/").pop() + location.search;
+function sameUser(a, b) {
+  if (a === undefined || b === undefined) return false;
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  return a.uid === b.uid && !!a.isAdmin === !!b.isAdmin && !!a.approved === !!b.approved && a.status === b.status;
+}
+function markdownReady() {
+  if (window.marked && window.DOMPurify) return Promise.resolve();
+  return new Promise(resolve => {
+    const t0 = Date.now();
+    const t = setInterval(() => {
+      if ((window.marked && window.DOMPurify) || Date.now() - t0 > 8000) { clearInterval(t); resolve(); }
+    }, 16);
+  });
+}
+function paint(p, user) {
+  painted = p;
+  const live = list.filter(x => isLive(x));
+  const i = p ? live.findIndex(x => x.id === p.id) : -1;
+  const next = p && live.length > 1 ? live[(i + 1) % live.length] : null;
+  const nextId = next && next.id !== p.id ? next.id : "";
+  const userKey = user ? [user.uid, user.isAdmin ? 1 : 0, user.approved ? 1 : 0, user.status || ""].join("|") : "";
+  const key = (p ? [p.id, p.updatedAt || 0, p.locked ? 1 : 0, p.body ? p.body.length : 0, p.status, p.visibility].join("|") : "none") + "#" + userKey + "#" + nextId;
+  if (key === paintKey) return;
+  paintKey = key;
   if (!p) { art.innerHTML = `<div class="empty">找不到這篇文章，可能已下架。<br><a href="index.html">回文章列表</a></div>`; return; }
   document.title = `${p.title}｜${CFG.siteName}`;
-  // 下一篇＝首頁排序中的下一篇；最後一篇就接回第一篇
-  const live = list.filter(x => isLive(x));
-  const i = live.findIndex(x => x.id === p.id);
-  const next = live.length > 1 ? live[(i + 1) % live.length] : null;
-  renderArticle(art, p, { CFG, next: next && next.id !== p.id ? next : null, loginNext: location.pathname.split("/").pop() + location.search, user });
+  renderArticle(art, p, { CFG, next: nextId ? next : null, loginNext, user: user || null });
 }
-store.onAuth(u => render(u));
+function needsPrivate(u, post) {
+  return !!(u && (u.isAdmin || u.approved) && (!post || post.locked));
+}
+async function refetch(u) {
+  const my = ++epoch;
+  try {
+    const p = await store.getPost(id);
+    if (my !== epoch) return;
+    await markdownReady();
+    if (my !== epoch) return;
+    fastState = p ? "hit" : "miss";
+    paint(p, u);
+  } catch (e) {
+    if (my === epoch) paint(null, u);
+  }
+}
+function onUser(u) {
+  if (sameUser(authUser, u)) return;
+  authUser = u;
+  if (!id) { paint(null, u); return; }
+  if (fastState === "wait") return;
+  if (needsPrivate(u, fastState === "hit" ? painted : null)) { refetch(u); return; }
+  if (fastState === "hit") paint(painted, u);
+  else paint(null, u);
+}
+store.onAuth(u => onUser(u));
+async function loadFast() {
+  const my = ++epoch;
+  let p = null;
+  try {
+    const [post, posts] = await Promise.all([postP, listP]);
+    if (my !== epoch) return;
+    list = posts || [];
+    p = post;
+    fastState = p ? "hit" : "miss";
+  } catch (e) {
+    if (my !== epoch) return;
+    fastState = "error";
+  }
+  kickAuth();
+  if (fastState === "error") { refetch(authUser || null); return; }
+  if (fastState === "hit") {
+    await markdownReady();
+    if (my !== epoch) return;
+    paint(p, authUser || null);
+    if (authUser && needsPrivate(authUser, p)) refetch(authUser);
+    return;
+  }
+  if (authUser && needsPrivate(authUser, null)) { refetch(authUser); return; }
+  if (authUser !== undefined) { await markdownReady(); if (my === epoch) paint(null, authUser); }
+}
+loadFast();
 </script>
 </body>
 </html>

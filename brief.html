@@ -9,8 +9,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"></noscript>
-<link rel="stylesheet" href="assets/style.css?v=20261123171454">
-<script src="config.js?v=20261123171454"></script>
+<link rel="preconnect" href="https://firestore.googleapis.com">
+<link rel="stylesheet" href="assets/style.css?v=20261123105241">
+<script src="config.js?v=20261123105241"></script>
 </head>
 <body>
 <main><div class="wrap narrow article">
@@ -18,29 +19,38 @@
   <div id="bf"><div class="empty">載入中…</div></div>
   <div class="bf-pager"><a id="prev" class="btn ghost sm" hidden>‹ 前一天</a><a id="next" class="btn ghost sm" hidden>後一天 ›</a></div>
 </div></main>
+<script>window.__ebDeferFirebase = true;</script>
 <script type="module">
-import { store } from "./assets/store.js?v=20261123171454";
-import { header, footer, toast } from "./assets/ui.js?v=20261123171454";
-import { loadIndex, loadRaw, merge, visible, renderBrief, fmtDay } from "./assets/brief.js?v=20261123171454";
-header("brief"); footer();
+import { store } from "./assets/store.js?v=20261123105241";
+import { header, footer, toast } from "./assets/ui.js?v=20261123105241";
+import { loadIndex, loadBriefRows, merge, renderBrief, fmtDay } from "./assets/brief.js?v=20261123105241";
 const el = document.getElementById("bf");
-store.onAuth(async u => {
-  const all = (await loadIndex()).sort().reverse();
+header("brief"); footer();
+let rows = null, authUser, paintKey = "";
+function sameUser(a, b) {
+  if (!a && !b) return true;
+  if (!a || !b) return false;
+  return a.uid === b.uid && !!a.isAdmin === !!b.isAdmin;
+}
+function paint(u) {
+  if (!rows) return;
   const want = new URLSearchParams(location.search).get("d");
-  // 只列出讀者看得到的日子（管理員可以看全部，草稿會標示）
+  // 讀者只看已上線的日子；管理員晚一點補上草稿
   const shown = [];
-  for (const d of all) {
-    const [raw, ov] = await Promise.all([loadRaw(d), store.getDoc("briefs", d)]);
-    const ok = visible(raw, ov);
-    if (ok || u?.isAdmin) shown.push({ d, raw, ov, ok });
+  for (const row of rows) {
+    if (row.ok || u?.isAdmin) shown.push(row);
     if (shown.length >= 400) break;
   }
+  const key = shown.map(x => x.d + (x.ok ? "1" : "0")).join(",") + "|" + (u?.isAdmin ? "a" : "");
+  if (key === paintKey) return;
+  paintKey = key;
   if (!shown.length) { el.innerHTML = `<div class="empty">早報準備中，每天早上 10 點見！</div>`; return; }
   const cur = shown.find(x => x.d === want) || shown[0];
   document.getElementById("pick").innerHTML = shown.map(x => `<option value="${x.d}" ${x === cur ? "selected" : ""}>${fmtDay(x.d)}${x.ok ? "" : "（草稿，只有你看得到）"}</option>`).join("");
   document.getElementById("pick").onchange = e => location.search = "?d=" + e.target.value;
   const i = shown.indexOf(cur);
   const prev = document.getElementById("prev"), next = document.getElementById("next");
+  prev.hidden = true; next.hidden = true;
   if (shown[i + 1]) { prev.hidden = false; prev.href = "?d=" + shown[i + 1].d; }
   if (shown[i - 1]) { next.hidden = false; next.href = "?d=" + shown[i - 1].d; }
   const b = merge(cur.raw, cur.ov);
@@ -64,7 +74,22 @@ store.onAuth(async u => {
       catch (e) { toast("存檔失敗：" + e.message, true); btn.disabled = false; btn.textContent = "⏰ 存檔並 10:00 發布"; }
     };
   }
+}
+store.onAuth(u => {
+  if (authUser !== undefined && sameUser(authUser, u)) return;
+  authUser = u;
+  if (u?.isAdmin) paint(u);
 });
+async function loadBriefs() {
+  try {
+    const all = (await loadIndex()).sort().reverse();
+    rows = await loadBriefRows(all);
+    paint(authUser?.isAdmin ? authUser : null);
+  } finally {
+    store.startFirebase();
+  }
+}
+loadBriefs();
 </script>
 </body>
 </html>

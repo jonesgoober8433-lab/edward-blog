@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=20261123171454";
+import { store, MODE } from "./store.js?v=20261123105241";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -24,7 +24,10 @@ export function applyDark(d, remember = true) {
   if (!preview) document.documentElement.dataset.dark = d;
   if (remember) try { localStorage.setItem("eb-site-dark", d); } catch (e) { }
 }
-store.getSettings().then(s => { applyPalette(s.palette); applyDark(s.dark); }).catch(() => { });
+const applyRemoteSettings = () => store.getSettings().then(s => { applyPalette(s.palette); applyDark(s.dark); }).catch(() => { });
+// 文章頁、早報頁會先把頻寬留給公開內容，配色等 Firebase 啟動再補（config.js?v=20261123105241 已套過本機配色）
+if (window.__ebDeferFirebase && store.afterFirebase) store.afterFirebase(applyRemoteSettings);
+else applyRemoteSettings();
 export const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
 
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -59,6 +62,13 @@ export function md(text, { embed = true } = {}) {
   });
   // 文章內文裡連結文字含「預約諮詢」的，一律發亮
   html = html.replace(/<a ([^>]*)>([^<]*預約諮詢[^<]*)<\/a>/g, (m, at, t) => `<a ${at} class="book-link">${t}</a>`);
+  // 文章圖片晚一點再抓、解碼不擋主執行緒。寬高不硬填：版面用 max-height，填了數字會把比例擠歪。
+  html = html.replace(/<img\b([^>]*?)\/?>/g, (m, attrs) => {
+    attrs = attrs.replace(/\s*\/\s*$/, "");
+    if (!/\bloading=/.test(attrs)) attrs += ' loading="lazy"';
+    if (!/\bdecoding=/.test(attrs)) attrs += ' decoding="async"';
+    return `<img${attrs}>`;
+  });
   return html;
 }
 export function ytId(u) {
