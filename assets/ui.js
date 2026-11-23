@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=20261120140209";
+import { store, MODE } from "./store.js?v=20261123114954";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -57,6 +57,8 @@ export function md(text, { embed = true } = {}) {
     }
     return m;
   });
+  // 文章內文裡連結文字含「預約諮詢」的，一律發亮
+  html = html.replace(/<a ([^>]*)>([^<]*預約諮詢[^<]*)<\/a>/g, (m, at, t) => `<a ${at} class="book-link">${t}</a>`);
   return html;
 }
 export function ytId(u) {
@@ -106,7 +108,8 @@ export function header(active = "") {
     const account = !authReady ? ""
       : u ? `<span class="who" title="${esc(u.email)}">${esc(u.name)}</span><button class="btn ghost sm" id="logout">登出</button>`
       : (MODE === "demo" && !LOCAL ? "" : `<a class="btn sm" href="login.html">登入</a>`);
-    el.querySelector("#hdrTools").innerHTML = themeBtn() + account;
+    const book = CFG.bookingUrl ? `<a class="btn gold sm book-glow" href="${esc(CFG.bookingUrl)}">預約諮詢</a>` : "";
+    el.querySelector("#hdrTools").innerHTML = book + themeBtn() + account;
     el.querySelector("#themeBtn").onclick = toggleTheme;
     el.querySelector("#logout")?.addEventListener("click", async () => { await store.signOut(); location.href = "index.html"; });
   };

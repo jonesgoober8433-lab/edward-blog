@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"></noscript>
-<link rel="stylesheet" href="assets/style.css?v=20261120140209">
-<script src="config.js?v=20261120140209"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261123114954">
+<script src="config.js?v=20261123114954"></script>
 </head>
 <body>
 <main><div class="wrap narrow article">
@@ -19,9 +19,9 @@
   <div class="bf-pager"><a id="prev" class="btn ghost sm" hidden>‹ 前一天</a><a id="next" class="btn ghost sm" hidden>後一天 ›</a></div>
 </div></main>
 <script type="module">
-import { store } from "./assets/store.js?v=20261120140209";
-import { header, footer, toast } from "./assets/ui.js?v=20261120140209";
-import { loadIndex, loadRaw, merge, visible, renderBrief, fmtDay } from "./assets/brief.js?v=20261120140209";
+import { store } from "./assets/store.js?v=20261123114954";
+import { header, footer, toast } from "./assets/ui.js?v=20261123114954";
+import { loadIndex, loadRaw, merge, visible, renderBrief, fmtDay } from "./assets/brief.js?v=20261123114954";
 header("brief"); footer();
 const el = document.getElementById("bf");
 store.onAuth(async u => {
