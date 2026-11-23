@@ -1,5 +1,5 @@
 // 文章頁畫面（正式文章頁 post.html 與後台裝置預覽 preview.html 共用）
-import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js?v=20261123171454";
+import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js?v=20261123105241";
 
 const ICON_TOC = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 6h2M4 12h2M4 18h2M9 6h11M9 12h11M9 18h11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>`;
 const ICON_ARROW = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
@@ -24,7 +24,7 @@ export function renderArticle(art, p, { CFG, next = null, loginNext = "", user =
       <span title="${fmtTime(p.updatedAt)}">最後更新：${fmtDate(p.updatedAt || Date.now())}</span>
       ${p.body ? `<span>約 ${readMins(p.body)} 分鐘讀完</span>` : ""}
     </div>
-    ${p.cover && !(p.body || "").includes(p.cover) ? `<img src="${esc(p.cover)}" alt="" style="width:100%;border-radius:14px;margin-bottom:20px">` : ""}
+    ${p.cover && !(p.body || "").includes(p.cover) ? `<img src="${esc(p.cover)}" alt="" loading="lazy" decoding="async" style="width:100%;border-radius:14px;margin-bottom:20px">` : ""}
     ${p.locked
       ? `<p class="prose">${esc(p.summary || "")}</p>
          <div class="paywall">${user && !user.approved

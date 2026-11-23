@@ -138,4 +138,98 @@ export async function fetchPublicPosts(cfg = (typeof window !== "undefined" && w
   return publicPostsFrom(list);
 }
 
+// 單篇公開文章、早報覆寫：同樣不帶登入、不寫進 localStorage。
+// 會員內文就算回應裡帶了也不採用（規則本來就會擋，這裡再擋一次）。
+async function fetchDoc(collection, id, cfg = (typeof window !== "undefined" && window.BLOG_CONFIG) || {}) {
+  if (collection !== "posts" && collection !== "bodies" && collection !== "briefs") throw new Error("這個集合不走公開路徑");
+  if (collection === "briefs") { if (!/^\d{4}-\d{2}-\d{2}$/.test(id)) return null; }
+  else if (!okId(id)) return null;
+  const fb = cfg.firebase;
+  if (!fb?.projectId || !fb?.apiKey) throw new Error("沒有 Firebase 設定");
+  const url = `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(fb.projectId)}/databases/(default)/documents/${collection}/${encodeURIComponent(id)}?key=${encodeURIComponent(fb.apiKey)}`;
+  const res = await fetch(url, {
+    method: "GET",
+    cache: "no-store",
+    credentials: "omit",
+    signal: typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined,
+  });
+  if (res.status === 404 || res.status === 403) return null;
+  if (!res.ok) throw new Error("讀取失敗");
+  const doc = await res.json();
+  const fields = {};
+  for (const [k, v] of Object.entries(doc.fields || {})) fields[k] = fsValue(v);
+  delete fields.body; // 預設拿掉；公開文章由 fetchPublicPost 在確認過後才放回
+  if (collection === "bodies") fields.__body = typeof (doc.fields?.body && fsValue(doc.fields.body)) === "string" ? fsValue(doc.fields.body) : "";
+  return fields;
+}
+
+export async function fetchPublicPost(id, cfg) {
+  if (!okId(id)) return null;
+  // 先看標題文件。會員文、草稿就不去讀內文，避免多一次被拒絕的請求。
+  const meta = await fetchDoc("posts", id, cfg);
+  if (!meta || !isPublicLive(meta)) return null;
+  const post = {
+    id,
+    title: typeof meta.title === "string" ? meta.title : "",
+    summary: typeof meta.summary === "string" ? meta.summary : "",
+    cover: typeof meta.cover === "string" ? meta.cover : "",
+    category: typeof meta.category === "string" ? meta.category : "",
+    tags: Array.isArray(meta.tags) ? meta.tags.filter(t => typeof t === "string") : [],
+    visibility: meta.visibility === "members" ? "members" : "public",
+    status: "published",
+    pinned: meta.pinned === true,
+  };
+  for (const k of ["createdAt", "updatedAt", "publishedAt"]) {
+    const n = num(meta[k]);
+    if (n !== undefined) post[k] = n;
+  }
+  // 會員文章只回標題卡片。內文欄位保持 null，呼叫端畫上鎖畫面。
+  if (post.visibility === "members") return { ...post, body: null, locked: true };
+  const bodyDoc = await fetchDoc("bodies", id, cfg);
+  if (bodyDoc && bodyDoc.visibility === "members") return { ...post, visibility: "members", body: null, locked: true };
+  if (!bodyDoc || bodyDoc.visibility !== "public" || !isPublicLive({ status: bodyDoc.status, publishedAt: bodyDoc.publishedAt })) {
+    return { ...post, body: "", locked: false };
+  }
+  return { ...post, body: bodyDoc.__body || "", locked: false };
+}
+
+// 早報的勾選／微調大家都能讀（規則 allow read）。沒有這天的文件回 null，不當成錯誤。
+export async function fetchPublicBrief(date, cfg) {
+  const all = await fetchPublicBriefs([date], cfg);
+  return all[0] || null;
+}
+
+// 一次把多天的覆寫讀回來。用 batchGet，缺的日子是 missing 而不是 404，主控台不會噴錯誤。
+export async function fetchPublicBriefs(dates, cfg = (typeof window !== "undefined" && window.BLOG_CONFIG) || {}) {
+  const days = [...new Set((dates || []).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d)))];
+  if (!days.length) return (dates || []).map(() => null);
+  const fb = cfg.firebase;
+  if (!fb?.projectId || !fb?.apiKey) throw new Error("沒有 Firebase 設定");
+  const names = days.map(d => `projects/${fb.projectId}/databases/(default)/documents/briefs/${d}`);
+  const url = `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(fb.projectId)}/databases/(default)/documents:batchGet?key=${encodeURIComponent(fb.apiKey)}`;
+  const res = await fetch(url, {
+    method: "POST",
+    cache: "no-store",
+    credentials: "omit",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ documents: names }),
+    signal: typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined,
+  });
+  if (!res.ok) throw new Error("早報讀取失敗");
+  const rows = await res.json();
+  if (!Array.isArray(rows)) throw new Error("早報讀取失敗");
+  const byId = new Map();
+  for (const item of rows) {
+    const found = item && item.found;
+    if (!found) continue;
+    const fields = {};
+    for (const [k, v] of Object.entries(found.fields || {})) {
+      if (k === "body") continue;
+      fields[k] = fsValue(v);
+    }
+    byId.set(docId(found.name), fields);
+  }
+  return (dates || []).map(d => byId.get(d) || null);
+}
+
 export { KEY as PUBLIC_CACHE_KEY };

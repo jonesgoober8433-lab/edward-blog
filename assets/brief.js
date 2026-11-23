@@ -1,6 +1,7 @@
 // 每日財經早報（給客戶看）：資料＝雲端排程產生的 briefs/data/日期.json ＋ Edward 在後台的勾選與微調（Firestore briefs/日期）
-import { store } from "./store.js?v=20261123171454";
-import { esc } from "./ui.js?v=20261123171454";
+import { store, MODE } from "./store.js?v=20261123105241";
+import { fetchPublicBriefs } from "./postcache.js?v=20261123105241";
+import { esc } from "./ui.js?v=20261123105241";
 
 const CFG = window.BLOG_CONFIG || {};
 export const CAT_STYLE = {
@@ -35,9 +36,22 @@ export function visible(raw, ov, now = new Date()) {
   const at = Date.parse(`${raw.date}T${CFG.briefPublishTime || "10:00"}:00+08:00`);   // 以台灣時間為準
   return now.getTime() >= at;
 }
+// 早報覆寫大家都能讀，不必等登入。正式模式一次把這幾天讀回來；失敗才退回 SDK。
+async function overridesFor(dates) {
+  if (MODE !== "firebase") return Promise.all(dates.map(d => store.getDoc("briefs", d)));
+  try { return await fetchPublicBriefs(dates); }
+  catch (e) { return Promise.all(dates.map(d => store.getDoc("briefs", d))); }
+}
+export async function loadBriefRows(dates) {
+  const days = [...dates];
+  const [raws, ovs] = await Promise.all([Promise.all(days.map(loadRaw)), overridesFor(days)]);
+  return days.map((d, i) => ({ d, raw: raws[i], ov: ovs[i], ok: visible(raws[i], ovs[i]) }));
+}
 export async function latestVisible(dates) {
-  for (const d of [...dates].sort().reverse().slice(0, 10)) {
-    const [raw, ov] = await Promise.all([loadRaw(d), store.getDoc("briefs", d)]);
+  const days = [...dates].sort().reverse().slice(0, 10);
+  // 首頁卡片只要最新的一份。通常第一天就上線了，不必把舊早報全部抓下來。
+  for (const d of days) {
+    const [raw, ov] = await Promise.all([loadRaw(d), overridesFor([d]).then(a => a[0])]);
     if (visible(raw, ov)) return merge(raw, ov);
   }
   return null;

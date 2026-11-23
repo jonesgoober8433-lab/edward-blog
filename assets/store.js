@@ -5,7 +5,7 @@
 // 正式模式另外把「公開已上線清單」寫進 eb-public-posts-v1（見 postcache.js）。
 // 草稿、排程、文章內文不會進那個快取，避免共用裝置把管理員畫面漏給下一個人。
 
-import { fetchPublicPosts, readPublicCache, writePublicCache } from "./postcache.js?v=20261123171454";
+import { fetchPublicPosts, fetchPublicPost, readPublicCache, writePublicCache } from "./postcache.js?v=20261123105241";
 
 const CFG = window.BLOG_CONFIG || {};
 export const MODE = CFG.firebase ? "firebase" : "demo";
@@ -48,6 +48,9 @@ function demoStore() {
 
   return {
     onAuth(fn) { listeners.add(fn); setTimeout(() => fn(me()), 0); return () => listeners.delete(fn); },
+    startFirebase() {},
+    afterFirebase(fn) { fn(); },
+    async getPublicPost(id) { return this.getPost(id); },
     current: me,
     async signUp(email, password, name) {
       email = email.trim().toLowerCase();
@@ -165,7 +168,24 @@ async function firebaseStore() {
     const status = isAdmin ? "approved" : (m?.status || "pending");
     return { uid: u.uid, email: u.email, name: m?.name || u.displayName || (u.email || "").split("@")[0], isAdmin, status, approved: isAdmin || status === "approved", emailVerified: isAdmin || !!u.emailVerified };
   }
-  authM.onAuthStateChanged(auth, async u => { user = await toUser(u); ready(); listeners.forEach(fn => fn(user)); });
+  // 登入狀態確定後只通知一次。以前 ready() 跟 forEach 各叫一次，文章頁會把同一篇抓兩遍。
+  let authGen = 0, authSettled = false, lastAuthKey;
+  const authKey = u => u ? [u.uid, u.isAdmin ? 1 : 0, u.approved ? 1 : 0, u.status || "", u.emailVerified ? 1 : 0].join("|") : "";
+  function emitAuth() {
+    const key = authKey(user);
+    if (authSettled && key === lastAuthKey) return;
+    authSettled = true;
+    lastAuthKey = key;
+    listeners.forEach(fn => fn(user));
+  }
+  authM.onAuthStateChanged(auth, async raw => {
+    const my = ++authGen;
+    const next = await toUser(raw);
+    if (my !== authGen) return;
+    user = next;
+    ready();
+    emitAuth();
+  });
 
   const err = e => {
     const m = { "auth/invalid-credential": "Email 或密碼不對", "auth/wrong-password": "Email 或密碼不對", "auth/user-not-found": "Email 或密碼不對", "auth/email-already-in-use": "這個 Email 已經註冊過了", "auth/weak-password": "密碼至少 6 個字", "auth/invalid-email": "Email 格式不對", "auth/too-many-requests": "嘗試太多次，請稍後再試", "permission-denied": "沒有權限" };
@@ -173,7 +193,11 @@ async function firebaseStore() {
   };
 
   return {
-    onAuth(fn) { listeners.add(fn); readyP.then(() => fn(user)); return () => listeners.delete(fn); },
+    onAuth(fn) {
+      listeners.add(fn);
+      if (authSettled) fn(user); // 已經知道是誰才立刻回；否則等上面那一次 emitAuth
+      return () => listeners.delete(fn);
+    },
     current: () => user,
     async signUp(email, password, name) {
       try {
@@ -183,7 +207,7 @@ async function firebaseStore() {
         await fs.setDoc(fs.doc(db, "members", c.user.uid), { email: c.user.email, name: name || "", requestedAt: Date.now(), status: "pending", approved: false, emailVerified: false });
         // 寄「驗證 Email」信：確認信箱是真的、而且是他本人的
         try { await authM.sendEmailVerification(c.user, { url: location.origin + location.pathname.replace(/[^/]*$/, "") + "member.html" }); } catch (e) { }
-        user = await toUser(c.user); listeners.forEach(fn => fn(user)); return user;
+        user = await toUser(c.user); emitAuth(); return user;
       } catch (e) { throw err(e); }
     },
     async signIn(email, password) {
@@ -265,26 +289,52 @@ function syncPublicCache(mutator) {
 }
 
 // 不要用頂層 await：否則首頁整個模組（連同快取先畫）都要等 Firebase SDK 下載完。
-let _fbReal = null, _fbErr = null;
-const _fbBoot = MODE === "firebase"
-  ? firebaseStore().then(s => { _fbReal = s; }, e => { _fbErr = e; })
-  : null;
+// 文章頁、早報頁會設 __ebDeferFirebase：先把公開內容的請求送出，再下載 SDK，避免手機頻寬被 SDK 佔滿。
+let _fbReal = null, _fbErr = null, _fbBoot = null;
+const deferFirebase = MODE === "firebase" && typeof window !== "undefined" && !!window.__ebDeferFirebase;
+const afterFirebaseCbs = [];
+function bootFirebase() {
+  if (!_fbBoot) _fbBoot = firebaseStore().then(s => { _fbReal = s; }, e => { _fbErr = e; });
+  return _fbBoot;
+}
 async function fbReady() {
-  if (_fbBoot) await _fbBoot;
+  await bootFirebase();
   if (_fbErr) throw _fbErr;
   return _fbReal;
 }
+if (MODE === "firebase" && !deferFirebase) bootFirebase();
 const FB_METHODS = ["signUp", "signIn", "signOut", "resetPassword", "resendVerification", "getPost", "searchText", "savePost", "deletePost", "reorder", "listTemplates", "saveTemplate", "deleteTemplate", "exists", "getDoc", "setDoc", "deleteDoc", "listDocs", "getSettings", "saveSettings", "listMembers", "decideMember", "resetDemo", "listMedia", "getMediaData", "saveMedia", "deleteMedia"];
 function firebaseFacade() {
+  const queued = [];
   const call = name => async (...args) => (await fbReady())[name](...args);
+  function armAuth(fn, alive) {
+    let off = () => {};
+    const run = () => { if (alive() && _fbReal) off = _fbReal.onAuth(fn); };
+    if (_fbReal) run();
+    else bootFirebase().then(() => { if (_fbErr) return; run(); });
+    return () => { off(); };
+  }
   const api = {
     onAuth(fn) {
-      let off = () => {};
-      let alive = true;
-      _fbBoot && _fbBoot.then(() => { if (alive && _fbReal) off = _fbReal.onAuth(fn); });
-      return () => { alive = false; off(); };
+      let dead = false;
+      const alive = () => !dead;
+      let cancel = () => {};
+      const queueOrArm = () => { cancel = armAuth(fn, alive); };
+      if (_fbBoot || !deferFirebase) queueOrArm();
+      else queued.push(queueOrArm);
+      return () => { dead = true; cancel(); const i = queued.indexOf(queueOrArm); if (i >= 0) queued.splice(i, 1); };
     },
+    // 文章頁／早報頁在公開請求送出後才呼叫，登入狀態與配色這時才開始抓。
+    startFirebase() {
+      const p = bootFirebase();
+      queued.splice(0).forEach(fn => fn());
+      afterFirebaseCbs.splice(0).forEach(fn => fn());
+      return p;
+    },
+    afterFirebase(fn) { if (_fbBoot) fn(); else afterFirebaseCbs.push(fn); },
     current() { return _fbReal ? _fbReal.current() : null; },
+    // 不帶登入、不等 SDK。失敗就丟回去，讓頁面決定要不要改走登入後的 getPost。
+    async getPublicPost(id) { return fetchPublicPost(id, CFG); },
     // 首頁、文章頁、會員頁的公開清單：不走 SDK、也不等登入。REST 失敗才退回 SDK。
     async listPosts(opts = {}) {
       if (opts && opts.all) return (await fbReady()).listPosts(opts);
