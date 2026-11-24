@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="assets/brand/icon-192.png"><link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png"><meta name="theme-color" content="#FFFAF0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>人生目標試算：每個月要存多少？｜Edward 的 Blog</title>
+<meta name="description" content="買房、買車、退休、養小孩、旅遊，拉一拉就知道每個月要存多少。免註冊，資料只留在你的瀏覽器。">
+<meta property="og:title" content="人生目標試算：每個月要存多少？">
+<meta property="og:description" content="買房、買車、退休、養小孩、旅遊，拉一拉就知道每個月要存多少。">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"></noscript>
+<link rel="stylesheet" href="assets/style.css?v=20261124133118">
+<script src="config.js?v=20261124133118"></script>
+<style>
+html,body{overflow-x:clip}
+.lp{max-width:860px;margin:0 auto;padding:24px 16px 120px;text-wrap:pretty}
+.lp h1,.lp h2,.lp h3{font-family:var(--serif);text-wrap:balance}
+.nw{white-space:nowrap}
+.lp-hero{position:relative;overflow:hidden;border-radius:22px;padding:30px 26px;color:#fff8ea;background:linear-gradient(140deg,var(--hero-a),var(--hero-b));box-shadow:var(--shadow)}
+.lp-hero:after{content:"";position:absolute;right:-70px;top:-70px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--hero-accent) 45%,transparent),transparent 70%)}
+.lp-hero .tag{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.1em;background:var(--hero-accent);color:#3b2a14;padding:3px 12px;border-radius:99px;margin-bottom:12px}
+.lp-hero h1{font-size:clamp(25px,5vw,34px);line-height:1.4;margin:0 0 12px;color:#fff8ea}
+.lp-hero p{margin:0;opacity:.92;line-height:1.85}
+.lp-hero .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.lp-hero .chips span{font-size:13.5px;background:rgba(255,248,234,.12);border:1px solid rgba(255,248,234,.25);padding:4px 12px;border-radius:99px;white-space:nowrap}
+
+.pick{margin:22px 0 8px}
+.pick h2{font-size:20px;margin:0 0 4px}
+.pick p{margin:0 0 12px;color:var(--mu);font-size:14.5px}
+.goals{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.goal{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:14px 6px;border:1.5px solid var(--ln);border-radius:16px;background:var(--card);cursor:pointer;font:700 15px var(--sans);color:var(--ink);transition:.15s;text-align:center}
+.goal i{font-style:normal;font-size:26px;line-height:1}
+.goal small{font-weight:500;font-size:12.5px;color:var(--mu)}
+.goal[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-soft);box-shadow:inset 0 0 0 1px var(--gold)}
+.goal:hover{border-color:var(--gold)}
+
+.mod{background:var(--card);border:1px solid var(--ln);border-radius:20px;box-shadow:var(--shadow);margin:16px 0;overflow:hidden}
+.mod[hidden]{display:none}
+.mod-h{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--ln);background:color-mix(in srgb,var(--gold-soft) 60%,var(--card))}
+.mod-h .ic{font-size:26px}
+.mod-h h3{margin:0;font-size:19px;flex:1}
+.mod-h .save{font-weight:700;color:var(--navy);white-space:nowrap;font-size:15px}
+.mod-b{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;padding:18px 20px 20px}
+.ctl{margin-bottom:14px}
+.ctl .lab{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:14.5px;font-weight:600;margin-bottom:4px}
+.ctl .lab b{font-family:var(--serif);font-size:17px;color:var(--navy);white-space:nowrap}
+.ctl.main .lab{font-size:15.5px}
+.ctl.main .lab b{font-size:21px}
+.ctl input[type=range]{width:100%;accent-color:var(--gold);height:28px;margin:0}
+details.asm{border-top:1px dashed var(--ln);padding-top:8px;margin-top:4px}
+details.asm summary{cursor:pointer;font-size:13.5px;color:var(--mu);font-weight:600;padding:4px 0}
+details.asm .ctl{margin:10px 0 0}
+details.asm .ctl .lab{font-size:13.5px}
+details.asm .ctl .lab b{font-size:15px}
+.res{background:var(--gold-soft);border-radius:16px;padding:16px 18px;align-self:start}
+.res .big{font-family:var(--serif);font-size:clamp(24px,4.6vw,30px);font-weight:700;color:var(--navy);line-height:1.3;margin:2px 0 6px}
+.res .cap{font-size:13.5px;color:var(--mu);font-weight:600}
+.res ul{list-style:none;margin:10px 0 0;padding:0;font-size:14.5px}
+.res li{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid color-mix(in srgb,var(--gold) 30%,transparent)}
+.res li span:last-child{font-weight:700;white-space:nowrap}
+.res .note{font-size:13px;color:var(--mu);margin:10px 0 0;line-height:1.65}
+.res .note a{color:var(--navy);font-weight:700}
+
+.sum{background:var(--card);border:1px solid var(--ln);border-radius:22px;box-shadow:var(--shadow);padding:22px;margin-top:22px}
+.sum h2{font-size:22px;margin:0 0 4px}
+.sum .total{font-family:var(--serif);font-size:clamp(30px,7vw,40px);font-weight:700;color:var(--navy);margin:6px 0 10px}
+.stack{display:flex;height:14px;border-radius:99px;overflow:hidden;background:var(--ln);margin:6px 0 10px}
+.stack i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;margin:0 0 14px;padding:0;list-style:none}
+.legend li{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.legend b{width:10px;height:10px;border-radius:3px;display:inline-block}
+.income{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--field);border:1px solid var(--ln);border-radius:14px;padding:12px 14px;font-size:14.5px}
+.income input{width:7.5em;font:16px var(--sans);padding:8px 10px;border:1.5px solid var(--ln);border-radius:10px;background:var(--card);color:var(--ink)}
+.income .ratio{font-weight:700;color:var(--navy)}
+.cta2{margin-top:18px;border-radius:18px;padding:20px;background:linear-gradient(140deg,var(--hero-a),var(--hero-b));color:#fff8ea;text-align:center}
+.cta2 h3{margin:0 0 6px;font-size:20px;color:#fff8ea}
+.cta2 p{margin:0 0 14px;opacity:.92;font-size:15px;line-height:1.8}
+.cta2 .btn{font-size:17px;padding:14px 26px}
+.go2{flex-direction:column;gap:2px;line-height:1.35}.go2 small{font-size:14px;font-weight:600;opacity:.9}
+.fine{font-size:13px;color:var(--mu);margin-top:18px;line-height:1.8}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--ln);padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
+.dock .in{max-width:860px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.dock .t{font-size:14px;color:var(--mu);line-height:1.3}
+.dock .t b{display:block;font-family:var(--serif);font-size:21px;color:var(--navy)}
+.dock .btn{white-space:nowrap}
+@media (max-width:700px){
+  .goals{grid-template-columns:repeat(3,1fr)}
+  .mod-b{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .lp{padding:16px 16px 120px}
+  .lp-hero{padding:24px 20px;border-radius:18px}
+  .mod-h{padding:14px 16px}
+  .mod-b{padding:16px}
+  .sum{padding:18px 16px}
+}
+</style>
+</head>
+<body>
+<main class="lp">
+  <section class="lp-hero">
+    <span class="tag">免費試算・免註冊</span>
+    <h1>人生目標試算<br>每個月要存多少？</h1>
+    <p>買房、買車、退休、養小孩、旅遊<br>
+    拉一拉，就知道每個月該存多少<br>
+    資料只留在你的瀏覽器，不會上傳</p>
+    <div class="chips"><span>⏱ 約 3 分鐘</span><span>🔒 不用留資料</span><span>📈 拉了就算</span></div>
+  </section>
+
+  <section class="pick">
+    <h2>先選你有的目標</h2>
+    <p>可以複選，之後隨時再加</p>
+    <div class="goals" id="goals"></div>
+  </section>
+
+  <div id="mods"></div>
+
+  <section class="sum" id="sum">
+    <h2>你的每月存錢地圖</h2>
+    <p style="margin:0;color:var(--mu);font-size:14.5px">所有目標加起來，每個月要存</p>
+    <div class="total" id="total">0 元</div>
+    <div class="stack" id="stack"></div>
+    <ul class="legend" id="legend"></ul>
+    <div class="income">
+      <label for="inc">你的每月收入大約</label>
+      <input id="inc" type="number" inputmode="numeric" min="0" step="1000" placeholder="例如 50000"> 元
+      <span class="ratio" id="ratio"></span>
+    </div>
+    <div class="cta2">
+      <h3>數字算出來了，接下來怎麼做到？</h3>
+      <p>哪個目標先存、錢放哪裡、保障夠不夠<br>
+      帶著這份地圖，跟 Edward 聊 20 分鐘</p>
+      <a class="btn gold go2" id="go" href="#"><span>帶著我的試算</span><small>預約免費諮詢 →</small></a>
+    </div>
+    <p class="fine">※ 試算僅供參考<br>報酬率、利率都是假設，可以在「調整假設」裡改<br>
+    ※ 投資有風險，過去的報酬不代表未來<br>這裡不是任何商品的推薦<br>
+    ※ 勞保、勞退請以勞保局的官方試算為準</p>
+  </section>
+</main>
+
+<div class="dock" id="dock" hidden>
+  <div class="in">
+    <div class="t">每月合計<b id="dockTotal">0 元</b></div>
+    <a class="btn gold" href="#sum" id="dockGo">看我的地圖 ↓</a>
+  </div>
+</div>
+
+<script type="module">
+import { header, footer } from "./assets/ui.js?v=20261124133118";
+header(""); footer();
+
+const KEY = "edward-life-plan-v1";
+const COLORS = { house: "#B08A4E", car: "#5B7DB1", retire: "#2E7D5B", kid: "#C0695A", trip: "#8A6BB0" };
+const $ = s => document.querySelector(s);
+const wan = v => v >= 1e6 ? Math.round(v / 1e4).toLocaleString("zh-TW") + " 萬" : v >= 10000 ? (Math.round(v / 1000) / 10).toLocaleString("zh-TW") + " 萬" : Math.round(v).toLocaleString("zh-TW") + " 元";
+const yuan = v => Math.round(v).toLocaleString("zh-TW") + " 元";
+const fv = (m, r, y) => { const n = Math.round(y * 12), i = r / 100 / 12; return n <= 0 ? 0 : i === 0 ? m * n : m * ((1 + i) ** n - 1) / i; };
+const pmt = (p, r, y) => { const n = Math.round(y * 12), i = r / 100 / 12; return p <= 0 || n <= 0 ? 0 : i === 0 ? p / n : p * i / (1 - (1 + i) ** -n); };
+const YEAR = new Date().getFullYear();
+
+// 每個目標：主要滑桿（save＝每月存多少）＋假設（收在「調整假設」裡）
+const GOALS = [
+  { id: "house", icon: "🏠", name: "買房", sub: "自備款＋房貸", on: true,
+    ctl: [["save", "每月存", 0, 100000, 1000, 30000, "money", true], ["years", "幾年後買", 1, 30, 1, 10, "yr"]],
+    asm: [["r", "存錢期間年報酬", 0, 10, 0.5, 4, "pct"], ["loan", "房貸成數", 0, 9, 1, 7, "cheng"], ["ly", "房貸年期", 10, 40, 1, 30, "yr2"], ["lr", "房貸利率", 1, 5, 0.05, 2.2, "pct"]],
+    calc(v) {
+      const down = fv(v.save, v.r, v.years), price = v.loan >= 10 ? 0 : down / (1 - v.loan / 10), loan = price - down, pay = pmt(loan, v.lr, v.ly);
+      return { cap: `${YEAR + v.years} 年，大約可以買`, big: wan(price) + "的房子",
+        rows: [["自備款（你存的）", wan(down)], ["房貸", wan(loan)], [`房貸月付（${v.ly} 年）`, yuan(pay)]],
+        note: "房價會漲，越晚買，同樣的錢買到的可能越小" };
+    } },
+  { id: "car", icon: "🚗", name: "買車", sub: "頭期款＋車貸",
+    ctl: [["save", "每月存", 0, 50000, 1000, 10000, "money", true], ["years", "幾年後買", 1, 15, 1, 5, "yr"]],
+    asm: [["r", "存錢期間年報酬", 0, 10, 0.5, 2, "pct"], ["loan", "車貸成數", 0, 9, 1, 5, "cheng"], ["ly", "車貸年期", 1, 7, 1, 5, "yr2"], ["lr", "車貸利率", 1, 8, 0.1, 3.5, "pct"]],
+    calc(v) {
+      const down = fv(v.save, v.r, v.years), price = down / (1 - v.loan / 10), loan = price - down, pay = pmt(loan, v.lr, v.ly);
+      return { cap: `${YEAR + v.years} 年，大約可以買`, big: wan(price) + "的車",
+        rows: [["頭期款（你存的）", wan(down)], ["車貸", wan(loan)], [`車貸月付（${v.ly} 年）`, yuan(pay)]],
+        note: "車子買了會折舊，記得把保險、保養、停車費也算進去" };
+    } },
+  { id: "retire", icon: "🌴", name: "退休", sub: "退休後每月能用",
+    ctl: [["save", "每月存", 0, 100000, 500, 5000, "money", true], ["age", "現在幾歲", 20, 64, 1, 30, "age"], ["ret", "幾歲退休", 45, 75, 1, 65, "age"]],
+    asm: [["r", "存錢期間年報酬", 0, 10, 0.5, 5, "pct"], ["until", "準備用到幾歲", 70, 100, 1, 85, "age"], ["r2", "退休後年報酬", 0, 6, 0.5, 2, "pct"], ["inf", "物價上漲率", 0, 4, 0.5, 2, "pct"]],
+    calc(v) {
+      const yrs = Math.max(0, v.ret - v.age), pot = fv(v.save, v.r, yrs), use = Math.max(1, v.until - v.ret), m = pmt(pot, v.r2, use), now = m / (1 + v.inf / 100) ** yrs;
+      return { cap: `${v.ret} 歲退休後，你自己存的錢每月可以用`, big: wan(m),
+        rows: [["退休時存到", wan(pot)], [`換成今天的購買力`, "約 " + wan(now)], ["可以用", `${use} 年（到 ${v.until} 歲）`]],
+        note: `另外還有勞保年金、勞退，可以用官方試算看看：<a href="https://www.bli.gov.tw/0004863.html" target="_blank" rel="noopener">勞保局</a>` };
+    } },
+  { id: "kid", icon: "👶", name: "養小孩", sub: "從出生到獨立",
+    ctl: [["save", "每月存", 0, 50000, 1000, 10000, "money", true], ["born", "幾年後出生", 0, 15, 1, 2, "yr0"], ["to", "養到幾歲", 18, 30, 1, 22, "age"]],
+    asm: [["cost", "每年花費（今天的物價）", 100000, 600000, 10000, 200000, "money"], ["inf", "物價上漲率", 0, 5, 0.5, 2, "pct"], ["r", "存錢期間年報酬", 0, 8, 0.5, 3, "pct"]],
+    calc(v) {
+      let need = 0; for (let t = 0; t < v.to; t++) need += v.cost * (1 + v.inf / 100) ** (v.born + t);
+      const have = fv(v.save, v.r, v.born + v.to), ratio = need ? have / need : 0;
+      return { cap: `養一個小孩到 ${v.to} 歲，大約要`, big: wan(need),
+        rows: [["你存到那時候", wan(have)], ["可以支應", Math.round(ratio * 100) + "%"], ["相當於", (Math.round(ratio * 10) / 10) + " 個小孩"]],
+        note: "每年花費可以在「調整假設」裡改，讀私立、出國念書都會差很多" };
+    } },
+  { id: "trip", icon: "✈️", name: "旅遊", sub: "說走就走的基金",
+    ctl: [["save", "每月存", 0, 50000, 500, 5000, "money", true], ["years", "幾年後出發", 1, 10, 1, 1, "yr"]],
+    asm: [["r", "存錢期間年報酬", 0, 6, 0.5, 1.5, "pct"]],
+    calc(v) {
+      const f = fv(v.save, v.r, v.years);
+      return { cap: `${YEAR + v.years} 年出發時，旅遊基金有`, big: wan(f),
+        rows: [["每年平均", wan(f / v.years)]],
+        note: "旅遊基金放在隨時領得出來的地方就好，不用追求高報酬" };
+    } },
+];
+
+const fmt = (t, v) => ({ money: wan(v), pct: v + "%", cheng: v + " 成", yr: v + " 年後", yr0: v === 0 ? "今年" : v + " 年後", yr2: v + " 年", age: v + " 歲" })[t] || v;
+
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+GOALS.forEach(g => {
+  const s = state[g.id] ||= {};
+  if (s.on === undefined) s.on = !!g.on;
+  [...g.ctl, ...g.asm].forEach(([k, , , , , d]) => { if (s[k] === undefined) s[k] = d; });
+});
+
+$("#goals").innerHTML = GOALS.map(g => `<button type="button" class="goal" data-g="${g.id}" aria-pressed="${state[g.id].on}"><i>${g.icon}</i>${g.name}<small>${g.sub}</small></button>`).join("");
+const slider = (g, [k, lab, min, max, step, , t, main]) => `<div class="ctl${main ? " main" : ""}"><div class="lab"><span>${lab}</span><b data-o="${g.id}.${k}"></b></div><input type="range" min="${min}" max="${max}" step="${step}" value="${state[g.id][k]}" data-k="${g.id}.${k}" data-t="${t}" aria-label="${g.name}：${lab}"></div>`;
+$("#mods").innerHTML = GOALS.map(g => `<section class="mod" id="m-${g.id}" ${state[g.id].on ? "" : "hidden"}>
+  <div class="mod-h"><span class="ic">${g.icon}</span><h3>${g.name}</h3><span class="save" data-save="${g.id}"></span></div>
+  <div class="mod-b"><div>${g.ctl.map(c => slider(g, c)).join("")}
+    <details class="asm"><summary>⚙️ 調整假設</summary>${g.asm.map(c => slider(g, c)).join("")}</details></div>
+    <div class="res" data-res="${g.id}"></div></div></section>`).join("");
+
+// 退休年齡不能小於現在年齡
+function fix(g) { if (g === "retire" && state.retire.ret <= state.retire.age) { state.retire.ret = Math.min(75, state.retire.age + 1); $(`[data-k="retire.ret"]`).value = state.retire.ret; } }
+
+function render() {
+  let total = 0; const parts = [];
+  GOALS.forEach(g => {
+    const v = state[g.id];
+    document.querySelectorAll(`[data-k^="${g.id}."]`).forEach(inp => { const k = inp.dataset.k.split(".")[1]; $(`[data-o="${g.id}.${k}"]`).textContent = fmt(inp.dataset.t, v[k]); });
+    $(`[data-save="${g.id}"]`).textContent = "每月 " + wan(v.save);
+    const r = g.calc(v);
+    $(`[data-res="${g.id}"]`).innerHTML = `<div class="cap">${r.cap}</div><div class="big">${r.big}</div><ul>${r.rows.map(([a, b]) => `<li><span>${a}</span><span>${b}</span></li>`).join("")}</ul><p class="note">${r.note}</p>`;
+    if (v.on) { total += v.save; parts.push([g, v.save]); }
+  });
+  $("#total").textContent = yuan(total);
+  $("#dockTotal").textContent = yuan(total);
+  $("#stack").innerHTML = parts.filter(p => p[1] > 0).map(([g, s]) => `<i style="width:${s / total * 100}%;background:${COLORS[g.id]}" title="${g.name}"></i>`).join("");
+  $("#legend").innerHTML = parts.map(([g, s]) => `<li><b style="background:${COLORS[g.id]}"></b>${g.name} ${wan(s)}${total ? `（${Math.round(s / total * 100)}%）` : ""}</li>`).join("") || "<li>先在上面選一個目標</li>";
+  const inc = +$("#inc").value;
+  const pct = inc > 0 ? Math.round(total / inc * 100) : 0;
+  $("#ratio").textContent = inc > 0 ? `→ 要存下收入的 ${pct}%` + (pct > 40 ? "，有點吃緊，可以先排目標的先後順序" : pct <= 20 ? "，很穩健" : "") : "";
+  // 帶去預約頁的摘要
+  const sum = parts.map(([g, s]) => `${g.name} ${wan(s)}/月（${g.calc(state[g.id]).big.replace(/<[^>]+>/g, "")}）`).join("；");
+  const plan = `人生目標試算：每月合計 ${yuan(total)}${sum ? "；" + sum : ""}${inc > 0 ? `；月收入約 ${yuan(inc)}` : ""}`;
+  $("#go").href = (window.BLOG_CONFIG.bookingUrl || "#") + "?plan=" + encodeURIComponent(plan.slice(0, 480));
+  state._inc = inc || ""; save();
+}
+
+document.addEventListener("input", e => {
+  const k = e.target.dataset?.k; if (!k) { if (e.target.id === "inc") render(); return; }
+  const [g, f] = k.split("."); state[g][f] = +e.target.value; fix(g); render();
+});
+$("#goals").addEventListener("click", e => {
+  const b = e.target.closest(".goal"); if (!b) return;
+  const g = b.dataset.g; state[g].on = !state[g].on; b.setAttribute("aria-pressed", state[g].on);
+  $(`#m-${g}`).hidden = !state[g].on; render();
+  if (state[g].on) $(`#m-${g}`).scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+if (state._inc) $("#inc").value = state._inc;
+render();
+
+// 下方浮動合計：看到總結區時收起來，避免擋住內容
+const dock = $("#dock"); let sumSeen = false;
+const dockUpd = () => { dock.hidden = sumSeen || scrollY < 200; };
+new IntersectionObserver(([en]) => { sumSeen = en.isIntersecting; dockUpd(); }, { threshold: 0.05 }).observe($("#sum"));
+addEventListener("scroll", dockUpd, { passive: true });
+</script>
+</body>
+</html>
