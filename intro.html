@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>認識 Edward｜3D 互動版</title>
+<meta name="description" content="往下滑，用 3D 動畫認識 Edward：保險經紀 × 人生財務教練。">
+<link rel="icon" href="assets/brand/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{--dark:#2A1D15;--cream:#F6F0E6;--caramel:#C8843F;--soft:#D9C8B4}
+*{box-sizing:border-box}
+html,body{margin:0;overflow-x:clip;background:#140D09;color:var(--cream);font-family:'Noto Sans TC',Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+#scroller section{display:block}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block}
+#fade{position:fixed;inset:0;background:#000;opacity:1;pointer-events:none;transition:opacity .45s ease}
+#text{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:center;padding:0 max(24px,8vw);text-wrap:pretty}
+.t-eyebrow{font-size:clamp(14px,1.6vw,22px);letter-spacing:.25em;color:var(--caramel);font-weight:700;margin:0 0 18px}
+.t-big{font-family:'Noto Serif TC',Georgia,serif;font-weight:700;font-size:clamp(30px,5.2vw,84px);line-height:1.3;margin:0;text-shadow:0 2px 24px rgba(0,0,0,.55)}
+.t-lead{font-size:clamp(17px,2.2vw,32px);line-height:1.6;color:var(--soft);margin:22px 0 0;text-shadow:0 2px 16px rgba(0,0,0,.6)}
+.t-note{font-size:clamp(12px,1.1vw,16px);color:#BFAE99;margin-top:18px;max-width:900px;line-height:1.5}
+.acc{color:var(--caramel)}
+.nw{white-space:nowrap}
+.line{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.line.on{opacity:1;transform:none}
+.top{justify-content:flex-start!important;padding-top:max(56px,9vh)!important}
+.bottom{justify-content:flex-end!important;padding-bottom:max(90px,13vh)!important}
+/* 無聊頁 */
+#boring{position:fixed;inset:0;background:#fff;color:#1a1a1a;font-family:Arial,'Noto Sans TC',sans-serif;display:none;flex-direction:column;justify-content:center;padding:0 10vw}
+#boring.show{display:flex}
+#boring .bt{font-size:clamp(34px,5vw,80px);text-align:center;margin:0}
+#boring .bs{font-size:clamp(18px,2.4vw,38px);color:#888;text-align:center;margin:18px 0 0}
+#boring .bh{font-size:clamp(30px,4.2vw,66px);margin:0 0 4vh}
+#boring ul{font-size:clamp(20px,2.6vw,40px);line-height:1.9;margin:0;padding-left:1.4em}
+#boring .bar{position:absolute;left:0;right:0;bottom:0;height:3vh;background:#3F6FB5}
+#boring .pg{position:absolute;right:3vw;bottom:5vh;color:#777;font-size:clamp(14px,1.3vw,20px)}
+/* 標籤（跟著 3D 物件走） */
+.lbl{position:fixed;left:0;top:0;transform:translate(-50%,-50%);pointer-events:none;text-align:center;white-space:nowrap;opacity:0;transition:opacity .6s ease}
+.lbl.on{opacity:1}
+.lbl b{display:block;font-family:'Noto Serif TC',serif;font-size:clamp(18px,2.2vw,34px);color:var(--cream);text-shadow:0 2px 12px rgba(0,0,0,.8)}
+.lbl span{display:block;font-size:clamp(12px,1.2vw,18px);color:var(--soft);margin-top:4px;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+/* 卡片頁 */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,2vw,32px);margin-top:28px;max-width:1300px}
+.card{background:rgba(42,29,21,.78);border:1px solid rgba(200,132,63,.35);border-radius:18px;padding:clamp(16px,2.4vw,36px);backdrop-filter:blur(6px)}
+.card .tag{color:var(--caramel);font-weight:700;letter-spacing:.15em;font-size:clamp(12px,1.2vw,18px)}
+.card h3{font-family:'Noto Serif TC',serif;font-size:clamp(20px,2.4vw,36px);margin:10px 0}
+.card p{margin:0;color:var(--soft);font-size:clamp(14px,1.4vw,21px);line-height:1.7}
+.pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.pill{background:var(--caramel);color:var(--dark);font-weight:700;border-radius:999px;padding:8px 18px;font-size:clamp(13px,1.3vw,19px);white-space:nowrap}
+a.pill{pointer-events:auto;text-decoration:none}
+@media (max-width:760px){.cards{grid-template-columns:1fr}.card p br{display:none}}
+.counter{font-family:'Noto Serif TC',serif;font-size:clamp(16px,1.8vw,26px);color:var(--soft);margin-top:10px;font-variant-numeric:tabular-nums}
+/* 介面 */
+#ui{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:center;padding:12px max(16px,2vw) calc(12px + env(safe-area-inset-bottom));pointer-events:none;z-index:5}
+#ui *{pointer-events:auto}
+#prog{flex:1;height:3px;background:rgba(255,255,255,.15);margin:0 16px;border-radius:2px;overflow:hidden}
+#prog i{display:block;height:100%;width:0;background:var(--caramel);transition:width .5s ease}
+.btn{background:rgba(20,13,9,.6);color:var(--cream);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:8px 16px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
+#hint{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);font-size:14px;color:#888;transition:opacity .8s;pointer-events:none;white-space:nowrap}
+body.boring-on #ui .btn,body.boring-on #hint{color:#555;background:rgba(255,255,255,.8);border-color:#ccc}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="fade"></div>
+<div id="text"></div>
+<div id="labels"></div>
+<div id="boring"></div>
+<div id="ui">
+  <button class="btn" id="prev" aria-label="上一段">↑</button>
+  <div id="prog"><i></i></div>
+  <a class="btn" id="flat" href="./">回 Blog 首頁</a>
+  <button class="btn" id="next" aria-label="下一段" style="margin-left:10px">↓</button>
+</div>
+<div id="hint">↓ 往下滑，動畫就會跟著動</div>
+<div id="scroller"></div>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+
+/* ================= 基本設定 ================= */
+const canvas = document.getElementById('gl');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+const textEl = document.getElementById('text');
+const labelsEl = document.getElementById('labels');
+const boringEl = document.getElementById('boring');
+const fadeEl = document.getElementById('fade');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W = innerWidth, H = innerHeight;
+const isNarrow = () => W < 760;
+
+function resize(){
+  W = innerWidth; H = innerHeight;
+  renderer.setSize(W, H, false);
+  slides.forEach(s => { if (s.cam){ s.cam.aspect = W/H; s.cam.updateProjectionMatrix(); } });
+}
+addEventListener('resize', resize);
+
+/* 小工具 */
+const rand = (a,b) => a + Math.random()*(b-a);
+const ease = t => t<0?0:t>1?1:1-Math.pow(1-t,3);
+const lerp = (a,b,t) => a+(b-a)*t;
+function stars(n=1500, r=400, color=0xffffff, size=1.2){
+  const g = new THREE.BufferGeometry(); const p = new Float32Array(n*3);
+  for(let i=0;i<n;i++){ const v = new THREE.Vector3().randomDirection().multiplyScalar(r*rand(.6,1)); p.set([v.x,Math.abs(v.y)*0.9+5,v.z],i*3); }
+  g.setAttribute('position', new THREE.BufferAttribute(p,3));
+  return new THREE.Points(g, new THREE.PointsMaterial({color, size, sizeAttenuation:false, transparent:true, opacity:.85}));
+}
+function glowSprite(color='#ffcf8a', size=4){
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const x = c.getContext('2d'); const gr = x.createRadialGradient(64,64,0,64,64,64);
+  gr.addColorStop(0,color); gr.addColorStop(.25,color+'aa'); gr.addColorStop(1,color+'00');
+  x.fillStyle = gr; x.fillRect(0,0,128,128);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c), transparent:true, depthWrite:false, blending:THREE.AdditiveBlending}));
+  s.scale.set(size,size,1); return s;
+}
+function newCam(fov=50){ const c = new THREE.PerspectiveCamera(fov, W/H, .1, 2000); return c; }
+/* 錢的複利：每月月底投 1 萬、年化 6%、月複利 */
+const FV = yrs => { const r=.005, n=Math.round(yrs*12); return n<=0?0:10000*((Math.pow(1+r,n)-1)/r); };
+
+/* 文字 */
+function setText(html, cls=''){
+  textEl.className = cls; textEl.innerHTML = html;
+  [...textEl.querySelectorAll('.line')].forEach((el,i) => { el._th = reduce?0:Math.min(.55, .03 + (+el.dataset.d||i)*.055); });
+}
+/* 跟著 3D 物件的標籤 */
+let labels = [];
+function setLabels(list){ labelsEl.innerHTML=''; labels = list.map(l => { const d=document.createElement('div'); d.className='lbl'; d.innerHTML=l.html; labelsEl.appendChild(d); d._th = reduce?0:Math.min(.7,(l.delay||900)/1000/(slides[cur].D||5)); return {el:d, obj:l.obj, off:l.off||new THREE.Vector3()}; }); }
+const _v = new THREE.Vector3();
+function placeLabels(cam){ for(const l of labels){ l.obj.getWorldPosition(_v); _v.add(l.off).project(cam); l.el.style.left=((_v.x+1)/2*W)+'px'; l.el.style.top=((1-_v.y)/2*H)+'px'; } }
+
+/* ================= 各頁場景 ================= */
+const slides = [];
+
+/* 1、2、15：故意很無聊的投影片 */
+const boring = (html) => ({ boring:true, enter(){ boringEl.innerHTML = html + '<div class="bar"></div><p class="pg">'+(cur+1)+'</p>'; } });
+slides.push(boring('<p class="bt">業務自我介紹</p><p class="bs">Edward｜保險經紀人</p>'));
+slides.push(boring('<p class="bh">簡報大綱</p><ul><li>公司簡介</li><li>個人經歷</li><li>商品介紹</li><li>Q&amp;A</li></ul>'));
+
+/* 3：打破 —— 白色碎片炸開，飄進星空 */
+slides.push((()=>{
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0d0907);
+  const cam = newCam(55); scene.add(stars(1800, 300));
+  const N = 260, geo = new THREE.PlaneGeometry(1,0.56);
+  const mat = new THREE.MeshBasicMaterial({color:0xf3eee7, side:THREE.DoubleSide});
+  const mesh = new THREE.InstancedMesh(geo, mat, N); scene.add(mesh);
+  const parts = []; const cols = 20, rows = 13;
+  for(let i=0;i<N;i++){ const cx=(i%cols)-cols/2+.5, cy=Math.floor(i/cols)-rows/2+.5;
+    parts.push({p0:new THREE.Vector3(cx*0.9, cy*0.52, 0), v:new THREE.Vector3(rand(-1,1)*6, rand(-1,1)*5, rand(2,14)), r:new THREE.Vector3(rand(-3,3),rand(-3,3),rand(-3,3))}); }
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), sc = new THREE.Vector3(0.9,0.94,1), pos = new THREE.Vector3();
+  let t0 = 0;
+  return { scene, cam,
+    enter(){ t0 = 0; cam.position.set(0,0,12); cam.lookAt(0,0,0);
+      setText('<p class="t-big line" data-d="2">這種簡報，</p><p class="t-big line" data-d="3">大多數人看到第二頁</p><p class="t-big line acc" data-d="4">就開始滑手機了！</p><p class="t-lead line" data-d="7">所以，換個方式認識我。</p>'); },
+    update(dt){ t0 += dt; const k = reduce?3:Math.max(0, t0-0.9);
+      for(let i=0;i<N;i++){ const P=parts[i]; const s=ease(k/2.2)*1;
+        pos.copy(P.p0).addScaledVector(P.v, s*3.2 + k*0.35); e.set(P.r.x*s, P.r.y*s, P.r.z*s); q.setFromEuler(e);
+        m4.compose(pos,q,sc); mesh.setMatrixAt(i,m4); }
+      mesh.instanceMatrix.needsUpdate = true; cam.position.z = 12 + Math.min(k,6)*0.4; }
+  };
+})());
+
+/* 4：不是省錢、不是買商品 —— 霧中漂浮的金幣與價格標籤，慢慢淡掉 */
+slides.push((()=>{
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x1b120c); scene.fog = new THREE.FogExp2(0x1b120c, 0.045);
+  const cam = newCam(50);
+  scene.add(new THREE.AmbientLight(0xffe2c0, .6)); const dl = new THREE.DirectionalLight(0xffc98a, 2.2); dl.position.set(4,6,5); scene.add(dl);
+  const coinG = new THREE.CylinderGeometry(.5,.5,.08,40);
+  const coinM = new THREE.MeshStandardMaterial({color:0xc9954a, metalness:.85, roughness:.3});
+  const coins = new THREE.Group(); scene.add(coins);
+  for(let i=0;i<70;i++){ const c = new THREE.Mesh(coinG, coinM); c.position.set(rand(-9,9), rand(-5,5), rand(-14,2)); c.rotation.set(rand(0,6),rand(0,6),rand(0,6)); c.userData.s = rand(.2,.8); coins.add(c); }
+  let t=0;
+  return { scene, cam,
+    enter(){ t=0; cam.position.set(0,0,8); cam.lookAt(0,0,0);
+      setText('<p class="t-eyebrow line" data-d="0">我怎麼看財務規劃</p><p class="t-big line" data-d="1">財務規劃</p><p class="t-big line" data-d="2">不是叫你省錢</p><p class="t-big line" data-d="3">也不是叫你買商品</p>'); },
+    update(dt){ t+=dt; coins.children.forEach(c=>{ c.rotation.x += dt*c.userData.s; c.rotation.y += dt*c.userData.s*.7; c.position.y += Math.sin(t+c.position.x)*dt*.1; });
+      cam.position.z = 8 - Math.min(t,10)*0.15; }
+  };
+})());
+
+/* 5：節奏 —— 三個軌道（賺錢、存錢、花錢）一起轉，越轉越同步 */
+slides.push((()=>{
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x120c08);
+  const cam = newCam(45); scene.add(stars(1200, 300, 0xffe6c4));
+  const cols = [0xc8843f, 0xe8d3b0, 0x8fa3a0];
+  const rings = [], balls = [];
+  [3,4.4,5.8].forEach((r,i)=>{
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(r,.025,8,160), new THREE.MeshBasicMaterial({color:cols[i], transparent:true, opacity:.55}));
+    ring.rotation.x = Math.PI/2; scene.add(ring); rings.push(ring);
+    const b = new THREE.Mesh(new THREE.SphereGeometry(.28,24,24), new THREE.MeshBasicMaterial({color:cols[i]})); scene.add(b);
+    const g = glowSprite(i===0?'#ffb36b':i===1?'#fff1d6':'#bfe0d8', 1.3); b.add(g); balls.push({b, r, ph:rand(0,6), sp:[.9,.55,1.4][i]});
+  });
+  const center = glowSprite('#ffcf8a', 2); scene.add(center);
+  let t=0;
+  return { scene, cam,
+    enter(){ t=0; setText('<p class="t-eyebrow line" data-d="0">我做的事</p><p class="t-big line" data-d="1">把<span class="acc">賺錢、存錢、花錢</span>的節奏理清楚</p><p class="t-lead line" data-d="3">讓現在的現金流<br>對齊你未來想過的人生！</p>','top');
+      setLabels([{obj:balls[0].b, html:'<b>賺錢</b>', off:new THREE.Vector3(0,.8,0), delay:1600},{obj:balls[1].b, html:'<b>存錢</b>', off:new THREE.Vector3(0,.8,0), delay:1800},{obj:balls[2].b, html:'<b>花錢</b>', off:new THREE.Vector3(0,.8,0), delay:2000}]); },
+    update(dt){ t+=dt; const sync = ease(t/6);
+      balls.forEach((o,i)=>{ const sp = lerp(o.sp, .6, sync); o.ph += dt*sp; const ph = lerp(o.ph, t*.6 + i*2.094, sync*0.9);
+        o.b.position.set(Math.cos(ph)*o.r, 0, Math.sin(ph)*o.r); });
+      const a = t*.05; cam.position.set(Math.sin(a)*2, 9, 12); cam.lookAt(0,-2.2,0); placeLabels(cam); }
+  };
+})());
+
+/* 6：你卡在哪一格 —— 三根發光柱子 */
+slides.push((()=>{
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x150e0a); scene.fog = new THREE.Fog(0x150e0a, 14, 40);
+  const cam = newCam(45);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(80,80), new THREE.MeshStandardMaterial({color:0x2a1d15, roughness:.35, metalness:.4}));
+  floor.rotation.x = -Math.PI/2; scene.add(floor);
+  scene.add(new THREE.AmbientLight(0xffffff,.45)); { const d=new THREE.DirectionalLight(0xffe0b8,2.2); d.position.set(3,8,10); scene.add(d); }
+  const pillars = [];
+  [-4,0,4].forEach((x,i)=>{
+    const m = new THREE.Mesh(new THREE.BoxGeometry(1.6,1,1.6), new THREE.MeshStandardMaterial({color:0xf0e2cc, emissive:0xc8843f, emissiveIntensity:.55, roughness:.6}));
+    m.position.set(x,0,0); scene.add(m); pillars.push(m);
+    const l = new THREE.PointLight(0xffb36b, 8, 9); l.position.set(x,3,2); scene.add(l);
+  });
+  const anchors = pillars.map(p=>{ const o=new THREE.Object3D(); scene.add(o); return o; });
+  let t=0; const hs=[2,2.8,3.6];
+  return { scene, cam,
+    enter(){ t=0; setText('<p class="t-eyebrow line" data-d="0">大多數人的錢，卡在這三個地方</p><p class="t-big line" data-d="1">你卡在哪一格？</p>','top');
+      setLabels([
+        {obj:anchors[0], html:'<b>賺錢</b><span>收入只靠一份薪水<br>不確定自己值多少</span>', delay:1400},
+        {obj:anchors[1], html:'<b>花錢</b><span>房貸車貸壓力大<br>錢不知道去哪了</span>', delay:1700},
+        {obj:anchors[2], html:'<b>存錢</b><span>通膨吃掉存款<br>退休金不知道夠不夠</span>', delay:2000}]); },
+    update(dt){ t+=dt; pillars.forEach((p,i)=>{ const h = .1 + hs[i]*ease((t-.3-i*.25)/1.6); p.scale.y = h; p.position.y = h/2; anchors[i].position.set(p.position.x, h+1.3, 0); });
+      cam.position.set(Math.sin(t*.06)*1.5, 4.2, 15); cam.lookAt(0,4.6,0); placeLabels(cam); }
+  };
+})());
+
+/* 7：時間的力量 —— 兩疊金幣隨年份長高 */
+slides.push((()=>{
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x1a110b);
+  const cam = newCam(40);
+  scene.add(new THREE.AmbientLight(0xffe7c7,.5)); const dl = new THREE.DirectionalLight(0xffd29a,2.6); dl.position.set(-5,10,8); scene.add(dl);
+  const sp = new THREE.SpotLight(0xffc27a, 60, 40, .5, .6); sp.position.set(0,16,6); scene.add(sp); { const f=new THREE.DirectionalLight(0xfff0dc,1.6); f.position.set(2,4,14); scene.add(f); }
+  const table = new THREE.Mesh(new THREE.CylinderGeometry(9,9,.4,64), new THREE.MeshStandardMaterial({color:0x3b2919, roughness:.5}));
+  table.position.y = -.2; scene.add(table);
+  const PER = 250000, MAX = 82, coinH = .12;
+  const g = new THREE.CylinderGeometry(.9,.9,coinH*0.92,40);
+  const gold = new THREE.MeshStandardMaterial({color:0xd4a052, metalness:.9, roughness:.28});
+  const dim = new THREE.MeshStandardMaterial({color:0x9a8a74, metalness:.6, roughness:.45});
+  const A = new THREE.InstancedMesh(g, gold, MAX), B = new THREE.InstancedMesh(g, dim, MAX); scene.add(A,B);
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s1 = new THREE.Vector3(1,1,1), pv = new THREE.Vector3();
+  const topA = new THREE.Object3D(), topB = new THREE.Object3D(); scene.add(topA, topB);
+  function fill(mesh, n, x){ for(let i=0;i<MAX;i++){ const on = i<n; pv.set(x + Math.sin(i*1.7)*.03, i*coinH + coinH/2, Math.cos(i*1.3)*.03); m4.compose(pv,q, on?s1:new THREE.Vector3(0,0,0)); mesh.setMatrixAt(i,m4);} mesh.instanceMatrix.needsUpdate = true; }
+  let t=0, cEl=null;
+  const fmt = v => Math.round(v/10000).toLocaleString('zh-TW');
+  return { scene, cam,
+    enter(){ t=0;
+      setText('<p class="t-eyebrow line" data-d="0">節奏為什麼重要</p><p class="t-big line" data-d="1" style="font-size:clamp(26px,4vw,64px)">同樣每月存 1 萬，差在幾歲開始</p><p class="counter line" id="cnt" data-d="2">&nbsp;</p><p class="t-note line" data-d="3" style="position:fixed;left:max(24px,8vw);right:max(24px,8vw);bottom:64px">試算假設：每月月底投入 10,000 元、年化報酬 6%、每月複利。僅說明時間的影響，非任何商品的保證報酬。</p>','top');
+      cEl = document.getElementById('cnt');
+      setLabels([{obj:topA, html:'<b class="acc">25 歲開始</b><span id="la">—</span>', delay:900},{obj:topB, html:'<b>35 歲開始</b><span id="lb">—</span>', delay:900}]); },
+    update(dt){ t+=dt; const yrs = reduce?40:Math.min(40, Math.max(0,(t-1.2))*7);
+      const va = FV(yrs), vb = FV(Math.max(0,yrs-10));
+      const na = Math.round(va/PER), nb = Math.round(vb/PER);
+      const X = isNarrow()?1.25:2.2; fill(A, na, -X); fill(B, nb, X);
+      topA.position.set(-X, na*coinH + .9, 0); topB.position.set(X, nb*coinH + .9, 0);
+      const la = document.getElementById('la'), lb = document.getElementById('lb');
+      if(la){ la.textContent = '約 '+fmt(va)+' 萬'; lb.textContent = yrs<10?'還沒開始':'約 '+fmt(vb)+' 萬'; }
+      if(cEl) cEl.innerHTML = yrs<40 ? '過了 <b>'+Math.floor(yrs)+'</b> 年…' : '到 65 歲：只晚 10 年，<span class="acc">結果差了快一半！</span>';
+      const h = Math.max(3, na*coinH); cam.position.set(Math.sin(t*.08)*2.5, h*.7+2, (isNarrow()?20:15) + h*(isNarrow()?2.2:1.5)); cam.lookAt(0, h*.85+.6, 0); placeLabels(cam); }
+  };
+})());
+
+/* 8：同樣的薪水、不同的方向 —— 同一座城市，左邊灰暗、右邊有陽光 */
+slides.push((()=>{
+  function city(warm){
+    const s = new THREE.Scene(); s.background = new THREE.Color(warm?0xf2c48c:0x8d8a86); s.fog = new THREE.Fog(warm?0xf2c48c:0x8d8a86, 18, 70);
+    s.add(new THREE.HemisphereLight(warm?0xfff0d8:0xbfbfbf, warm?0x5a3a20:0x555555, warm?1.6:.9));
+    const dl = new THREE.DirectionalLight(warm?0xffc07a:0xd0d0d0, warm?3:.6); dl.position.set(10,14,6); s.add(dl);
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(200,200), new THREE.MeshStandardMaterial({color:warm?0x7a9a5a:0x6c6a66}));
+    ground.rotation.x=-Math.PI/2; s.add(ground);
+    const rng = (()=>{ let a=7; return ()=>((a=Math.imul(a^a>>>15,a|1)^(a+0x6D2B79F5))>>>0)/4294967296; })();
+    const bg = new THREE.BoxGeometry(1,1,1);
+    for(let i=0;i<220;i++){ const x=(rng()-.5)*60, z=-rng()*60+8, h=.6+rng()*(warm?3.2:4.5);
+      const mat = new THREE.MeshStandardMaterial({color: warm ? new THREE.Color().setHSL(.07+rng()*.06,.45,.72+rng()*.15) : new THREE.Color().setHSL(0,0,.45+rng()*.2), roughness:.8});
+      const b = new THREE.Mesh(bg, mat); b.scale.set(1+rng()*1.5,h,1+rng()*1.5); b.position.set(x,h/2,z); s.add(b);
+      if(warm && rng()<.35){ const tr = new THREE.Mesh(new THREE.ConeGeometry(.5,1.4,8), new THREE.MeshStandardMaterial({color:0x4f7a3a})); tr.position.set(x+1.4, .7, z+.8); s.add(tr); } }
+    if(warm){ const sun = glowSprite('#fff2c8', 22); sun.position.set(8,14,-50); s.add(sun); }
+    return s;
+  }
+  const L = city(false), R = city(true);
+  const cam = newCam(48);
+  let t=0;
+  return { scene:L, cam, split:R,
+    enter(){ t=0; const n = isNarrow();
+      if(n){ setText('<div style="position:fixed;left:24px;right:24px;top:6vh"><p class="t-big line" data-d="1" style="color:#f0ede9">同樣的薪水</p><p class="t-lead line" data-d="2" style="color:#ece9e5">錢進來，就花掉</p></div><div style="position:fixed;left:24px;right:24px;top:52vh"><p class="t-big line" data-d="4" style="color:#3a2312;text-shadow:none">不同的方向</p><p class="t-lead line" data-d="5" style="color:#4a2e18;text-shadow:none">每筆錢都有清楚的位置</p></div>'); return; }
+      setText('<div style="display:flex;justify-content:space-between;width:100%;gap:4vw"><div style="flex:1"><p class="t-big line" data-d="1" style="color:#e6e3df">同樣的薪水</p><p class="t-lead line" data-d="2" style="color:#ece9e5">錢進來，就花掉<br>年底才發現沒存到<br>退休？以後再說</p></div><div style="flex:1"><p class="t-big line" data-d="4" style="color:#fff8ee">不同的方向</p><p class="t-lead line" data-d="5" style="color:#fff3e2">每筆錢都有清楚的位置<br>保障剛好，不多也不少<br>退休缺口算得出來</p></div></div>','top'); },
+    update(dt){ t+=dt; cam.position.set(Math.sin(t*.05)*3, 6, 22 - Math.min(t,12)*.4); cam.lookAt(0,2,-10); }
+  };
+})());
+
+/* 9：三層工具 —— 由內而外的三層圓盤 */
+slides.push((()=>{
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x140d09);
+  const cam = newCam(42); scene.add(stars(900,300,0xffe6c4));
+  scene.add(new THREE.AmbientLight(0xffffff,.35)); const dl = new THREE.DirectionalLight(0xffd6a0,2.4); dl.position.set(5,10,6); scene.add(dl);
+  const layers = []; const data = [[1.6,0xe9d6b6],[2.7,0xc8843f],[3.8,0x7d5a3c]];
+  data.forEach(([r,c],i)=>{ const m = new THREE.Mesh(new THREE.CylinderGeometry(r,r,.35,72), new THREE.MeshStandardMaterial({color:c, roughness:.45, metalness:.2, transparent:true, opacity:.95}));
+    scene.add(m); layers.push(m); });
+  const anchors = layers.map(()=>{ const o=new THREE.Object3D(); scene.add(o); return o; });
+  let t=0;
+  return { scene, cam,
+    enter(){ t=0; setText('<p class="t-eyebrow line" data-d="0">我怎麼幫你</p><p class="t-big line" data-d="1">三層工具，由內而外</p>','top');
+      setLabels([{obj:anchors[0], html:'<b>① 心態認知</b><span>先想清楚目標、建立長期主義</span>', delay:1500},
+                 {obj:anchors[1], html:'<b>② 非金融服務</b><span>收支儀表板・職涯定價・專家轉介</span>', delay:1900},
+                 {obj:anchors[2], html:'<b>③ 金融工具</b><span>保經全市場保險・基金・ETF・黃金</span>', delay:2300}]); },
+    update(dt){ t+=dt; layers.forEach((m,i)=>{ const k = ease((t-.2-i*.35)/1.4); m.position.y = (2-i)*1.6*k - (1-k)*3; m.rotation.y = t*.15*(i%2?-1:1); m.material.opacity = .95*k;
+        anchors[i].position.set(data[2][0] + (isNarrow()?.6:2.6), m.position.y, 0); });
+      cam.position.set(Math.sin(t*.07)*1.2, 7.5, 14); cam.lookAt(isNarrow()?1.5:2.5,3.4,0); placeLabels(cam); }
+  };
+})());
+
+/* 10：兩種合作方式 —— 溫暖的診間光線＋兩張卡片 */
+slides.push((()=>{
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x1c130d);
+  const cam = newCam(50);
+  const dust = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(Float32Array.from({length:1800},()=>rand(-12,12)),3)), new THREE.PointsMaterial({color:0xffd9a8, size:2, sizeAttenuation:false, transparent:true, opacity:.5}));
+  scene.add(dust);
+  const beams = new THREE.Group(); scene.add(beams);
+  for(let i=0;i<5;i++){ const b = new THREE.Mesh(new THREE.PlaneGeometry(2.2,30), new THREE.MeshBasicMaterial({color:0xffc98a, transparent:true, opacity:.06, blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide}));
+    b.position.set(-8+i*4, 4, -6); b.rotation.z = .45; beams.add(b); }
+  let t=0;
+  return { scene, cam,
+    enter(){ t=0; cam.position.set(0,0,12); cam.lookAt(0,0,0);
+      setText('<p class="t-eyebrow line" data-d="0">兩種合作方式</p><p class="t-big line" data-d="1">像看醫生，不像逛賣場</p><div class="cards line" data-d="2"><div class="card"><div class="tag">醫生式</div><h3>全方位財務健檢</h3><p>收入、支出、保障、投資、退休與傳承<br>一次看完整張財務體檢表</p></div><div class="card"><div class="tag">藥局式</div><h3>單點精準諮詢</h3><p>只想解決一個問題就好<br>保單健診、買房預算、退休缺口</p></div></div><div class="pills line" data-d="4"><span class="pill">先講好議程</span><span class="pill">30～45 分鐘</span><span class="pill">直接診斷</span><span class="pill">給處方</span></div>'); },
+    update(dt){ t+=dt; dust.rotation.y = t*.02; dust.position.y = Math.sin(t*.2)*.3; beams.children.forEach((b,i)=> b.material.opacity = .05 + Math.sin(t*.6+i)*.025); }
+  };
+})());
+
+/* 11：陪伴的人 —— 三階樓梯 */
+slides.push((()=>{
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x17100b); scene.fog = new THREE.Fog(0x17100b, 16, 45);
+  const cam = newCam(42);
+  scene.add(new THREE.AmbientLight(0xffffff,.3)); const dl = new THREE.DirectionalLight(0xffd29a,2.8); dl.position.set(-6,12,8); scene.add(dl);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(80,80), new THREE.MeshStandardMaterial({color:0x2a1d15, roughness:.4, metalness:.3})); floor.rotation.x=-Math.PI/2; scene.add(floor);
+  const steps=[], anchors=[];
+  [1,1.8,2.6].forEach((h,i)=>{ const m = new THREE.Mesh(new THREE.BoxGeometry(3.2,1,3), new THREE.MeshStandardMaterial({color:[0xe9d6b6,0xd7a466,0xc8843f][i], roughness:.5}));
+    m.position.x = -3.6 + i*3.6; scene.add(m); steps.push([m,h]); const o = new THREE.Object3D(); scene.add(o); anchors.push(o); });
+  const walker = glowSprite('#ffe1b0', 2.2); scene.add(walker);
+  let t=0;
+  return { scene, cam,
+    enter(){ t=0; setText('<p class="t-eyebrow line" data-d="0">我陪伴的人</p><p class="t-big line" data-d="1">不同階段，不同的課題</p>','top');
+      setLabels([{obj:anchors[0], html:'<b>小資族</b><span>第一桶金、緊急預備金</span>', delay:1500},
+                 {obj:anchors[1], html:'<b>中產家庭</b><span>買房買車、教育、退休</span>', delay:1800},
+                 {obj:anchors[2], html:'<b>企業主・高資產</b><span>稅務、資產保全、傳承</span>', delay:2100}]); },
+    update(dt){ t+=dt; steps.forEach(([m,h],i)=>{ const k = ease((t-.2-i*.3)/1.3); m.scale.y = Math.max(.01,h*k); m.position.y = h*k/2; anchors[i].position.set(m.position.x, h*k + 1.3, 0); });
+      const w = Math.min(2, Math.max(0,(t-2.2)/2.2)); const seg = Math.min(2, Math.floor(w)); const f = w - seg; const [m0,h0] = steps[seg]; const [m1,h1] = steps[Math.min(2,seg+1)];
+      walker.position.set(lerp(m0.position.x, m1.position.x, ease(f)), lerp(h0,h1,ease(f)) + .6 + Math.sin(f*Math.PI)*.8, .3);
+      cam.position.set(Math.sin(t*.06)*2, 4.5, 14); cam.lookAt(0,2.4,0); placeLabels(cam); }
+  };
+})());
+
+/* 12：關於我 —— 星空下的一盞燈＋名片 */
+slides.push((()=>{
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0e0906);
+  const cam = newCam(50); scene.add(stars(2000,300,0xfff0dc,1.4));
+  const glow = glowSprite('#ffb86b', 10); glow.position.set(6,-1,-6); scene.add(glow);
+  let t=0;
+  return { scene, cam,
+    enter(){ t=0; cam.position.set(0,0,10); cam.lookAt(0,0,-5);
+      setText('<p class="t-eyebrow line" data-d="0">關於我</p><p class="t-big line" data-d="1" style="font-size:clamp(44px,7vw,110px)">Edward</p><p class="t-lead line" data-d="2">保險經紀 × 人生財務教練</p><div class="pills line" data-d="4"><span class="pill">處經理</span><span class="pill">CFC 專業財務教練</span><span class="pill">保經全市場，不綁單一公司</span></div><p class="t-lead line" data-d="5" style="font-size:clamp(15px,1.7vw,24px)">親和、有自己的觀點，討厭廢話，見面就談正事。</p>'); },
+    update(dt){ t+=dt; scene.rotation.y = t*.015; glow.scale.setScalar(10 + Math.sin(t*1.3)*.6); }
+  };
+})());
+
+/* 13：還沒有定案 —— 夜裡的草原，一盞燈亮起，鏡頭拉遠 */
+slides.push((()=>{
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x07050a); scene.fog = new THREE.FogExp2(0x07050a, .06);
+  const cam = newCam(50); scene.add(stars(1600,300,0xffffff,1));
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(60,64), new THREE.MeshStandardMaterial({color:0x14100a, roughness:1})); ground.rotation.x=-Math.PI/2; scene.add(ground);
+  const N=4000, blade = new THREE.PlaneGeometry(.05,.6); blade.translate(0,.3,0);
+  const grass = new THREE.InstancedMesh(blade, new THREE.MeshStandardMaterial({color:0x9a7a42, side:THREE.DoubleSide, roughness:1}), N);
+  const m4=new THREE.Matrix4(), q=new THREE.Quaternion(), e=new THREE.Euler(), pv=new THREE.Vector3(), sv=new THREE.Vector3();
+  for(let i=0;i<N;i++){ const r=Math.sqrt(Math.random())*14, a=rand(0,6.28); pv.set(Math.cos(a)*r,0,Math.sin(a)*r); e.set(rand(-.3,.3),rand(0,6.28),rand(-.3,.3)); q.setFromEuler(e); sv.set(1,rand(.5,1.6),1); m4.compose(pv,q,sv); grass.setMatrixAt(i,m4); }
+  scene.add(grass);
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(.04,.05,2.6,8), new THREE.MeshStandardMaterial({color:0x1a1410})); pole.position.set(0,1.3,0); scene.add(pole);
+  const lampLight = new THREE.PointLight(0xffb060, 0, 12, 1.6); lampLight.position.set(0,2.7,0); scene.add(lampLight);
+  const lampGlow = glowSprite('#ffc070', 3); lampGlow.position.copy(lampLight.position); scene.add(lampGlow);
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(.16,16,16), new THREE.MeshBasicMaterial({color:0xffd59a})); bulb.position.copy(lampLight.position); scene.add(bulb);
+  const FN=90, fg=new THREE.BufferGeometry(), fp=new Float32Array(FN*3), seeds=[];
+  for(let i=0;i<FN;i++){ seeds.push([rand(-6,6),rand(.4,3),rand(-6,6),rand(0,6)]); }
+  fg.setAttribute('position', new THREE.BufferAttribute(fp,3));
+  const flies = new THREE.Points(fg, new THREE.PointsMaterial({color:0xffd27a, size:3, sizeAttenuation:false, transparent:true, opacity:0, blending:THREE.AdditiveBlending})); scene.add(flies);
+  let t=0;
+  return { scene, cam,
+    enter(){ t=0; setText('<p class="t-big line" data-d="3">你的人生，</p><p class="t-big line acc" data-d="5">還沒有定案。</p><p class="t-lead line" data-d="8">現在調整方向，永遠比十年後再來補救便宜！</p>'); },
+    update(dt){ t+=dt; const on = ease((t-.6)/1.6);
+      lampLight.intensity = 14*on; lampGlow.material.opacity = on; bulb.material.color.setScalar(.2+.8*on).multiply(new THREE.Color(0xffd59a));
+      flies.material.opacity = .9*ease((t-1.5)/2);
+      for(let i=0;i<FN;i++){ const s=seeds[i]; fp[i*3]=s[0]+Math.sin(t*.4+s[3])*.6; fp[i*3+1]=s[1]+Math.sin(t*.9+s[3]*2)*.25; fp[i*3+2]=s[2]+Math.cos(t*.3+s[3])*.6; }
+      fg.attributes.position.needsUpdate = true;
+      const k = reduce?1:ease(t/9); const lx = isNarrow()?0:-2.4; cam.position.set(lerp(1.2,4,k)+lx, lerp(1.6,5.5,k), lerp(3.2,13,k)); cam.lookAt(lx,lerp(1.6,1.2,k),0); }
+  };
+})());
+
+/* 14：下一步 —— 日出 */
+slides.push((()=>{
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x2a1a14); scene.fog = new THREE.Fog(0xd9905a, 20, 90);
+  const cam = newCam(50);
+  scene.add(new THREE.HemisphereLight(0xffd8a8, 0x6a4026, 2));
+  const sea = new THREE.Mesh(new THREE.PlaneGeometry(400,400,80,80), new THREE.MeshStandardMaterial({color:0xa06a46, roughness:.3, metalness:.35})); sea.rotation.x=-Math.PI/2; scene.add(sea);
+  const sun = glowSprite('#ffe0a8', 40); sun.position.set(0,-4,-90); scene.add(sun);
+  const sunL = new THREE.DirectionalLight(0xffb878, 2); sunL.position.set(0,3,-40); scene.add(sunL);
+  const pos = sea.geometry.attributes.position; const base = Float32Array.from(pos.array);
+  let t=0; const bg0 = new THREE.Color(0x2a1a14), bg1 = new THREE.Color(0xe7a066);
+  return { scene, cam,
+    enter(){ t=0; cam.position.set(0,3,20); cam.lookAt(0,4,-50);
+      setText('<p class="t-eyebrow line" data-d="0" style="color:#5a2f10">下一步</p><p class="t-big line" data-d="1">先聊 30 分鐘</p><p class="t-lead line" data-d="2" style="color:#fff3e2">不推商品，先幫你看清楚自己卡在哪一格</p><div class="pills line" data-d="4"><a class="pill" href="https://jonesgoober8433-lab.github.io/edward-consult/" target="_blank" rel="noopener">預約諮詢</a><a class="pill" href="./">看 Edward 的 Blog</a></div>'); },
+    update(dt){ t+=dt; const k = reduce?1:ease(t/5);
+      sun.position.y = lerp(-6, 14, k); scene.background.copy(bg0).lerp(bg1,k); sunL.intensity = 1 + 2*k;
+      for(let i=0;i<pos.count;i++){ const x=base[i*3], y=base[i*3+1]; pos.array[i*3+2] = Math.sin(x*.15+t)*.25 + Math.cos(y*.12+t*.8)*.25; } pos.needsUpdate = true; sea.geometry.computeVertexNormals(); }
+  };
+})());
+
+/* 15：回到無聊 */
+slides.push(boring('<p class="bt">有任何問題嗎？</p>'));
+
+/* ================= 往下滑＝時間軸 ================= */
+const D = {2:4.5,3:6,4:8,5:4,6:8,7:8,8:4.5,9:4,10:5,11:5,12:9,13:5};
+slides.forEach((sl,i)=>{ sl.D = D[i] || 0; });
+const scroller = document.getElementById('scroller');
+const secs = slides.map((sl,i)=>{ const d=document.createElement('section'); d.style.height = (sl.boring ? 110 : 60 + sl.D*28) + 'vh'; scroller.appendChild(d); return d; });
+let cur = -1, vt = 0, lastT = 0;
+const prog = document.querySelector('#prog i');
+function enterSlide(i){
+  cur = i; const s = slides[i];
+  textEl.innerHTML=''; labelsEl.innerHTML=''; labels=[];
+  document.body.classList.toggle('boring-on', !!s.boring);
+  boringEl.classList.toggle('show', !!s.boring);
+  if (s.cam){ s.cam.aspect = W/H; s.cam.updateProjectionMatrix(); }
+  s.enter && s.enter();
+  vt = 0; lastT = 0;
+  fadeEl.style.transition='none'; fadeEl.style.opacity = s.boring?0:.85;
+  requestAnimationFrame(()=>{ fadeEl.style.transition='opacity .45s ease'; fadeEl.style.opacity=0; });
+}
+function where(){
+  const y = scrollY + H*0.5; let i = 0;
+  for (let k=0;k<secs.length;k++){ if (secs[k].offsetTop <= y) i = k; }
+  const sec = secs[i], span = Math.max(1, sec.offsetHeight - H*0.5);
+  const p = Math.min(1, Math.max(0, (scrollY + H*0.5 - sec.offsetTop) / span));
+  return [i, p];
+}
+function jump(d){ const [i] = where(); const k = Math.min(secs.length-1, Math.max(0, i+d)); scrollTo({top: Math.max(0, secs[k].offsetTop - H*0.45 + 2), behavior:'smooth'}); }
+document.getElementById('next').onclick = () => jump(1);
+document.getElementById('prev').onclick = () => jump(-1);
+addEventListener('keydown', e => { if(['ArrowRight','PageDown'].includes(e.key)){ e.preventDefault(); jump(1); } if(['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); jump(-1); } });
+addEventListener('scroll', ()=>{ document.getElementById('hint').style.opacity = scrollY>40?0:1; }, {passive:true});
+
+/* ================= 主迴圈 ================= */
+const clock = new THREE.Clock();
+function loop(){
+  requestAnimationFrame(loop);
+  const real = Math.min(clock.getDelta(), .1);
+  const [i, p] = where();
+  if (i !== cur) enterSlide(i);
+  const s = slides[cur];
+  const total = document.documentElement.scrollHeight - H;
+  prog.style.width = (total>0 ? scrollY/total*100 : 0) + '%';
+  if (s.boring) return;
+  for (const el of textEl.querySelectorAll('.line')) el.classList.toggle('on', p >= el._th);
+  for (const l of labels) l.el.classList.toggle('on', p >= l.el._th);
+  const target = reduce ? s.D : p * s.D;
+  vt += (target - vt) * Math.min(1, real*8);            // 平滑跟隨捲動
+  const dt = (vt - lastT) + real*0.04;                    // 加一點點「靜止時的呼吸感」
+  lastT = vt;
+  s.update && s.update(dt);
+  if (s.split){
+    renderer.setScissorTest(true);
+    renderer.setViewport(0,0,W,H);
+    if (isNarrow()){ const hh = Math.floor(H/2); renderer.setScissor(0,hh,W,H-hh); renderer.render(s.scene, s.cam); renderer.setScissor(0,0,W,hh); renderer.render(s.split, s.cam); }
+    else { const half = Math.floor(W/2); renderer.setScissor(0,0,half,H); renderer.render(s.scene, s.cam); renderer.setScissor(half,0,W-half,H); renderer.render(s.split, s.cam); }
+    renderer.setScissorTest(false);
+  } else renderer.render(s.scene, s.cam);
+}
+resize(); loop();
+</script>
+</body>
+</html>
