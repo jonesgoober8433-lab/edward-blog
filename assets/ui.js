@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=20261124133118";
+import { store, MODE } from "./store.js?v=20261127144333";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -25,7 +25,7 @@ export function applyDark(d, remember = true) {
   if (remember) try { localStorage.setItem("eb-site-dark", d); } catch (e) { }
 }
 const applyRemoteSettings = () => store.getSettings().then(s => { applyPalette(s.palette); applyDark(s.dark); }).catch(() => { });
-// 文章頁、早報頁會先把頻寬留給公開內容，配色等 Firebase 啟動再補（config.js?v=20261124133118 已套過本機配色）
+// 文章頁、早報頁會先把頻寬留給公開內容，配色等 Firebase 啟動再補（config.js?v=20261127144333 已套過本機配色）
 if (window.__ebDeferFirebase && store.afterFirebase) store.afterFirebase(applyRemoteSettings);
 else applyRemoteSettings();
 export const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
@@ -55,8 +55,8 @@ export function md(text, { embed = true } = {}) {
       let host = ""; try { host = new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return m; }
       const title = text && text !== url ? text : (id ? "YouTube 影片" : host);
       return `<a class="bookmark" href="${esc(url)}" target="_blank" rel="noopener">
-        ${id ? `<span class="bm-thumb"><img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy"><span class="bm-play">▶</span></span>` : `<span class="bm-thumb bm-icon">🔗</span>`}
-        <span class="bm-txt"><b>${esc(title)}</b><small>${esc(host)}</small></span></a>`;
+        ${id ? `<span class="bm-thumb"><img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy"><span class="bm-play">▶</span></span>` : bmThumb(url) ? `<span class="bm-thumb"><img src="${bmThumb(url)}" alt="" loading="lazy"></span>` : `<span class="bm-thumb bm-icon">🔗</span>`}
+        <span class="bm-txt"><b>${esc(title)}</b></span></a>`;
     }
     return m;
   });
@@ -70,6 +70,12 @@ export function md(text, { embed = true } = {}) {
     return `<img${attrs}>`;
   });
   return html;
+}
+// 自己網站的頁面，書籤卡片用專屬封面圖（不用 🔗）
+const BM_THUMBS = { "intro.html": "images/intro-3d-thumb.jpg" };
+function bmThumb(u) {
+  try { const x = new URL(u, location.href); if (!/jonesgoober8433-lab\.github\.io$/.test(x.hostname) && x.hostname !== location.hostname) return "";
+    const f = x.pathname.split("/").pop(); return BM_THUMBS[f] || ""; } catch (e) { return ""; }
 }
 export function ytId(u) {
   try {

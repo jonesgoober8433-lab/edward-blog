@@ -5,7 +5,7 @@
 // 正式模式另外把「公開已上線清單」寫進 eb-public-posts-v1（見 postcache.js）。
 // 草稿、排程、文章內文不會進那個快取，避免共用裝置把管理員畫面漏給下一個人。
 
-import { fetchPublicPosts, fetchPublicPost, readPublicCache, writePublicCache } from "./postcache.js?v=20261124133118";
+import { fetchPublicPosts, fetchPublicPost, readPublicCache, writePublicCache } from "./postcache.js?v=20261127144333";
 
 const CFG = window.BLOG_CONFIG || {};
 export const MODE = CFG.firebase ? "firebase" : "demo";
