@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"></noscript>
-<link rel="stylesheet" href="assets/style.css?v=20261127170035">
-<script src="config.js?v=20261127170035"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261127171806">
+<script src="config.js?v=20261127171806"></script>
 </head>
 <body>
 <main><div class="wrap wide" id="root"><div class="empty">載入中…</div></div></main>
@@ -31,6 +31,9 @@
       <h3 style="margin:18px 0 6px">📚 今日財經小知識</h3>
       <div class="row2"><div><label for="kTerm">名詞</label><input id="kTerm"></div><div><label for="kEx">例子</label><input id="kEx"></div></div>
       <label for="kExp">白話解釋</label><textarea id="kExp" rows="3"></textarea>
+      <div class="row2"><div><label for="kFrom">連到哪一則新聞</label><select id="kFrom"></select></div><div><label for="kQuote">新聞裡的那句話（要跟新聞內文一字不差，才會被標亮）</label><input id="kQuote"></div></div>
+      <label for="kToday">🔍 套回今天的新聞</label><textarea id="kToday" rows="2"></textarea>
+      <label for="kTake">✅ 一句話記住</label><input id="kTake">
       <div class="actions">
         <button class="btn danger sm" id="reset">恢復小Edward 的原始版</button>
         <span style="flex:1"></span>
@@ -56,9 +59,9 @@
   </div>
 </template>
 <script type="module">
-import { store } from "./assets/store.js?v=20261127170035";
-import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261127170035";
-import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE, factsText } from "./assets/brief.js?v=20261127170035";
+import { store } from "./assets/store.js?v=20261127171806";
+import { header, footer, esc, toast, fmtTime } from "./assets/ui.js?v=20261127171806";
+import { loadIndex, loadRaw, visible, fmtDay, CAT_STYLE, factsText } from "./assets/brief.js?v=20261127171806";
 const CFG = window.BLOG_CONFIG;
 header("badmin"); footer();
 const root = document.getElementById("root");
@@ -93,6 +96,8 @@ async function start() {
     $("headline").value = ov?.headline ?? raw.headline ?? "";
     const k = { ...raw.knowledge, ...(ov?.knowledge || {}) };
     $("kTerm").value = k.term || ""; $("kExp").value = k.explain || ""; $("kEx").value = k.example || "";
+    $("kFrom").innerHTML = `<option value="">（不連）</option>` + raw.candidates.map((c, i) => `<option value="${esc(c.id)}">${i + 1}. ${esc(c.title)}</option>`).join("");
+    $("kFrom").value = k.from || ""; $("kQuote").value = k.quote || ""; $("kToday").value = k.today || ""; $("kTake").value = k.takeaway || "";
     E = JSON.parse(JSON.stringify(ov?.edits || {}));
     $("cands").innerHTML = raw.candidates.map(c0 => cardHtml(c0, picks.has(c0.id))).join("");
     count(); status();
@@ -168,7 +173,7 @@ async function start() {
     const picks = [...document.querySelectorAll(".cand")].filter(c => c.querySelector("input").checked).map(c => c.dataset.id);
     if (document.querySelector(".cand.editing")) toast("有一則還在編輯中，沒按「✓ 完成編輯」的部分不會存進去", true);
     const edits = JSON.parse(JSON.stringify(E));
-    return { picks, edits, headline: $("headline").value.trim(), knowledge: { term: $("kTerm").value.trim(), explain: $("kExp").value.trim(), example: $("kEx").value.trim() }, status: st, updatedAt: Date.now() };
+    return { picks, edits, headline: $("headline").value.trim(), knowledge: { term: $("kTerm").value.trim(), explain: $("kExp").value.trim(), example: $("kEx").value.trim(), from: $("kFrom").value, quote: $("kQuote").value.trim(), today: $("kToday").value.trim(), takeaway: $("kTake").value.trim() }, status: st, updatedAt: Date.now() };
   }
   async function save(st) {
     const d = collect(st);

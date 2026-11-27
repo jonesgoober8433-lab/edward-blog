@@ -80,8 +80,18 @@
 
 ### 4. 今日一句話和財經小知識
 - `headline`：一句話講今天最重要的事，不超過 40 字。
-- `knowledge`：挑一個跟今天新聞有關的財經名詞，格式 `{"term":"…","explain":"白話 2～3 句","example":"生活化的例子"}`。
-  - 先看 `briefs/index.json` 最近 30 天用過哪些名詞，不要重複。
+- `knowledge`（今日財經小知識）**一定要連到今天某一則被選中（picks）的新聞**（Edward 2026-11-27 指定）。做法：
+  1. 從 picks 的新聞裡，找一個讀者看了可能不懂、但看懂就能理解這則新聞的財經名詞或概念。
+  2. 格式：
+     ```json
+     {"term":"名詞（英文）","explain":"白話 2～3 句","example":"生活化的比喻",
+      "from":"那則新聞的 id（例如 c1）",
+      "quote":"那則新聞 facts 裡出現這個概念的一句話，必須跟 facts 一字不差（網站會把它標亮）",
+      "today":"套回今天：用今天這則新聞的事實，說明這個名詞怎麼發生（2～3 句，只寫事實與白話解釋，不給買賣建議）",
+      "takeaway":"一句話記住（20 字內）"}
+     ```
+  3. `from` 必須在 `picks` 裡；`quote` 必須是那則 `facts` 的一段原文（可以只取其中一句）；找不到合適句子就把 `quote` 留空字串。
+  4. 先看 `briefs/index.json` 最近 30 天用過哪些名詞，不要重複。
 
 ### 5. 寫檔
 `briefs/data/DATE.json` 的格式如下，`id` 用 c1、c2…：
@@ -93,7 +103,7 @@
   "market": [ ... ],
   "candidates": [ { "id": "c1", "title": "...", "facts": "...", "index": [ ... ], "crossCheck": "", "why": "...", "outlook": "...", "category": "...", "number": {...}, "sources": [...], "pros": "...", "cons": "...", "score": 4, "recommend": true } ],
   "picks": ["c1", "c3", "c4"],
-  "knowledge": { "term": "...", "explain": "...", "example": "..." }
+  "knowledge": { "term": "...", "explain": "...", "example": "...", "from": "c1", "quote": "...", "today": "...", "takeaway": "..." }
 }
 ```
 - `picks` 就是 `recommend` 為 `true` 的那幾則的 id。

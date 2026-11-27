@@ -1,7 +1,7 @@
 // 每日財經早報（給客戶看）：資料＝雲端排程產生的 briefs/data/日期.json ＋ Edward 在後台的勾選與微調（Firestore briefs/日期）
-import { store, MODE } from "./store.js?v=20261127170035";
-import { fetchPublicBriefs } from "./postcache.js?v=20261127170035";
-import { esc } from "./ui.js?v=20261127170035";
+import { store, MODE } from "./store.js?v=20261127171806";
+import { fetchPublicBriefs } from "./postcache.js?v=20261127171806";
+import { esc } from "./ui.js?v=20261127171806";
 
 const CFG = window.BLOG_CONFIG || {};
 export const CAT_STYLE = {
@@ -100,23 +100,47 @@ export function itemTables(c, market = []) {
   const want = (c.index || []).length ? c.index.map(x => x.name) : (AUTO_IDX[c.category] || []);
   return want.map(n => (market || []).find(m => m.name === n) || (c.index || []).find(x => x.name === n)).filter(x => x && x.close != null);
 }
+// 今日財經小知識：一定連到今天某一則新聞（Edward 2026-11-27）
+// knowledge = {term, explain, example, from: 新聞 id, quote: 新聞裡出現這個概念的那句, today: 套回今天, takeaway: 一句話記住}
+function markQuote(html, k, c) {
+  if (!k?.quote || k.from !== c.id) return html;
+  const q = esc(k.quote);
+  return html.includes(q) ? html.replace(q, `<a class="bf-kmark" href="#know" title="今日財經小知識：${esc(k.term)}">${q}</a>`) : html;
+}
+function knowCard(b) {
+  const k = b.knowledge; if (!k?.term) return "";
+  const n = (b.items || []).findIndex(c => c.id === k.from), src = n >= 0 ? b.items[n] : null;
+  return `<section class="bf-know" id="know">
+    <span class="bf-klab">📚 今日財經小知識</span>
+    <h3>${esc(k.term)}</h3>
+    ${src ? `<a class="bf-kfrom" href="#news-${esc(src.id)}">📰 出自今天第 ${n + 1} 則：${esc(src.title)}　↑ 回到新聞</a>` : ""}
+    ${src && k.quote ? `<p class="bf-kquote">${esc(k.quote)}</p>` : ""}
+    <div class="bf-kgrid">
+      <div><b>🧠 白話解釋</b><p>${esc(k.explain || "")}</p></div>
+      ${k.example ? `<div><b>🍜 生活比喻</b><p>${esc(k.example)}</p></div>` : ""}
+    </div>
+    ${k.today ? `<div class="bf-ktoday"><b>🔍 套回今天的新聞</b><p>${esc(k.today)}</p></div>` : ""}
+    ${k.takeaway ? `<p class="bf-ktake"><b>✅ 一句話記住</b>${esc(k.takeaway)}</p>` : ""}
+  </section>`;
+}
 export function renderBrief(el, b) {
   el.innerHTML = `
     <div class="bf-head"><span class="tag">每日財經早報</span><h1>${fmtDay(b.date)}</h1>
       ${b.headline ? `<p class="bf-lead">${esc(b.headline)}</p>` : ""}</div>
     ${marketStrip(b.market)}
     <div class="bf-items">${b.items.map((c, i) => `
-      <article class="bf-item">
+      <article class="bf-item" id="news-${esc(c.id)}">
         ${cover(c)}
         <div class="bf-txt">
           <span class="bf-no">${i + 1}</span><h2>${esc(c.title)}</h2>
-          ${factsText(c) ? `<p class="bf-facts">${esc(factsText(c))}</p>` : ""}
+          ${factsText(c) ? `<p class="bf-facts">${markQuote(esc(factsText(c)), b.knowledge, c)}</p>` : ""}
+          ${b.knowledge?.term && b.knowledge.from === c.id ? `<a class="bf-kchip" href="#know">📚 今日小知識：${esc(b.knowledge.term)}　往下看 ↓</a>` : ""}
           ${itemTables(c, b.market).map(indexTable).join("")}
           ${(c.sources || []).length ? `<div class="bf-sec bf-cross"><b>🔍 交叉比對（出處）</b><p>${(c.sources || []).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}${s.date ? "（" + esc(s.date) + "）" : ""}</a>`).join("、")}</p></div>` : ""}
           <div class="bf-why"><b>💡 簡單分析：為什麼重要？</b><p>${esc(c.why)}</p></div>
           ${c.outlook ? `<div class="bf-sec bf-out"><b>🔮 推估可能</b><span class="bf-tag">推估，非預測</span><p>${esc(c.outlook)}</p></div>` : ""}
         </div>
       </article>`).join("")}</div>
-    ${b.knowledge?.term ? `<div class="bf-know"><span>📚 今日財經小知識</span><h3>${esc(b.knowledge.term)}</h3><p>${esc(b.knowledge.explain || "")}</p>${b.knowledge.example ? `<p class="bf-ex">例子：${esc(b.knowledge.example)}</p>` : ""}</div>` : ""}
+    ${knowCard(b)}
     <p class="bf-fine">本早報整理自公開新聞與官方資料。「推估可能」是依據公開資訊推論的情境，不是預測，也不構成任何投資建議。數字以各來源最新公告為準。</p>`;
 }
