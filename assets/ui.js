@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=20261127154650";
+import { store, MODE } from "./store.js?v=20261127160358";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -25,7 +25,7 @@ export function applyDark(d, remember = true) {
   if (remember) try { localStorage.setItem("eb-site-dark", d); } catch (e) { }
 }
 const applyRemoteSettings = () => store.getSettings().then(s => { applyPalette(s.palette); applyDark(s.dark); }).catch(() => { });
-// 文章頁、早報頁會先把頻寬留給公開內容，配色等 Firebase 啟動再補（config.js?v=20261127154650 已套過本機配色）
+// 文章頁、早報頁會先把頻寬留給公開內容，配色等 Firebase 啟動再補（config.js?v=20261127160358 已套過本機配色）
 if (window.__ebDeferFirebase && store.afterFirebase) store.afterFirebase(applyRemoteSettings);
 else applyRemoteSettings();
 export const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
@@ -168,4 +168,52 @@ export function toast(msg, bad = false) {
   t.className = "toast" + (bad ? " bad" : "");
   t.textContent = msg; document.body.append(t);
   setTimeout(() => t.remove(), Math.max(2600, msg.length * 90));
+}
+
+// ===== 文章卡片標題：Edward 指定的斷行（2026-11-27）=====
+// 「／」＝換行；斷在行尾的「，」會自動拿掉。標題日後改字、對不上時，自動回到一般換行。
+// 新文章要斷行：在這裡加一行 "文章id": "前半／後半"
+export const TITLE_BREAKS = {
+ "n-ec9e7cff9014": "理財新手村：／防禦、系統、進攻，三步通關路線圖",
+ "q4-draft-pub-stabilization-fund": "國安基金進場：／跟投資人有什麼關係？",
+ "q4-draft-pub-national-pension": "國民年金是什麼：／為什麼離職就要繳這筆錢？",
+ "q4-draft-pub-travel-sports": "出國滑雪、騎馬受傷，／旅平險賠不賠？：／看懂這 2 條除外條款就不會被拒賠",
+ "q4-draft-pub-travel-flu": "出國得流感，旅平險賠不賠？：／3 個條件決定你拿不拿得到理賠",
+ "notify-cleanup-mwlt4w58": "通知大掃除：／截一張圖給／ChatGPT 或 Gemini，／5 分鐘清掉奇怪通知",
+ "q4-2026-12-16-vip-mwlxdjl4": "資產配置健檢表：／股債比例＋每年再平衡日曆",
+ "q4-draft-pub-travel": "出國前必看：／旅平險怎麼買，／美日韓真實案例告訴你",
+ "q4-2026-12-01-pub-mwlxdjd4": "遺產稅贈與稅：／年底前一定要知道的幾件事",
+ "q4-2026-12-29-pub-mwlxdjr5": "我為什麼做財務教練：／買完之後，才是開始",
+ "q4-draft-pub-medical6": "六大保障一次看懂：醫療險／怎麼買、怎麼比、避開哪些坑",
+ "q4-2026-12-09-vip-mwlxdjhj": "傳承三工具：／保險金、信託、贈與怎麼搭配",
+ "q4-2026-12-22-pub-mwlxdjnq": "勞退自提6%：值不值得？／自選投資又怎麼看",
+ "q4-2026-12-15-pub-mwlxdjjp": "儲蓄險報酬率怎麼算：／累積、平均、年化差很多",
+ "q4-2026-11-25-vip-mwlxdja3": "勞保勞退試算表：／自己算退休後每月能領多少",
+ "q4-2026-12-11-pub-mwlxdjir": "保證月領 3%：／為什麼比不保證 6% 更危險",
+ "q4-2026-11-20-pub-mwlxdj5j": "勞保年金怎麼算：／60、65、70 歲請領差多少，／一次算給你看！",
+ "q4-2026-12-08-pub-mwlxdjga": "回本數學：／跌 30% 要漲多少才回本？／為什麼每年要再平衡",
+ "n-f16212282114": "AI 2027：／是毀滅預言，還是黃金牢籠？／當超級智慧近在咫尺，／我們該如何「理性」生存？",
+ "q4-2026-12-04-pub-mwlxdjeu": "Beta策略：／為什麼你不需要選股／也能參與市場成長",
+ "q4-2026-11-27-pub-mwlxdjbf": "越常買賣越輸大盤：／三份研究告訴你／忙進忙出為什麼賺更少",
+ "n-f73d0e49d0f4": "股市大跌別急著逃！／把波動變成機會的 3 個方法",
+ "n-da45a8525d5c": "【投資心法】／如果這輩子只能選一種投資，／絕對是「定期定額」",
+ "n-ebbc12a6e34b": "資產翻倍要多久？／理財必學的「72 法則」，／一眼看穿投資與詐騙",
+ "n-d2949ecaf61e": "保單不見了怎麼辦？／5分鐘搞定「保險存摺」，／所有保單一網打盡！",
+ "n-f042c44cfa69": "你的隱形名片：／別讓這 3 位數，／擋住你嚮往的生活！",
+ "q4-2026-11-24-pub-mwlxdj8a": "通膨小偷：／10 年前的 1000 塊，／現在剩多少？",
+ "n-f96aa59472a0": "告別赤字：／翻轉一個觀念，讓存款翻倍",
+ "n-e346eb4f8d3d": "讀書心得：／富豪的「BS 思維」——／為什麼債務也能是資產？",
+ "n-d061314876d7": "川普 2.0 核心震撼彈：／3 分鐘看懂《大而美法案》／如何影響你的荷包與台積電！",
+ "n-cf2ad1ad8308": "海湖莊園協議是什麼？／美債、新台幣與外匯存底，／台灣可能面臨的 3 個衝擊",
+ "q4-draft-pub-labor-claim-rw": "【改寫版待審】／勞保勞退怎麼領：／一次領、分批領，差多少",
+ "q4-2026-12-30-vip-mwlxdjsj": "2027理財檢查清單：／新年要更新的數字與要做的事",
+ "q4-2026-12-25-pub-mwlxdjpy": "退休要準備多少：／基本、小康、寬裕／三種生活一次算",
+ "q4-2026-12-23-vip-mwlxdjoz": "30歲雙薪家庭：／資產配置怎麼排先後順序",
+ "q4-2026-12-18-pub-mwlxdjmi": "景氣四季：／看懂燈號，不被新聞牽著走"
+};
+export function cardTitle(p) {
+  const t = p.title || "", b = TITLE_BREAKS[p.id];
+  if (!b || b.replace(/／/g, "").replace(/\s/g, "") !== t.replace(/\s/g, "")) return esc(t);
+  const lines = b.split("／").map(s => s.trim()).filter(Boolean);
+  return lines.map((s, i) => `<span class="tl">${esc(i < lines.length - 1 ? s.replace(/，$/, "") : s)}</span>`).join("");
 }

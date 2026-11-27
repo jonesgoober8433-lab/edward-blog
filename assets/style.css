@@ -95,6 +95,7 @@ label { display: block; font-size: 13px; font-weight: 600; color: var(--mu); mar
 .card .cover.blank::after { content: attr(data-cat); color: var(--hero-accent); font: 700 22px var(--serif); letter-spacing: .3em; padding: 6px 18px; border-top: 1px solid rgba(233,211,172,.5); border-bottom: 1px solid rgba(233,211,172,.5); }
 .card .in { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .card h3 { margin: 0; font-size: 19px; }
+.card h3 .tl { display: block; }   /* 指定斷行：每段一行，太長才自動再換 */
 .card p { margin: 0; color: var(--mu); font-size: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .card.featured { grid-column: 1 / -1; flex-direction: row; }
 .card.featured .cover { aspect-ratio: auto; flex: 0 0 42%; min-height: 220px; }

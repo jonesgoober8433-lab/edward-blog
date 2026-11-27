@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"></noscript>
-<link rel="stylesheet" href="assets/style.css?v=20261127154650">
-<script src="config.js?v=20261127154650"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261127160358">
+<script src="config.js?v=20261127160358"></script>
 </head>
 <body>
 <main>
@@ -37,11 +37,11 @@
   </div>
 </main>
 <script type="module">
-import { store, MODE } from "./assets/store.js?v=20261127154650";
-import { readPublicCache } from "./assets/postcache.js?v=20261127154650";
-import { header, footer, esc, fmtDate, fmtTime, toast } from "./assets/ui.js?v=20261127154650";
-import { mountMarket } from "./assets/market.js?v=20261127154650";
-import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261127154650";
+import { store, MODE } from "./assets/store.js?v=20261127160358";
+import { readPublicCache } from "./assets/postcache.js?v=20261127160358";
+import { header, footer, esc, fmtDate, fmtTime, toast, cardTitle } from "./assets/ui.js?v=20261127160358";
+import { mountMarket } from "./assets/market.js?v=20261127160358";
+import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261127160358";
 const startCharts = mountMarket(document.getElementById("mkt"));
 function showBrief() {
   loadIndex().then(latestVisible).then(b => {
@@ -130,7 +130,7 @@ function render() {
       <div class="cover ${p.cover ? "" : "blank"}" data-cat="${esc(p.category || "Edward")}" ${p.cover ? `style="background-image:url('${esc(p.cover)}')"` : ""}></div>
       <div class="in">
         <span class="tag">${esc(p.category || "")}</span>
-        <h3>${esc(p.title)}</h3>
+        <h3>${cardTitle(p)}</h3>
         <p>${esc(p.summary || "")}</p>
         <div class="meta">
           ${p.pinned ? `<span class="badge pin">置頂</span>` : ""}
