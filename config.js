@@ -16,7 +16,7 @@ window.BLOG_CONFIG = {
   darkStyle: "oled",
   tagline: "投資理財・退休傳承・社會保險，用白話把錢的事講清楚",
   author: "Edward",
-  authorTitle: "保經事業部負責人｜CFC",
+  authorTitle: "保經事業部負責人｜CFC 財務教練",
   // 預約諮詢按鈕要連到哪裡（LINE、Google 表單等），留空就不顯示
   bookingUrl: "https://jonesgoober8433-lab.github.io/edward-consult/",
   bookingNote: "免費 15-20 分鐘財務現況評估",
