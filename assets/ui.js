@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=20261127160358";
+import { store, MODE } from "./store.js?v=20261127164520";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -25,7 +25,7 @@ export function applyDark(d, remember = true) {
   if (remember) try { localStorage.setItem("eb-site-dark", d); } catch (e) { }
 }
 const applyRemoteSettings = () => store.getSettings().then(s => { applyPalette(s.palette); applyDark(s.dark); }).catch(() => { });
-// 文章頁、早報頁會先把頻寬留給公開內容，配色等 Firebase 啟動再補（config.js?v=20261127160358 已套過本機配色）
+// 文章頁、早報頁會先把頻寬留給公開內容，配色等 Firebase 啟動再補（config.js?v=20261127164520 已套過本機配色）
 if (window.__ebDeferFirebase && store.afterFirebase) store.afterFirebase(applyRemoteSettings);
 else applyRemoteSettings();
 export const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
@@ -173,15 +173,28 @@ export function toast(msg, bad = false) {
 // ===== 文章卡片標題：Edward 指定的斷行（2026-11-27）=====
 // 「／」＝換行；斷在行尾的「，」會自動拿掉。標題日後改字、對不上時，自動回到一般換行。
 // 新文章要斷行：在這裡加一行 "文章id": "前半／後半"
+// 電腦版（含 iPad）、手機版要不同：{"t": 原標題, "pc": "電腦版", "mb": "手機版"}（螢幕 ≤600px 用手機版）
 export const TITLE_BREAKS = {
  "n-ec9e7cff9014": "理財新手村：／防禦、系統、進攻，三步通關路線圖",
  "q4-draft-pub-stabilization-fund": "國安基金進場：／跟投資人有什麼關係？",
  "q4-draft-pub-national-pension": "國民年金是什麼：／為什麼離職就要繳這筆錢？",
- "q4-draft-pub-travel-sports": "出國滑雪、騎馬受傷，／旅平險賠不賠？：／看懂這 2 條除外條款就不會被拒賠",
+ "q4-draft-pub-travel-sports": {
+  "t": "出國滑雪、騎馬受傷，旅平險賠不賠？：看懂這 2 條除外條款就不會被拒賠",
+  "pc": "出國滑雪、騎馬受傷，／旅平險賠不賠？／看懂這 2 條除外條款就不會被拒賠",
+  "mb": "出國滑雪、騎馬受傷，／旅平險賠不賠？：／看懂這 2 條除外條款就不會被拒賠"
+ },
  "q4-draft-pub-travel-flu": "出國得流感，旅平險賠不賠？：／3 個條件決定你拿不拿得到理賠",
- "notify-cleanup-mwlt4w58": "通知大掃除：／截一張圖給／ChatGPT 或 Gemini，／5 分鐘清掉奇怪通知",
+ "notify-cleanup-mwlt4w58": {
+  "t": "通知大掃除：截一張圖給 ChatGPT 或 Gemini，5 分鐘清掉奇怪通知",
+  "pc": "通知大掃除：截一張圖給／GPT 或 Gemini，／5 分鐘清掉奇怪通知",
+  "mb": "通知大掃除：／截一張圖給／ChatGPT 或 Gemini，／5 分鐘清掉奇怪通知"
+ },
  "q4-2026-12-16-vip-mwlxdjl4": "資產配置健檢表：／股債比例＋每年再平衡日曆",
- "q4-draft-pub-travel": "出國前必看：／旅平險怎麼買，／美日韓真實案例告訴你",
+ "q4-draft-pub-travel": {
+  "t": "出國前必看：旅平險怎麼買，美日韓真實案例告訴你",
+  "pc": "出國前必看：旅平險怎麼買？／美日韓真實案例告訴你",
+  "mb": "出國前必看：／旅平險怎麼買，／美日韓真實案例告訴你"
+ },
  "q4-2026-12-01-pub-mwlxdjd4": "遺產稅贈與稅：／年底前一定要知道的幾件事",
  "q4-2026-12-29-pub-mwlxdjr5": "我為什麼做財務教練：／買完之後，才是開始",
  "q4-draft-pub-medical6": "六大保障一次看懂：醫療險／怎麼買、怎麼比、避開哪些坑",
@@ -212,8 +225,12 @@ export const TITLE_BREAKS = {
  "q4-2026-12-18-pub-mwlxdjmi": "景氣四季：／看懂燈號，不被新聞牽著走"
 };
 export function cardTitle(p) {
-  const t = p.title || "", b = TITLE_BREAKS[p.id];
-  if (!b || b.replace(/／/g, "").replace(/\s/g, "") !== t.replace(/\s/g, "")) return esc(t);
-  const lines = b.split("／").map(s => s.trim()).filter(Boolean);
-  return lines.map((s, i) => `<span class="tl">${esc(i < lines.length - 1 ? s.replace(/，$/, "") : s)}</span>`).join("");
+  const t = p.title || "", b = TITLE_BREAKS[p.id], same = (a, c) => a.replace(/\s/g, "") === c.replace(/\s/g, "");
+  const lines = str => { const L = str.split("／").map(s => s.trim()).filter(Boolean); return L.map((s, i) => `<span class="tl">${esc(i < L.length - 1 ? s.replace(/，$/, "") : s)}</span>`).join(""); };
+  if (!b) return esc(t);
+  // 字串＝電腦手機同一種斷法（字必須跟標題一樣）
+  if (typeof b === "string") return same(b.replace(/／/g, ""), t) ? lines(b) : esc(t);
+  // 物件＝電腦版／手機版分開（可以用不同字；標題日後改了就退回一般顯示）
+  if (b.t && !same(b.t, t)) return esc(t);
+  return `<span class="tv tv-pc">${lines(b.pc || t)}</span><span class="tv tv-mb">${lines(b.mb || b.pc || t)}</span>`;
 }
