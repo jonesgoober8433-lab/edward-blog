@@ -59,6 +59,12 @@ a.pill{pointer-events:auto;text-decoration:none}
 .btn{background:rgba(20,13,9,.6);color:var(--cream);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:8px 16px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
 #hint{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);font-size:14px;color:#888;transition:opacity .8s;pointer-events:none;white-space:nowrap}
 body.boring-on #ui .btn,body.boring-on #hint{color:#555;background:rgba(255,255,255,.8);border-color:#ccc}
+/* 右側捲動進度條（只顯示、不能拉） */
+#vbar{position:fixed;right:max(10px,1.2vw);top:50%;transform:translateY(-50%);width:6px;height:56vh;border-radius:6px;background:rgba(255,255,255,.18);box-shadow:0 0 0 1px rgba(0,0,0,.25);pointer-events:none;z-index:6}
+#vbar i{position:absolute;left:0;right:0;top:0;height:0;border-radius:6px;background:linear-gradient(#E9B27A,var(--caramel));box-shadow:0 0 10px rgba(233,178,122,.75)}
+#vbar b{position:absolute;left:50%;width:14px;height:14px;margin:-7px 0 0 -7px;top:0;border-radius:50%;background:#F6E3C8;box-shadow:0 0 12px rgba(233,178,122,.9)}
+body.boring-on #vbar{background:rgba(0,0,0,.12);box-shadow:none}
+@media (max-width:760px){#vbar{right:6px;width:5px;height:50vh}#vbar b{width:12px;height:12px;margin:-6px 0 0 -6px}}
 </style>
 </head>
 <body>
@@ -74,6 +80,7 @@ body.boring-on #ui .btn,body.boring-on #hint{color:#555;background:rgba(255,255,
   <button class="btn" id="next" aria-label="下一段" style="margin-left:10px">↓</button>
 </div>
 <div id="hint">↓ 往下滑，動畫就會跟著動</div>
+<div id="vbar" aria-hidden="true"><i></i><b></b></div>
 <div id="scroller"></div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
@@ -419,8 +426,6 @@ slides.push((()=>{
   };
 })());
 
-/* 15：回到無聊 */
-slides.push(boring('<p class="bt">有任何問題嗎？</p>'));
 
 /* ================= 往下滑＝時間軸 ================= */
 const D = {2:4.5,3:6,4:8,5:4,6:8,7:8,8:4.5,9:4,10:5,11:5,12:9,13:5};
@@ -429,6 +434,7 @@ const scroller = document.getElementById('scroller');
 const secs = slides.map((sl,i)=>{ const d=document.createElement('section'); d.style.height = (sl.boring ? 110 : 60 + sl.D*28) + 'vh'; scroller.appendChild(d); return d; });
 let cur = -1, vt = 0, lastT = 0;
 const prog = document.querySelector('#prog i');
+const vFill = document.querySelector('#vbar i'), vDot = document.querySelector('#vbar b');
 function enterSlide(i){
   cur = i; const s = slides[i];
   textEl.innerHTML=''; labelsEl.innerHTML=''; labels=[];
@@ -462,7 +468,8 @@ function loop(){
   if (i !== cur) enterSlide(i);
   const s = slides[cur];
   const total = document.documentElement.scrollHeight - H;
-  prog.style.width = (total>0 ? scrollY/total*100 : 0) + '%';
+  const pct = (total>0 ? Math.min(100, scrollY/total*100) : 0) + '%';
+  prog.style.width = pct; vFill.style.height = pct; vDot.style.top = pct;
   if (s.boring) return;
   for (const el of textEl.querySelectorAll('.line')) el.classList.toggle('on', p >= el._th);
   for (const l of labels) l.el.classList.toggle('on', p >= l.el._th);
