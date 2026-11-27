@@ -139,8 +139,8 @@ const slides = [];
 
 /* 1、2、15：故意很無聊的投影片 */
 const boring = (html) => ({ boring:true, enter(){ boringEl.innerHTML = html + '<div class="bar"></div><p class="pg">'+(cur+1)+'</p>'; } });
-slides.push(boring('<p class="bt">業務自我介紹</p><p class="bs">Edward｜保險經紀人</p>'));
-slides.push(boring('<p class="bh">簡報大綱</p><ul><li>公司簡介</li><li>個人經歷</li><li>商品介紹</li><li>Q&amp;A</li></ul>'));
+slides.push(boring('<p class="bt">小編自我介紹</p><p class="bs">Edward｜保險經紀人業務（事業部負責人）、<br>CFC 財務教練</p>'));
+slides.push(boring('<ul><li>個人經歷</li><li>個人簡介</li></ul>'));
 
 /* 3：打破 —— 白色碎片炸開，飄進星空 */
 slides.push((()=>{
@@ -156,7 +156,7 @@ slides.push((()=>{
   let t0 = 0;
   return { scene, cam,
     enter(){ t0 = 0; cam.position.set(0,0,12); cam.lookAt(0,0,0);
-      setText('<p class="t-big line" data-d="2">這種簡報，</p><p class="t-big line" data-d="3">大多數人看到第二頁</p><p class="t-big line acc" data-d="4">就開始滑手機了！</p><p class="t-lead line" data-d="7">所以，換個方式認識我。</p>'); },
+      setText('<p class="t-big line" data-d="2">這種簡報，</p><p class="t-big line" data-d="3">大多數人看到這</p><p class="t-big line acc" data-d="4">就開始放空了！</p><p class="t-lead line" data-d="7">所以，讓大家換個方式認識我。</p>'); },
     update(dt){ t0 += dt; const k = reduce?3:Math.max(0, t0-0.9);
       for(let i=0;i<N;i++){ const P=parts[i]; const s=ease(k/2.2)*1;
         pos.copy(P.p0).addScaledVector(P.v, s*3.2 + k*0.35); e.set(P.r.x*s, P.r.y*s, P.r.z*s); q.setFromEuler(e);
@@ -253,7 +253,7 @@ slides.push((()=>{
   const fmt = v => Math.round(v/10000).toLocaleString('zh-TW');
   return { scene, cam,
     enter(){ t=0;
-      setText('<p class="t-eyebrow line" data-d="0">節奏為什麼重要</p><p class="t-big line" data-d="1" style="font-size:clamp(26px,4vw,64px)">同樣每月存 1 萬，差在幾歲開始</p><p class="counter line" id="cnt" data-d="2">&nbsp;</p><p class="t-note line" data-d="3" style="position:fixed;left:max(24px,8vw);right:max(24px,8vw);bottom:64px">試算假設：每月月底投入 10,000 元、年化報酬 6%、每月複利。僅說明時間的影響，非任何商品的保證報酬。</p>','top');
+      setText('<p class="t-eyebrow line" data-d="0">節奏為什麼重要</p><p class="t-big line" data-d="1" style="font-size:clamp(26px,4vw,64px)">同樣每月存 1 萬，差在幾歲開始</p><p class="counter line" id="cnt" data-d="2">&nbsp;</p><p class="t-note line" data-d="3" style="position:fixed;left:max(24px,8vw);right:max(24px,8vw);bottom:64px">試算假設：每月月底投入 10,000 元、年化報酬 6%、每月複利<br>（僅說明時間的影響，非任何商品的保證報酬）</p>','top');
       cEl = document.getElementById('cnt');
       setLabels([{obj:topA, html:'<b class="acc">25 歲開始</b><span id="la">—</span>', delay:900},{obj:topB, html:'<b>35 歲開始</b><span id="lb">—</span>', delay:900}]); },
     update(dt){ t+=dt; const yrs = reduce?40:Math.min(40, Math.max(0,(t-1.2))*7);
@@ -329,7 +329,7 @@ slides.push((()=>{
   let t=0;
   return { scene, cam,
     enter(){ t=0; cam.position.set(0,0,12); cam.lookAt(0,0,0);
-      setText('<p class="t-eyebrow line" data-d="0">兩種合作方式</p><p class="t-big line" data-d="1">像看醫生，不像逛賣場</p><div class="cards line" data-d="2"><div class="card"><div class="tag">醫生式</div><h3>全方位財務健檢</h3><p>收入、支出、保障、投資、退休與傳承<br>一次看完整張財務體檢表</p></div><div class="card"><div class="tag">藥局式</div><h3>單點精準諮詢</h3><p>只想解決一個問題就好<br>保單健診、買房預算、退休缺口</p></div></div><div class="pills line" data-d="4"><span class="pill">先講好議程</span><span class="pill">30～45 分鐘</span><span class="pill">直接診斷</span><span class="pill">給處方</span></div>'); },
+      setText('<p class="t-eyebrow line" data-d="0">兩種合作方式</p><p class="t-big line" data-d="1">像看醫生，不像逛賣場</p><div class="cards line" data-d="2"><div class="card"><div class="tag">醫生式</div><h3>全方位財務健檢</h3><p>收入、支出、保障、投資、退休與傳承<br>一次看完整張財務體檢表</p></div><div class="card"><div class="tag">藥局式</div><h3>單點精準諮詢</h3><p>只想解決一個問題就好<br>保單健診、買房預算、退休缺口</p></div></div><div class="pills line" data-d="4"><span class="pill">先講好議程</span><span class="pill">15～20 分鐘</span><span class="pill">直接診斷</span><span class="pill">給處方</span></div>'); },
     update(dt){ t+=dt; dust.rotation.y = t*.02; dust.position.y = Math.sin(t*.2)*.3; beams.children.forEach((b,i)=> b.material.opacity = .05 + Math.sin(t*.6+i)*.025); }
   };
 })());
@@ -412,7 +412,7 @@ slides.push((()=>{
   let t=0; const bg0 = new THREE.Color(0x2a1a14), bg1 = new THREE.Color(0xe7a066);
   return { scene, cam,
     enter(){ t=0; cam.position.set(0,3,20); cam.lookAt(0,4,-50);
-      setText('<p class="t-eyebrow line" data-d="0" style="color:#5a2f10">下一步</p><p class="t-big line" data-d="1">先聊 30 分鐘</p><p class="t-lead line" data-d="2" style="color:#fff3e2">不推商品，先幫你看清楚自己卡在哪一格</p><div class="pills line" data-d="4"><a class="pill" href="https://jonesgoober8433-lab.github.io/edward-consult/" target="_blank" rel="noopener">預約諮詢</a><a class="pill" href="./">看 Edward 的 Blog</a></div>'); },
+      setText('<p class="t-eyebrow line" data-d="0" style="color:#5a2f10">下一步</p><p class="t-big line" data-d="1">先聊 20 分鐘</p><p class="t-lead line" data-d="2" style="color:#fff3e2">不推商品，先幫你看清楚自己卡在哪一格</p><div class="pills line" data-d="4"><a class="pill" href="https://jonesgoober8433-lab.github.io/edward-consult/" target="_blank" rel="noopener">預約諮詢</a><a class="pill" href="./">看 Edward 的 Blog</a></div>'); },
     update(dt){ t+=dt; const k = reduce?1:ease(t/5);
       sun.position.y = lerp(-6, 14, k); scene.background.copy(bg0).lerp(bg1,k); sunL.intensity = 1 + 2*k;
       for(let i=0;i<pos.count;i++){ const x=base[i*3], y=base[i*3+1]; pos.array[i*3+2] = Math.sin(x*.15+t)*.25 + Math.cos(y*.12+t*.8)*.25; } pos.needsUpdate = true; sea.geometry.computeVertexNormals(); }
