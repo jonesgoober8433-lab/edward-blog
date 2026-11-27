@@ -751,3 +751,44 @@ body.resizing { cursor: col-resize; user-select: none; }
 .book-glow, .cta .btn, .site-footer .booking .btn, .btn.booking, .member-book { animation: book-glow 2.4s ease-in-out infinite; }
 .prose a.book-link { font-weight: 700; background: var(--gold-soft); padding: 1px 8px; border-radius: 6px; animation: book-glow 2.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .book-glow, .cta .btn, .site-footer .booking .btn, .btn.booking, .prose a.book-link { animation: none; } }
+
+/* ===== 理財地圖（理財新手村，自動更新） ===== */
+.fmap { margin: 18px 0 8px; }
+.fmap-meta { font-size: 14px; color: var(--mu); background: var(--gold-soft); border-radius: 10px; padding: 8px 14px; }
+.fmap-stage { border: 1px solid var(--ln); border-radius: 14px; padding: 4px 18px 14px; margin: 18px 0; background: var(--card); box-shadow: var(--shadow); }
+.fmap-stage h2 { margin: 14px 0 6px !important; }
+.fmap-start { border-style: dashed; border-color: var(--gold); }
+.fmap-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 14px; }
+.fmap-en { color: var(--gold); font-weight: 700; letter-spacing: .05em; }
+.fmap-goal b { color: var(--navy-2); margin-right: 6px; }
+.fmap-prog { margin-left: auto; font-size: 13px; color: var(--gold); font-weight: 700; white-space: nowrap; }
+.fmap-lead { color: var(--mu); margin: 6px 0 0 !important; }
+.fmap-group h3 { font-size: 16px; margin: 14px 0 6px !important; color: var(--navy-2); }
+.fmap-list { list-style: none; padding: 0 !important; margin: 0 !important; counter-reset: fm; }
+.fmap-list li { counter-increment: fm; position: relative; padding: 7px 0 7px 34px !important; margin: 0 !important; border-top: 1px dashed var(--ln); }
+.fmap-list li:first-child { border-top: 0; }
+.fmap-list li::before { content: counter(fm); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; border-radius: 50%; background: var(--gold-soft); color: var(--navy-2); font: 700 13px/24px var(--sans); text-align: center; }
+.fmap-list li.read::before { content: "✓"; background: var(--gold); color: #fff; }
+.fmap-list a { color: var(--ink); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--gold) 45%, transparent); }
+.fmap-list a:hover { color: var(--navy-2); border-bottom-color: var(--gold); }
+.fmap-list li.read a { color: var(--mu); }
+.fmap-b { display: inline-block; margin-left: 8px; font-size: 11.5px; font-weight: 700; border-radius: 99px; padding: 0 8px; vertical-align: 2px; white-space: nowrap; }
+.fmap-b.vip { background: var(--hero-a); color: var(--hero-accent); }
+.fmap-b.new { background: #C0392B; color: #fff; }
+.fmap-b.ok { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
+@media (max-width: 600px) { .fmap-stage { padding: 2px 14px 12px; } .fmap-prog { margin-left: 0; } }
+.fmap-stage:not(.open) .more { display: none !important; }
+.fmap-list li[value]::before { content: attr(value); }
+.fmap-list li.read::before { content: "✓"; }
+.fmap-more { display: block; width: 100%; margin-top: 10px; padding: 8px; border: 1px dashed var(--gold); border-radius: 10px; background: transparent; color: var(--gold); font: 700 14px var(--sans); cursor: pointer; }
+.fmap-more:hover { background: var(--gold-soft); }
+.fmap-where { margin: 28px 0 0; border: 1.5px solid var(--gold); border-radius: 14px; padding: 14px 18px; background: var(--card); }
+.fmap-where .fw-pos { margin: 0 0 8px; font-size: 15px; }
+.fmap-where .fw-pos b { color: var(--navy-2); }
+.fw-next { display: block; text-decoration: none; color: var(--ink); background: var(--gold-soft); border-radius: 10px; padding: 8px 14px; margin-bottom: 8px; }
+.fw-next small { display: block; color: var(--gold); font-weight: 700; font-size: 12.5px; }
+.fw-next b { font-family: var(--serif); }
+.fw-next:hover { outline: 1.5px solid var(--gold); }
+.fw-map { font-size: 14px; font-weight: 600; color: var(--navy-2); }
+.fmap-stage { scroll-margin-top: 80px; }
+.fmap-stage h2 { scroll-margin-top: 80px; }
