@@ -2,7 +2,7 @@
 // 台股加權指數：用證交所官方公開資料自己畫（TradingView 免費版不提供台股）
 // 美股：TradingView 免費小圖（S&P 500、那斯達克、道瓊用追蹤指數的差價合約報價；費半用 SOXX ETF 代表）
 // Edward 2026-11-19：要數字跳動，但只能看不能點 → 每張卡蓋一層透明保護層（.mkt-body::after），點了不會跳去 TradingView
-import { esc } from "./ui.js?v=20261127145418";
+import { esc } from "./ui.js?v=20261127154650";
 
 const CARDS = [
   { key: "twii", name: "台股加權指數", note: "證交所官方資料" },

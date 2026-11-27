@@ -36,6 +36,9 @@ body { font: 16px/1.75 var(--sans); -webkit-font-smoothing: antialiased; min-hei
 main { flex: 1; }
 a { color: var(--navy-2); }
 h1, h2, h3 { font-family: var(--serif); letter-spacing: .02em; line-height: 1.35; }
+/* 全站不留孤字：標題左右平均分行；內文、摘要、清單最後一行至少兩個字 */
+h1, h2, h3, h4, .bm-txt b, small, figcaption { text-wrap: balance; }
+p, li, blockquote, td, th, dd, label { text-wrap: pretty; }
 .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
 .narrow { max-width: 760px; }
 
