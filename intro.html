@@ -39,6 +39,8 @@ html,body{margin:0;overflow-x:clip;background:#140D09;color:var(--cream);font-fa
 /* 標籤（跟著 3D 物件走） */
 .lbl{position:fixed;left:0;top:0;transform:translate(-50%,-50%);pointer-events:none;text-align:center;white-space:nowrap;opacity:0;transition:opacity .6s ease}
 .lbl.on{opacity:1}
+br.mb{display:none}
+@media (max-width:760px){br.mb{display:inline}.pc{display:none}}
 .lbl b{display:block;font-family:'Noto Serif TC',serif;font-size:clamp(18px,2.2vw,34px);color:var(--cream);text-shadow:0 2px 12px rgba(0,0,0,.8)}
 .lbl span{display:block;font-size:clamp(12px,1.2vw,18px);color:var(--soft);margin-top:4px;text-shadow:0 2px 10px rgba(0,0,0,.8)}
 /* 卡片頁 */
@@ -50,7 +52,7 @@ html,body{margin:0;overflow-x:clip;background:#140D09;color:var(--cream);font-fa
 .pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
 .pill{background:var(--caramel);color:var(--dark);font-weight:700;border-radius:999px;padding:8px 18px;font-size:clamp(13px,1.3vw,19px);white-space:nowrap}
 a.pill{pointer-events:auto;text-decoration:none}
-@media (max-width:760px){.cards{grid-template-columns:1fr}.card p br{display:none}}
+@media (max-width:760px){.cards{grid-template-columns:1fr}.card p br:not(.mb){display:inline}}
 .counter{font-family:'Noto Serif TC',serif;font-size:clamp(16px,1.8vw,26px);color:var(--soft);margin-top:10px;font-variant-numeric:tabular-nums}
 /* 介面 */
 #ui{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:center;padding:12px max(16px,2vw) calc(12px + env(safe-area-inset-bottom));pointer-events:none;z-index:5}
@@ -140,14 +142,14 @@ function setText(html, cls=''){
 let labels = [];
 function setLabels(list){ labelsEl.innerHTML=''; labels = list.map(l => { const d=document.createElement('div'); d.className='lbl'; d.innerHTML=l.html; labelsEl.appendChild(d); d._th = reduce?0:Math.min(.7,(l.delay||900)/1000/(slides[cur].D||5)); return {el:d, obj:l.obj, off:l.off||new THREE.Vector3()}; }); }
 const _v = new THREE.Vector3();
-function placeLabels(cam){ for(const l of labels){ l.obj.getWorldPosition(_v); _v.add(l.off).project(cam); l.el.style.left=((_v.x+1)/2*W)+'px'; l.el.style.top=((1-_v.y)/2*H)+'px'; } }
+function placeLabels(cam){ for(const l of labels){ l.obj.getWorldPosition(_v); _v.add(l.off).project(cam); const hw=(l.el.offsetWidth||0)/2, x=(_v.x+1)/2*W; l.el.style.left=Math.min(W-hw-(isNarrow()?20:30), Math.max(hw+12, x))+'px'; l.el.style.top=((1-_v.y)/2*H)+'px'; } }
 
 /* ================= 各頁場景 ================= */
 const slides = [];
 
 /* 1、2、15：故意很無聊的投影片 */
 const boring = (html) => ({ boring:true, enter(){ boringEl.innerHTML = html + '<div class="bar"></div><p class="pg">'+(cur+1)+'</p>'; } });
-slides.push(boring('<p class="bt">小編自我介紹</p><p class="bs">Edward｜保險經紀人業務（事業部負責人）、<br>CFC 財務教練</p>'));
+slides.push(boring('<p class="bt">小編自我介紹</p><p class="bs">Edward｜保險經紀人業務<br class="mb">（事業部負責人）<span class="pc">、</span><br>CFC 財務教練</p>'));
 slides.push(boring('<ul><li>個人經歷</li><li>個人簡介</li></ul>'));
 
 /* 3：打破 —— 白色碎片炸開，飄進星空 */
@@ -206,12 +208,12 @@ slides.push((()=>{
   const center = glowSprite('#ffcf8a', 2); scene.add(center);
   let t=0;
   return { scene, cam,
-    enter(){ t=0; setText('<p class="t-eyebrow line" data-d="0">我做的事</p><p class="t-big line" data-d="1">把<span class="acc">賺錢、存錢、花錢</span>的節奏理清楚</p><p class="t-lead line" data-d="3">讓現在的現金流<br>對齊你未來想過的人生！</p>','top');
+    enter(){ t=0; setText('<p class="t-eyebrow line" data-d="0">我做的事</p><p class="t-big line" data-d="1">把<span class="acc">賺錢、存錢、花錢</span><br class="mb">的節奏理清楚</p><p class="t-lead line" data-d="3">讓現在的現金流<br>對齊你未來想過的人生！</p>','top');
       setLabels([{obj:balls[0].b, html:'<b>賺錢</b>', off:new THREE.Vector3(0,.8,0), delay:1600},{obj:balls[1].b, html:'<b>存錢</b>', off:new THREE.Vector3(0,.8,0), delay:1800},{obj:balls[2].b, html:'<b>花錢</b>', off:new THREE.Vector3(0,.8,0), delay:2000}]); },
     update(dt){ t+=dt; const sync = ease(t/6);
       balls.forEach((o,i)=>{ const sp = lerp(o.sp, .6, sync); o.ph += dt*sp; const ph = lerp(o.ph, t*.6 + i*2.094, sync*0.9);
         o.b.position.set(Math.cos(ph)*o.r, 0, Math.sin(ph)*o.r); });
-      const a = t*.05; cam.position.set(Math.sin(a)*2, 9, 12); cam.lookAt(0,-2.2,0); placeLabels(cam); }
+      const a = t*.05, n = isNarrow(); cam.position.set(Math.sin(a)*2, n?11:9, n?17:12); cam.lookAt(0, n?1.2:-2.2, 0); placeLabels(cam); }
   };
 })());
 
@@ -236,8 +238,8 @@ slides.push((()=>{
         {obj:anchors[0], html:'<b>賺錢</b><span>收入只靠一份薪水<br>不確定自己值多少</span>', delay:1400},
         {obj:anchors[1], html:'<b>花錢</b><span>房貸車貸壓力大<br>錢不知道去哪了</span>', delay:1700},
         {obj:anchors[2], html:'<b>存錢</b><span>通膨吃掉存款<br>退休金不知道夠不夠</span>', delay:2000}]); },
-    update(dt){ t+=dt; pillars.forEach((p,i)=>{ const h = .1 + hs[i]*ease((t-.3-i*.25)/1.6); p.scale.y = h; p.position.y = h/2; anchors[i].position.set(p.position.x, h+1.3, 0); });
-      cam.position.set(Math.sin(t*.06)*1.5, 4.2, 15); cam.lookAt(0,4.6,0); placeLabels(cam); }
+    update(dt){ t+=dt; const n = isNarrow(); pillars.forEach((p,i)=>{ const h = .1 + hs[i]*ease((t-.3-i*.25)/1.6); p.scale.y = h; p.position.y = h/2; p.position.x = (i-1)*(n?2.4:4); anchors[i].position.set(p.position.x, h+1.3+(n?i*.9:0), 0); });
+      cam.position.set(Math.sin(t*.06)*(n?.6:1.5), 4.2, n?24:15); cam.lookAt(0, n?3.4:4.6, 0); placeLabels(cam); }
   };
 })());
 
@@ -261,7 +263,7 @@ slides.push((()=>{
   const fmt = v => Math.round(v/10000).toLocaleString('zh-TW');
   return { scene, cam,
     enter(){ t=0;
-      setText('<p class="t-eyebrow line" data-d="0">節奏為什麼重要</p><p class="t-big line" data-d="1" style="font-size:clamp(26px,4vw,64px)">同樣每月存 1 萬，差在幾歲開始</p><p class="counter line" id="cnt" data-d="2">&nbsp;</p><p class="t-note line" data-d="3" style="position:fixed;left:max(24px,8vw);right:max(24px,8vw);bottom:64px">試算假設：每月月底投入 10,000 元、年化報酬 6%、每月複利<br>（僅說明時間的影響，非任何商品的保證報酬）</p>','top');
+      setText('<p class="t-eyebrow line" data-d="0">節奏為什麼重要</p><p class="t-big line" data-d="1" style="font-size:clamp(26px,4vw,64px)">同樣每月存 1 萬<span class="pc">，</span><br class="mb">差在幾歲開始</p><p class="counter line" id="cnt" data-d="2">&nbsp;</p><p class="t-note line" data-d="3" style="position:fixed;left:max(24px,8vw);right:max(24px,8vw);bottom:64px">試算假設：每月月底投入 10,000 元、年化報酬 6%、每月複利<br>（僅說明時間的影響，非任何商品的保證報酬）</p>','top');
       cEl = document.getElementById('cnt');
       setLabels([{obj:topA, html:'<b class="acc">25 歲開始</b><span id="la">—</span>', delay:900},{obj:topB, html:'<b>35 歲開始</b><span id="lb">—</span>', delay:900}]); },
     update(dt){ t+=dt; const yrs = reduce?40:Math.min(40, Math.max(0,(t-1.2))*7);
@@ -320,8 +322,8 @@ slides.push((()=>{
                  {obj:anchors[1], html:'<b>② 非金融服務</b><span>收支儀表板・職涯定價・專家轉介</span>', delay:1900},
                  {obj:anchors[2], html:'<b>③ 金融工具</b><span>保經全市場保險・基金・ETF・黃金</span>', delay:2300}]); },
     update(dt){ t+=dt; layers.forEach((m,i)=>{ const k = ease((t-.2-i*.35)/1.4); m.position.y = (2-i)*1.6*k - (1-k)*3; m.rotation.y = t*.15*(i%2?-1:1); m.material.opacity = .95*k;
-        anchors[i].position.set(data[2][0] + (isNarrow()?.6:2.6), m.position.y, 0); });
-      cam.position.set(Math.sin(t*.07)*1.2, 7.5, 14); cam.lookAt(isNarrow()?1.5:2.5,3.4,0); placeLabels(cam); }
+        isNarrow() ? anchors[i].position.set(0, m.position.y + 1.15, data[i][0]*.15) : anchors[i].position.set(data[2][0] + 2.6, m.position.y, 0); });
+      const n = isNarrow(); cam.position.set(Math.sin(t*.07)*(n?.5:1.2), n?9:7.5, n?22:14); cam.lookAt(n?0:2.5, n?2.2:3.4, 0); placeLabels(cam); }
   };
 })());
 
@@ -337,7 +339,7 @@ slides.push((()=>{
   let t=0;
   return { scene, cam,
     enter(){ t=0; cam.position.set(0,0,12); cam.lookAt(0,0,0);
-      setText('<p class="t-eyebrow line" data-d="0">兩種合作方式</p><p class="t-big line" data-d="1">像看醫生，不像逛賣場</p><div class="cards line" data-d="2"><div class="card"><div class="tag">醫生式</div><h3>全方位財務健檢</h3><p>收入、支出、保障、投資、退休與傳承<br>一次看完整張財務體檢表</p></div><div class="card"><div class="tag">藥局式</div><h3>單點精準諮詢</h3><p>只想解決一個問題就好<br>保單健診、買房預算、退休缺口</p></div></div><div class="pills line" data-d="4"><span class="pill">先講好議程</span><span class="pill">15～20 分鐘</span><span class="pill">直接診斷</span><span class="pill">給處方</span></div>'); },
+      setText('<p class="t-eyebrow line" data-d="0">兩種合作方式</p><p class="t-big line" data-d="1">像看醫生，不像逛賣場</p><div class="cards line" data-d="2"><div class="card"><div class="tag">醫生式</div><h3>全方位財務健檢</h3><p>收入、支出、保障、投資<span class="pc">、</span><br class="mb">退休與傳承<br>一次看完整張財務體檢表</p></div><div class="card"><div class="tag">藥局式</div><h3>單點精準諮詢</h3><p>只想解決一個問題就好<br>保單健診、買房預算<span class="pc">、</span><br class="mb">退休缺口</p></div></div><div class="pills line" data-d="4"><span class="pill">先講好議程</span><span class="pill">15～20 分鐘</span><span class="pill">直接診斷</span><span class="pill">給處方</span></div>'); },
     update(dt){ t+=dt; dust.rotation.y = t*.02; dust.position.y = Math.sin(t*.2)*.3; beams.children.forEach((b,i)=> b.material.opacity = .05 + Math.sin(t*.6+i)*.025); }
   };
 })());
@@ -358,10 +360,10 @@ slides.push((()=>{
       setLabels([{obj:anchors[0], html:'<b>小資族</b><span>第一桶金、緊急預備金</span>', delay:1500},
                  {obj:anchors[1], html:'<b>中產家庭</b><span>買房買車、教育、退休</span>', delay:1800},
                  {obj:anchors[2], html:'<b>企業主・高資產</b><span>稅務、資產保全、傳承</span>', delay:2100}]); },
-    update(dt){ t+=dt; steps.forEach(([m,h],i)=>{ const k = ease((t-.2-i*.3)/1.3); m.scale.y = Math.max(.01,h*k); m.position.y = h*k/2; anchors[i].position.set(m.position.x, h*k + 1.3, 0); });
+    update(dt){ t+=dt; const n = isNarrow(); steps.forEach(([m,h],i)=>{ const k = ease((t-.2-i*.3)/1.3); m.scale.y = Math.max(.01,h*k); m.position.y = h*k/2; m.position.x = (i-1)*(n?2.4:3.6); m.scale.x = n?.7:1; anchors[i].position.set(m.position.x, h*k + 1.3 + (n?i*.7:0), 0); });
       const w = Math.min(2, Math.max(0,(t-2.2)/2.2)); const seg = Math.min(2, Math.floor(w)); const f = w - seg; const [m0,h0] = steps[seg]; const [m1,h1] = steps[Math.min(2,seg+1)];
       walker.position.set(lerp(m0.position.x, m1.position.x, ease(f)), lerp(h0,h1,ease(f)) + .6 + Math.sin(f*Math.PI)*.8, .3);
-      cam.position.set(Math.sin(t*.06)*2, 4.5, 14); cam.lookAt(0,2.4,0); placeLabels(cam); }
+      cam.position.set(Math.sin(t*.06)*(n?.6:2), 4.5, n?22:14); cam.lookAt(0, n?2.8:2.4, 0); placeLabels(cam); }
   };
 })());
 
@@ -373,7 +375,7 @@ slides.push((()=>{
   let t=0;
   return { scene, cam,
     enter(){ t=0; cam.position.set(0,0,10); cam.lookAt(0,0,-5);
-      setText('<p class="t-eyebrow line" data-d="0">關於我</p><p class="t-big line" data-d="1" style="font-size:clamp(44px,7vw,110px)">Edward</p><p class="t-lead line" data-d="2">保險經紀 × 人生財務教練</p><div class="pills line" data-d="4"><span class="pill">處經理</span><span class="pill">CFC 專業財務教練</span><span class="pill">保經全市場，不綁單一公司</span></div><p class="t-lead line" data-d="5" style="font-size:clamp(15px,1.7vw,24px)">親和、有自己的觀點，討厭廢話，見面就談正事。</p>'); },
+      setText('<p class="t-eyebrow line" data-d="0">關於我</p><p class="t-big line" data-d="1" style="font-size:clamp(44px,7vw,110px)">Edward</p><p class="t-lead line" data-d="2">保險經紀 × 人生財務教練</p><div class="pills line" data-d="4"><span class="pill">處經理</span><span class="pill">CFC 專業財務教練</span><span class="pill">保經全市場，不綁單一公司</span></div><p class="t-lead line" data-d="5" style="font-size:clamp(15px,1.7vw,24px)">親和、有自己的觀點<span class="pc">，</span><br class="mb">討厭廢話，見面就談正事。</p>'); },
     update(dt){ t+=dt; scene.rotation.y = t*.015; glow.scale.setScalar(10 + Math.sin(t*1.3)*.6); }
   };
 })());
@@ -398,7 +400,7 @@ slides.push((()=>{
   const flies = new THREE.Points(fg, new THREE.PointsMaterial({color:0xffd27a, size:3, sizeAttenuation:false, transparent:true, opacity:0, blending:THREE.AdditiveBlending})); scene.add(flies);
   let t=0;
   return { scene, cam,
-    enter(){ t=0; setText('<p class="t-big line" data-d="3">你的人生，</p><p class="t-big line acc" data-d="5">還沒有定案。</p><p class="t-lead line" data-d="8">現在調整方向，永遠比十年後再來補救便宜！</p>'); },
+    enter(){ t=0; setText('<p class="t-big line" data-d="3">你的人生，</p><p class="t-big line acc" data-d="5">還沒有定案。</p><p class="t-lead line" data-d="8">現在調整方向<span class="pc">，</span><br class="mb">永遠比十年後再來補救便宜！</p>'); },
     update(dt){ t+=dt; const on = ease((t-.6)/1.6);
       lampLight.intensity = 14*on; lampGlow.material.opacity = on; bulb.material.color.setScalar(.2+.8*on).multiply(new THREE.Color(0xffd59a));
       flies.material.opacity = .9*ease((t-1.5)/2);
@@ -420,7 +422,7 @@ slides.push((()=>{
   let t=0; const bg0 = new THREE.Color(0x2a1a14), bg1 = new THREE.Color(0xe7a066);
   return { scene, cam,
     enter(){ t=0; cam.position.set(0,3,20); cam.lookAt(0,4,-50);
-      setText('<p class="t-eyebrow line" data-d="0" style="color:#5a2f10">下一步</p><p class="t-big line" data-d="1">先聊 20 分鐘</p><p class="t-lead line" data-d="2" style="color:#fff3e2">不推商品，先幫你看清楚自己卡在哪一格</p><div class="pills line" data-d="4"><a class="pill" href="https://jonesgoober8433-lab.github.io/edward-consult/" target="_blank" rel="noopener">預約諮詢</a><a class="pill" href="./">看 Edward 的 Blog</a></div>'); },
+      setText('<p class="t-eyebrow line" data-d="0" style="color:#5a2f10">下一步</p><p class="t-big line" data-d="1">先聊 20 分鐘</p><p class="t-lead line" data-d="2" style="color:#fff3e2">不推商品<span class="pc">，</span><br class="mb">先幫你看清楚自己卡在哪一格</p><div class="pills line" data-d="4"><a class="pill" href="https://jonesgoober8433-lab.github.io/edward-consult/" target="_blank" rel="noopener">預約諮詢</a><a class="pill" href="./">看 Edward 的 Blog</a></div>'); },
     update(dt){ t+=dt; const k = reduce?1:ease(t/5);
       sun.position.y = lerp(-6, 14, k); scene.background.copy(bg0).lerp(bg1,k); sunL.intensity = 1 + 2*k;
       for(let i=0;i<pos.count;i++){ const x=base[i*3], y=base[i*3+1]; pos.array[i*3+2] = Math.sin(x*.15+t)*.25 + Math.cos(y*.12+t*.8)*.25; } pos.needsUpdate = true; sea.geometry.computeVertexNormals(); }
