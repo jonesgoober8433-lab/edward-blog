@@ -10,17 +10,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"></noscript>
-<link rel="stylesheet" href="assets/style.css?v=20261128030513">
-<script src="config.js?v=20261128030513"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261128173407">
+<script src="config.js?v=20261128173407"></script>
 </head>
 <body>
 <main>
   <section class="hero"><div class="wrap">
-    <button type="button" class="hero-sort" id="sortFab" hidden title="拖曳調整文章順序（只有你看得到）" aria-label="拖曳調整文章順序"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3v18M12 3l-3.5 3.5M12 3l3.5 3.5M12 21l-3.5-3.5M12 21l3.5-3.5M3 12h18M3 12l3.5-3.5M3 12l3.5 3.5M21 12l-3.5-3.5M21 12l-3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><span>排序</span></button>
     <div class="rule"></div>
     <h1 id="siteName">Edward 的 Blog</h1>
     <p id="tagline"></p>
-    <div class="search"><input id="q" type="search" placeholder="搜尋文章：例如 勞保、退休、ETF…" aria-label="搜尋文章"></div>
+    <div class="search"><input id="q" type="search" placeholder="搜尋文章：例如 勞保、退休、ETF…" aria-label="搜尋文章"><button type="button" class="hero-sort" id="sortFab" hidden title="拖曳調整文章順序（只有你看得到）" aria-label="拖曳調整文章順序"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3v18M12 3l-3.5 3.5M12 3l3.5 3.5M12 21l-3.5-3.5M12 21l3.5-3.5M3 12h18M3 12l3.5-3.5M3 12l3.5 3.5M21 12l-3.5-3.5M21 12l-3.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><span>排序</span></button></div>
   </div></section>
   <div class="wrap">
     <div class="home-top">
@@ -37,11 +36,11 @@
   </div>
 </main>
 <script type="module">
-import { store, MODE } from "./assets/store.js?v=20261128030513";
-import { readPublicCache } from "./assets/postcache.js?v=20261128030513";
-import { header, footer, esc, fmtDate, fmtTime, toast, cardTitle } from "./assets/ui.js?v=20261128030513";
-import { mountMarket } from "./assets/market.js?v=20261128030513";
-import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261128030513";
+import { store, MODE } from "./assets/store.js?v=20261128173407";
+import { readPublicCache } from "./assets/postcache.js?v=20261128173407";
+import { header, footer, esc, fmtDate, fmtTime, toast, cardTitle } from "./assets/ui.js?v=20261128173407";
+import { mountMarket } from "./assets/market.js?v=20261128173407";
+import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261128173407";
 const startCharts = mountMarket(document.getElementById("mkt"));
 function showBrief() {
   loadIndex().then(latestVisible).then(b => {
