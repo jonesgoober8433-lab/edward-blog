@@ -459,7 +459,16 @@ body.dv-open #preview { display: none; }
 
 /* ===== 每日財經早報頁 ===== */
 .bf-nav { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
-.bf-nav select { width: auto; padding: 5px 10px; font-size: 14px; }
+.bf-strip { display: flex; gap: 8px; overflow-x: auto; margin: 10px 0 4px; padding: 2px 2px 8px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+.bf-chip { position: relative; flex: 0 0 auto; width: 56px; padding: 8px 0; border: 1px solid var(--ln); background: var(--card); border-radius: 14px; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--ink); text-decoration: none; scroll-snap-align: start; }
+.bf-chip i { font-style: normal; font-size: 11px; color: var(--mu); }
+.bf-chip b { font-size: 17px; font-variant-numeric: tabular-nums; }
+.bf-chip.wk i { color: var(--gold); }
+.bf-chip.draft { border-style: dashed; }
+.bf-chip.on { background: var(--gold); border-color: var(--gold); color: #fff; }
+.bf-chip.on i { color: #fff; opacity: .9; }
+:root[data-theme="dark"] .bf-chip.on, :root[data-theme="dark"] .bf-chip.on i { color: #14110D; }
+.bf-chip:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .bf-head { margin: 10px 0 14px; }
 .bf-head h1 { margin: 6px 0 4px; }
 .bf-lead { font: 700 18px/1.6 var(--serif); color: var(--navy-2); margin: 0; }

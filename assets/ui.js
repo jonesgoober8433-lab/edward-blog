@@ -1,5 +1,5 @@
 // 共用畫面零件：頁首、頁尾、日期、Markdown 轉換
-import { store, MODE } from "./store.js?v=20261127173131";
+import { store, MODE } from "./store.js?v=20261128025341";
 const CFG = window.BLOG_CONFIG || {};
 export const PALETTES = [
   ["navy", "1｜海軍藍＋穩重金", "#14284B", "#D2B07A"],
@@ -25,7 +25,7 @@ export function applyDark(d, remember = true) {
   if (remember) try { localStorage.setItem("eb-site-dark", d); } catch (e) { }
 }
 const applyRemoteSettings = () => store.getSettings().then(s => { applyPalette(s.palette); applyDark(s.dark); }).catch(() => { });
-// 文章頁、早報頁會先把頻寬留給公開內容，配色等 Firebase 啟動再補（config.js?v=20261127173131 已套過本機配色）
+// 文章頁、早報頁會先把頻寬留給公開內容，配色等 Firebase 啟動再補（config.js?v=20261128025341 已套過本機配色）
 if (window.__ebDeferFirebase && store.afterFirebase) store.afterFirebase(applyRemoteSettings);
 else applyRemoteSettings();
 export const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
