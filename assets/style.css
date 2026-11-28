@@ -121,6 +121,7 @@ label { display: block; font-size: 13px; font-weight: 600; color: var(--mu); mar
 .prose h3 { font-size: 20px; margin: 26px 0 8px; }
 .prose blockquote { margin: 18px 0; padding: 10px 18px; background: var(--gold-soft); border-radius: 10px; color: var(--ink); }
 .prose img { max-width: 100%; max-height: 78vh; width: auto; height: auto; display: block; margin: 14px auto; border-radius: 10px; box-shadow: 0 6px 18px -12px rgba(0,0,0,.35); cursor: zoom-in; }
+.prose img.no-zoom { cursor: default; }
 .prose img.img-s { width: 38%; min-width: 220px; }
 .prose img.img-m { width: 62%; min-width: 260px; }
 .prose img.img-l { width: 100%; max-height: none; }
