@@ -52,11 +52,24 @@ br.mb{display:none}
 .pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
 .pill{background:var(--caramel);color:var(--dark);font-weight:700;border-radius:999px;padding:8px 18px;font-size:clamp(13px,1.3vw,19px);white-space:nowrap}
 a.pill{pointer-events:auto;text-decoration:none}
+.p10{text-align:center;width:100%;display:flex;flex-direction:column;align-items:center}
+.p10 .cards{width:100%;max-width:1100px}
+.p10 .pills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:100%;max-width:440px;margin-inline:auto}
+.p10 .pill{text-align:center}
 @media (max-width:760px){.cards{grid-template-columns:1fr}.card p br:not(.mb){display:inline}}
 .counter{font-family:'Noto Serif TC',serif;font-size:clamp(16px,1.8vw,26px);color:var(--soft);margin-top:10px;font-variant-numeric:tabular-nums}
 /* 介面 */
 #ui{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:center;padding:12px max(16px,2vw) calc(12px + env(safe-area-inset-bottom));pointer-events:none;z-index:5}
 #ui *{pointer-events:auto}
+/* 右上角音樂鈕 */
+#snd{position:fixed;top:calc(12px + env(safe-area-inset-top));right:max(14px,1.6vw);z-index:7;display:flex;align-items:center;gap:6px;height:40px;min-width:40px;padding:0 12px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(20,13,9,.55);color:var(--cream);font:600 13px/1 'Noto Sans TC',sans-serif;cursor:pointer;backdrop-filter:blur(6px)}
+#snd .ic{font-size:17px;line-height:1}
+#snd .tx{white-space:nowrap}
+#snd.on .tx{display:none}
+#snd.on .ic{animation:snd 1.6s ease-in-out infinite}
+#snd.off .ic{opacity:.55;text-decoration:line-through}
+@keyframes snd{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+body.boring-on #snd{color:#555;background:rgba(255,255,255,.85);border-color:#ccc}
 #prog{flex:1;height:3px;background:rgba(255,255,255,.15);margin:0 16px;border-radius:2px;overflow:hidden}
 #prog i{display:block;height:100%;width:0;background:var(--caramel);transition:width .5s ease}
 .btn{background:rgba(20,13,9,.6);color:var(--cream);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:8px 16px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
@@ -84,6 +97,7 @@ body.boring-on #vbar{background:rgba(0,0,0,.12);box-shadow:none}
 </div>
 <div id="hint">↓ 往下滑，動畫就會跟著動</div>
 <div id="vbar" aria-hidden="true"><i></i><b></b></div>
+<button id="snd" type="button" aria-label="音樂：開／關"><span class="ic">♪</span><span class="tx">輕觸開啟音樂</span></button>
 <div id="scroller"></div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
@@ -149,7 +163,7 @@ const slides = [];
 
 /* 1、2、15：故意很無聊的投影片 */
 const boring = (html) => ({ boring:true, enter(){ boringEl.innerHTML = html + '<div class="bar"></div><p class="pg">'+(cur+1)+'</p>'; } });
-slides.push(boring('<p class="bt">小編自我介紹</p><p class="bs">Edward｜保險經紀人業務<br class="mb">（事業部負責人）<span class="pc">、</span><br>CFC 財務教練</p>'));
+slides.push(boring('<p class="bt">小編自我介紹</p><p class="bs">Edward<span class="pc">｜</span><br class="mb">保險經紀人業務（事業部負責人）<span class="pc">、</span><br>CFC 財務教練</p>'));
 slides.push(boring('<ul><li>個人經歷</li><li>個人簡介</li></ul>'));
 
 /* 3：打破 —— 白色碎片炸開，飄進星空 */
@@ -300,7 +314,7 @@ slides.push((()=>{
   let t=0;
   return { scene:L, cam, split:R,
     enter(){ t=0; const n = isNarrow();
-      if(n){ setText('<div style="position:fixed;left:24px;right:24px;top:6vh"><p class="t-big line" data-d="1" style="color:#f0ede9">同樣的薪水</p><p class="t-lead line" data-d="2" style="color:#ece9e5">錢進來，就花掉</p></div><div style="position:fixed;left:24px;right:24px;top:52vh"><p class="t-big line" data-d="4" style="color:#3a2312;text-shadow:none">不同的方向</p><p class="t-lead line" data-d="5" style="color:#4a2e18;text-shadow:none">每筆錢都有清楚的位置</p></div>'); return; }
+      if(n){ setText('<div style="position:fixed;left:24px;right:24px;top:6vh"><p class="t-big line" data-d="1" style="color:#f0ede9">同樣的薪水</p><p class="t-lead line" data-d="2" style="color:#ece9e5">錢進來，就花掉<br>年底才發現沒存到<br>退休？以後再說</p></div><div style="position:fixed;left:24px;right:24px;top:52vh"><p class="t-big line" data-d="4" style="color:#3a2312;text-shadow:none">不同的方向</p><p class="t-lead line" data-d="5" style="color:#4a2e18;text-shadow:none">每筆錢都有清楚的位置<br>保障剛好，不多也不少<br>退休缺口算得出來</p></div>'); return; }
       setText('<div style="display:flex;justify-content:space-between;width:100%;gap:4vw"><div style="flex:1"><p class="t-big line" data-d="1" style="color:#e6e3df">同樣的薪水</p><p class="t-lead line" data-d="2" style="color:#ece9e5">錢進來，就花掉<br>年底才發現沒存到<br>退休？以後再說</p></div><div style="flex:1"><p class="t-big line" data-d="4" style="color:#fff8ee">不同的方向</p><p class="t-lead line" data-d="5" style="color:#fff3e2">每筆錢都有清楚的位置<br>保障剛好，不多也不少<br>退休缺口算得出來</p></div></div>','top'); },
     update(dt){ t+=dt; cam.position.set(Math.sin(t*.05)*3, 6, 22 - Math.min(t,12)*.4); cam.lookAt(0,2,-10); }
   };
@@ -339,7 +353,7 @@ slides.push((()=>{
   let t=0;
   return { scene, cam,
     enter(){ t=0; cam.position.set(0,0,12); cam.lookAt(0,0,0);
-      setText('<p class="t-eyebrow line" data-d="0">兩種合作方式</p><p class="t-big line" data-d="1">像看醫生，不像逛賣場</p><div class="cards line" data-d="2"><div class="card"><div class="tag">醫生式</div><h3>全方位財務健檢</h3><p>收入、支出、保障、投資<span class="pc">、</span><br class="mb">退休與傳承<br>一次看完整張財務體檢表</p></div><div class="card"><div class="tag">藥局式</div><h3>單點精準諮詢</h3><p>只想解決一個問題就好<br>保單健診、買房預算<span class="pc">、</span><br class="mb">退休缺口</p></div></div><div class="pills line" data-d="4"><span class="pill">先講好議程</span><span class="pill">15～20 分鐘</span><span class="pill">直接診斷</span><span class="pill">給處方</span></div>'); },
+      setText('<div class="p10"><p class="t-eyebrow line" data-d="0">兩種合作方式</p><p class="t-big line" data-d="1">像看醫生，不像逛賣場</p><div class="cards line" data-d="2"><div class="card"><div class="tag">醫生式</div><h3>全方位財務健檢</h3><p>收入、支出、保障、投資<span class="pc">、</span><br class="mb">退休與傳承<br>一次看完整張財務體檢表</p></div><div class="card"><div class="tag">藥局式</div><h3>單點精準諮詢</h3><p>只想解決一個問題就好<br>保單健診、買房預算<span class="pc">、</span><br class="mb">退休缺口</p></div></div><div class="pills line" data-d="4"><span class="pill">先講好議程</span><span class="pill">15～20 分鐘</span><span class="pill">直接診斷</span><span class="pill">給處方</span></div></div>'); },
     update(dt){ t+=dt; dust.rotation.y = t*.02; dust.position.y = Math.sin(t*.2)*.3; beams.children.forEach((b,i)=> b.material.opacity = .05 + Math.sin(t*.6+i)*.025); }
   };
 })());
@@ -400,7 +414,7 @@ slides.push((()=>{
   const flies = new THREE.Points(fg, new THREE.PointsMaterial({color:0xffd27a, size:3, sizeAttenuation:false, transparent:true, opacity:0, blending:THREE.AdditiveBlending})); scene.add(flies);
   let t=0;
   return { scene, cam,
-    enter(){ t=0; setText('<p class="t-big line" data-d="3">你的人生，</p><p class="t-big line acc" data-d="5">還沒有定案。</p><p class="t-lead line" data-d="8">現在調整方向<span class="pc">，</span><br class="mb">永遠比十年後再來補救便宜！</p>'); },
+    enter(){ t=0; setText('<p class="t-big line" data-d="3">你的人生</p><p class="t-big line acc" data-d="5">還沒有定案</p><p class="t-lead line" data-d="8">現在調整方向<span class="pc">，</span><br class="mb">永遠比十年後再來補救便宜！</p>'); },
     update(dt){ t+=dt; const on = ease((t-.6)/1.6);
       lampLight.intensity = 14*on; lampGlow.material.opacity = on; bulb.material.color.setScalar(.2+.8*on).multiply(new THREE.Color(0xffd59a));
       flies.material.opacity = .9*ease((t-1.5)/2);
@@ -490,6 +504,70 @@ function loop(){
   } else renderer.render(s.scene, s.cam);
 }
 resize(); loop();
+
+/* ================= 輕音樂（瀏覽器即時產生，不用音樂檔、沒有版權問題） ================= */
+// 預設開啟：瀏覽器規定要先有一次觸控／點擊才能出聲，所以第一次碰螢幕就自動開始；右上角可以關掉。
+const sndBtn = document.getElementById('snd');
+const Music = (() => {
+  let ctx = null, master = null, bus = null, timer = null, nextChord = 0, nextNote = 0, ci = 0;
+  let want = true, playing = false;
+  const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+  const CHORDS = [[48,55,64,71,74],[45,52,60,67,71],[41,48,57,64,69],[43,50,59,62,69]]; // Cmaj9 Am9 Fmaj9(add13) G6/9
+  const PENTA = [72,74,76,79,81,84,86,88];
+  const LEN = 8;
+  function impulse(sec){ const n = ctx.sampleRate*sec, b = ctx.createBuffer(2, n, ctx.sampleRate);
+    for (let c=0;c<2;c++){ const d=b.getChannelData(c); for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/n, 2.6); } return b; }
+  function build(){
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch(e){}   // iPhone 靜音模式也能聽到
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+    const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = 2200; lp.connect(master);
+    const rv = ctx.createConvolver(); rv.buffer = impulse(3.2); const wet = ctx.createGain(); wet.gain.value = .45; rv.connect(wet); wet.connect(lp);
+    bus = ctx.createGain(); bus.gain.value = 1; bus.connect(lp); bus.connect(rv);
+    return true;
+  }
+  function pad(t, notes){
+    notes.forEach((m,i) => { [-4,4].forEach(det => {
+      const o = ctx.createOscillator(), g = ctx.createGain(); o.type = i<2 ? 'sine' : 'triangle'; o.frequency.value = hz(m); o.detune.value = det;
+      const v = (i<2 ? .05 : .028);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t+2.6); g.gain.setValueAtTime(v, t+LEN-1.2); g.gain.linearRampToValueAtTime(0, t+LEN+2.2);
+      o.connect(g); g.connect(bus); o.start(t); o.stop(t+LEN+2.4); }); });
+  }
+  function pluck(t){
+    const m = PENTA[Math.floor(Math.random()*PENTA.length)], o = ctx.createOscillator(), g = ctx.createGain();
+    o.type='sine'; o.frequency.value = hz(m); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.045, t+.02); g.gain.exponentialRampToValueAtTime(.0008, t+2.2);
+    o.connect(g); g.connect(bus); o.start(t); o.stop(t+2.3);
+  }
+  function tick(){
+    const now = ctx.currentTime;
+    while (nextChord < now + 1) { pad(nextChord, CHORDS[ci++ % CHORDS.length]); nextChord += LEN; }
+    while (nextNote < now + 1) { if (Math.random() < .55) pluck(nextNote); nextNote += [.5,.75,1][Math.floor(Math.random()*3)]; }
+  }
+  async function on(){
+    if (!ctx && !build()) return false;
+    try { await ctx.resume(); } catch(e){}
+    if (ctx.state !== 'running') return false;
+    if (!timer){ nextChord = nextNote = ctx.currentTime + .1; tick(); timer = setInterval(tick, 250); }
+    master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(.55, ctx.currentTime, 1.2);
+    playing = true; return true;
+  }
+  function off(){ if (!ctx) return; master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0, ctx.currentTime, .35);
+    setTimeout(() => { if (!playing){ clearInterval(timer); timer = null; ctx.suspend(); } }, 1500); playing = false; }
+  function ui(){ sndBtn.classList.toggle('on', playing); sndBtn.classList.toggle('off', !want);
+    sndBtn.querySelector('.tx').textContent = want ? '輕觸開啟音樂' : '音樂已關';
+    sndBtn.setAttribute('aria-pressed', playing ? 'true' : 'false'); }
+  async function toggle(){ if (want && !playing){ await on(); ui(); return; }   // 還沒開始播：按鈕＝開音樂
+    want = !want; if (want) await on(); else off(); ui(); }
+  // 第一次碰螢幕（點、滑、按鍵）就開始播
+  async function firstTouch(e){ if (e && e.target && e.target.closest && e.target.closest('#snd')) return; if (want && !playing){ if (await on()) ui(); } if (playing) ['pointerdown','touchend','keydown','click'].forEach(ev => removeEventListener(ev, firstTouch, true)); }
+  ['pointerdown','touchend','keydown','click'].forEach(ev => addEventListener(ev, firstTouch, true));
+  document.addEventListener('visibilitychange', () => { if (!ctx) return; if (document.hidden) ctx.suspend(); else if (want && playing) ctx.resume(); });
+  on().then(ui);   // 有些瀏覽器允許直接播
+  ui();
+  return { toggle };
+})();
+sndBtn.addEventListener('click', e => { e.stopPropagation(); Music.toggle(); });
 </script>
 </body>
 </html>
