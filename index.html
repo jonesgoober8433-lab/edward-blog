@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"></noscript>
-<link rel="stylesheet" href="assets/style.css?v=20261128173407">
-<script src="config.js?v=20261128173407"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261128173936">
+<script src="config.js?v=20261128173936"></script>
 </head>
 <body>
 <main>
@@ -36,11 +36,11 @@
   </div>
 </main>
 <script type="module">
-import { store, MODE } from "./assets/store.js?v=20261128173407";
-import { readPublicCache } from "./assets/postcache.js?v=20261128173407";
-import { header, footer, esc, fmtDate, fmtTime, toast, cardTitle } from "./assets/ui.js?v=20261128173407";
-import { mountMarket } from "./assets/market.js?v=20261128173407";
-import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261128173407";
+import { store, MODE } from "./assets/store.js?v=20261128173936";
+import { readPublicCache } from "./assets/postcache.js?v=20261128173936";
+import { header, footer, esc, fmtDate, fmtTime, toast, cardTitle } from "./assets/ui.js?v=20261128173936";
+import { mountMarket } from "./assets/market.js?v=20261128173936";
+import { loadIndex, latestVisible, fmtDay } from "./assets/brief.js?v=20261128173936";
 const startCharts = mountMarket(document.getElementById("mkt"));
 function showBrief() {
   loadIndex().then(latestVisible).then(b => {
@@ -56,7 +56,10 @@ function showBrief() {
 const CFG = window.BLOG_CONFIG;
 header("home"); footer();
 document.getElementById("siteName").textContent = CFG.siteName;
-document.getElementById("tagline").textContent = CFG.tagline;
+{ // 手機：在「，」處換行、行尾不留逗號（Edward 2026-11-28）
+  const [t1, ...rest] = String(CFG.tagline || "").split("，");
+  document.getElementById("tagline").innerHTML = rest.length ? `${esc(t1)}<span class="tg-c">，</span><br class="tg-br">${esc(rest.join("，"))}` : esc(t1);
+}
 
 let posts = [], cat = "全部", texts = {};
 let loadGen = 0, paintedSig = null, sorting = false, isAdmin = false, sideStarted = false;
