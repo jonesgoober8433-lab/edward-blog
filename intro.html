@@ -70,6 +70,35 @@ a.pill{pointer-events:auto;text-decoration:none}
 #snd.off .ic{opacity:.55;text-decoration:line-through}
 @keyframes snd{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 body.boring-on #snd{color:#555;background:rgba(255,255,255,.85);border-color:#ccc}
+#sndp{position:fixed;top:calc(60px + env(safe-area-inset-top));right:max(14px,1.6vw);z-index:8;width:min(300px,calc(100vw - 28px));padding:14px 14px 12px;border-radius:16px;border:1px solid rgba(255,255,255,.2);background:rgba(20,13,9,.88);color:var(--cream);font:400 14px/1.4 'Noto Sans TC',sans-serif;backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+#sndp[hidden]{display:none}
+#sndp .sp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+#sndp .sp-head b{font-size:15px;margin-right:auto}
+#sndp .sp-sz{border:1px solid rgba(255,255,255,.25);background:none;color:inherit;font:600 12px/1 'Noto Sans TC',sans-serif;padding:6px 10px;border-radius:999px;cursor:pointer;white-space:nowrap;margin-right:6px}
+#sndp .sp-cur{display:none;margin:0;font-size:12.5px;opacity:.8}
+#sndp.mini .sp-cur{display:block}
+#sndp.mini .sp-t,#sndp.mini .sp-list{display:none}
+#sndp.mini{width:min(260px,calc(100vw - 28px))}
+body.boring-on #sndp .sp-sz{border-color:#ccc}
+#sndp .sp-sw{display:flex;align-items:center;gap:8px;border:0;background:none;color:inherit;font:600 13px/1 'Noto Sans TC',sans-serif;cursor:pointer;padding:4px}
+#sndp .sp-sw i{position:relative;width:40px;height:22px;border-radius:999px;background:rgba(255,255,255,.25);transition:background .2s}
+#sndp .sp-sw i::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
+#sndp .sp-sw.on i{background:#c8935a}
+#sndp .sp-sw.on i::after{transform:translateX(18px)}
+#sndp .sp-vol{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+#sndp .sp-vol span{white-space:nowrap}
+#sndp .sp-vol input{flex:1;min-width:0;accent-color:#c8935a;height:28px}
+#sndp .sp-vol em{font-style:normal;width:3.2em;text-align:right;font-variant-numeric:tabular-nums;opacity:.8}
+#sndp .sp-t{margin:0 0 8px;font-size:12px;opacity:.7}
+#sndp .sp-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#sndp .sp-st{display:flex;flex-direction:column;gap:3px;text-align:left;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:inherit;cursor:pointer;font-family:'Noto Sans TC',sans-serif}
+#sndp .sp-st b{font-size:14px;white-space:nowrap}
+#sndp .sp-st small{font-size:11.5px;line-height:1.35;opacity:.72;text-wrap:pretty}
+#sndp .sp-st.cur{border-color:#c8935a;background:rgba(200,147,90,.22)}
+#sndp .sp-st.cur b::before{content:"♪ ";color:#e0b07a}
+body.boring-on #sndp{color:#333;background:rgba(255,255,255,.96);border-color:#ddd}
+body.boring-on #sndp .sp-st{border-color:#ddd;background:#f6f6f6}
+body.boring-on #sndp .sp-sw:not(.on) i{background:#ccc}
 #prog{flex:1;height:3px;background:rgba(255,255,255,.15);margin:0 16px;border-radius:2px;overflow:hidden}
 #prog i{display:block;height:100%;width:0;background:var(--caramel);transition:width .5s ease}
 .btn{background:rgba(20,13,9,.6);color:var(--cream);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:8px 16px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
@@ -97,7 +126,8 @@ body.boring-on #vbar{background:rgba(0,0,0,.12);box-shadow:none}
 </div>
 <div id="hint">↓ 往下滑，動畫就會跟著動</div>
 <div id="vbar" aria-hidden="true"><i></i><b></b></div>
-<button id="snd" type="button" aria-label="音樂：開／關"><span class="ic">♪</span><span class="tx">輕觸開啟音樂</span></button>
+<button id="snd" type="button" aria-label="音樂設定" aria-expanded="false"><span class="ic">♪</span><span class="tx">輕觸開啟音樂</span></button>
+<div id="sndp" role="dialog" aria-label="音樂設定" hidden></div>
 <div id="scroller"></div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
@@ -506,68 +536,135 @@ function loop(){
 resize(); loop();
 
 /* ================= 輕音樂（瀏覽器即時產生，不用音樂檔、沒有版權問題） ================= */
-// 預設開啟：瀏覽器規定要先有一次觸控／點擊才能出聲，所以第一次碰螢幕就自動開始；右上角可以關掉。
-const sndBtn = document.getElementById('snd');
+// 預設開啟：瀏覽器規定要先有一次觸控／點擊才能出聲，所以第一次碰螢幕就自動開始。
+// 右上角 ♪ 打開面板：開關、音量、4 種曲風；選擇會記在這台裝置（Edward 2026-11-28）
+const sndBtn = document.getElementById('snd'), sndPanel = document.getElementById('sndp');
 const Music = (() => {
-  let ctx = null, master = null, bus = null, timer = null, nextChord = 0, nextNote = 0, ci = 0;
-  let want = true, playing = false;
+  let ctx = null, master = null, lp = null, wet = null, bus = null, noise = null, timer = null;
+  let nextChord = 0, nextStep = 0, ci = 0, si = 0, want = true, playing = false;
+  const store = { get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : v; } catch(e){ return d; } },
+                  set(k, v){ try { localStorage.setItem(k, v); } catch(e){} } };
+  let vol = Math.max(0, Math.min(100, +store.get('intro-vol', 60) || 0));
   const hz = m => 440 * Math.pow(2, (m - 69) / 12);
-  const CHORDS = [[48,55,64,71,74],[45,52,60,67,71],[41,48,57,64,69],[43,50,59,62,69]]; // Cmaj9 Am9 Fmaj9(add13) G6/9
-  const PENTA = [72,74,76,79,81,84,86,88];
-  const LEN = 8;
+  const rnd = a => a[Math.floor(Math.random() * a.length)];
+  // 單音：鋼琴／音樂盒／撥弦都用這個，差在音色與尾音長短
+  function tone(t, m, o){
+    const g = ctx.createGain(), a = ctx.createOscillator(); a.type = o.wave || 'sine'; a.frequency.value = hz(m);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(o.vol, t + (o.att || .015)); g.gain.exponentialRampToValueAtTime(.0006, t + o.dec);
+    a.connect(g); a.start(t); a.stop(t + o.dec + .1);
+    if (o.part){ const b = ctx.createOscillator(), h = ctx.createGain(); b.type = 'sine'; b.frequency.value = hz(m) * o.part;
+      h.gain.setValueAtTime(0, t); h.gain.linearRampToValueAtTime(o.vol * (o.pv || .3), t + .01); h.gain.exponentialRampToValueAtTime(.0005, t + o.dec * .45);
+      b.connect(h); h.connect(bus); b.start(t); b.stop(t + o.dec); }
+    g.connect(bus);
+  }
+  function pad(t, notes, st){
+    notes.forEach((m, i) => { [-4, 4].forEach(det => {
+      const o = ctx.createOscillator(), g = ctx.createGain(); o.type = i < 2 ? 'sine' : 'triangle'; o.frequency.value = hz(m); o.detune.value = det;
+      const v = (i < 2 ? .05 : .028) * st.padVol, L = st.len;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + Math.min(2.6, L * .35)); g.gain.setValueAtTime(v, t + L - 1); g.gain.linearRampToValueAtTime(0, t + L + 2);
+      o.connect(g); g.connect(bus); o.start(t); o.stop(t + L + 2.2); }); });
+  }
+  function hit(t, kind){
+    if (kind === 'kick'){ const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(45, t + .18);
+      g.gain.setValueAtTime(.22, t); g.gain.exponentialRampToValueAtTime(.001, t + .35); o.connect(g); g.connect(bus); o.start(t); o.stop(t + .4); return; }
+    const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = noise;
+    if (kind === 'snare'){ f.type = 'bandpass'; f.frequency.value = 1800; g.gain.setValueAtTime(.07, t); g.gain.exponentialRampToValueAtTime(.001, t + .22); }
+    else { f.type = 'highpass'; f.frequency.value = 7000; g.gain.setValueAtTime(.025, t); g.gain.exponentialRampToValueAtTime(.001, t + .06); }
+    s.connect(f); f.connect(g); g.connect(bus); s.start(t); s.stop(t + .3);
+  }
+  // 4 種曲風：chords＝和弦、len＝每個和弦幾秒、step＝節拍格、note＝每一格要彈什麼
+  const STYLES = [
+    { key: 'calm', name: '溫柔氛圍', desc: '慢慢流動的和弦<br>最安靜', lp: 2200, wet: .45, len: 8, step: .25, padVol: 1,
+      chords: [[48,55,64,71,74],[45,52,60,67,71],[41,48,57,64,69],[43,50,59,62,69]],
+      note(t, k){ if (k % 3 === 0 && Math.random() < .55) tone(t, rnd([72,74,76,79,81,84,86,88]), { vol: .045, dec: 2.2, att: .02 }); } },
+    { key: 'piano', name: '輕快鋼琴', desc: '溫暖的分解和弦<br>比較有精神', lp: 3800, wet: .3, len: 4, step: 1/3, padVol: .45,
+      chords: [[48,60,64,67],[43,55,59,62],[45,57,60,64],[41,53,57,60]],
+      note(t, k, ch){ const up = ch.slice(1).map(m => m + 12), seq = [0,1,2,1,2,0,1,2,0,2,1,2]; tone(t, up[seq[k % 12] % up.length], { wave: 'triangle', vol: .05, dec: 1.4, part: 2, pv: .25 });
+        if (k % 6 === 0) tone(t, ch[0], { wave: 'triangle', vol: .06, dec: 2.4 });
+        if (k % 3 === 0 && Math.random() < .25) tone(t, rnd([76,79,81,84,86]), { wave: 'triangle', vol: .04, dec: 1.6, part: 2, pv: .2 }); } },
+    { key: 'lofi', name: '深夜 Lo-fi', desc: '慵懶的爵士和弦<br>加上輕輕的鼓', lp: 1500, wet: .35, len: 3.2, step: .4, padVol: .8,
+      chords: [[50,53,57,60,64],[43,53,59,64],[48,55,59,62,64],[45,55,61,65]],
+      note(t, k){ const b = k % 8; if (b === 0 || b === 5) hit(t, 'kick'); if (b === 2 || b === 6) hit(t, 'snare'); hit(t + (k % 2 ? .06 : 0), 'hat');
+        if (b === 3 && Math.random() < .5) tone(t, rnd([74,76,77,79,81]), { vol: .035, dec: 1.8, att: .03 }); } },
+    { key: 'bell', name: '晨光音樂盒', desc: '清脆的音樂盒<br>明亮清新', lp: 6000, wet: .5, len: 6, step: .375, padVol: .55,
+      chords: [[48,55,64],[52,59,67],[53,60,69],[55,62,71]],
+      note(t, k){ if (Math.random() < .6) tone(t, rnd([84,86,88,91,93,96]), { vol: .03, dec: 2.6, att: .005, part: 2.76, pv: .35 }); } },
+  ];
+  si = Math.max(0, STYLES.findIndex(s => s.key === store.get('intro-style', 'calm')));
   function impulse(sec){ const n = ctx.sampleRate*sec, b = ctx.createBuffer(2, n, ctx.sampleRate);
     for (let c=0;c<2;c++){ const d=b.getChannelData(c); for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/n, 2.6); } return b; }
+  function newBus(){ const old = bus; bus = ctx.createGain(); bus.gain.value = 0; bus.connect(lp); bus.connect(rv);
+    bus.gain.setTargetAtTime(1, ctx.currentTime, .4);
+    if (old){ old.gain.cancelScheduledValues(ctx.currentTime); old.gain.setTargetAtTime(0, ctx.currentTime, .3); setTimeout(() => { try { old.disconnect(); } catch(e){} }, 2500); } }
+  let rv = null;
   function build(){
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
     try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch(e){}   // iPhone 靜音模式也能聽到
     ctx = new AC();
     master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
-    const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = 2200; lp.connect(master);
-    const rv = ctx.createConvolver(); rv.buffer = impulse(3.2); const wet = ctx.createGain(); wet.gain.value = .45; rv.connect(wet); wet.connect(lp);
-    bus = ctx.createGain(); bus.gain.value = 1; bus.connect(lp); bus.connect(rv);
-    return true;
-  }
-  function pad(t, notes){
-    notes.forEach((m,i) => { [-4,4].forEach(det => {
-      const o = ctx.createOscillator(), g = ctx.createGain(); o.type = i<2 ? 'sine' : 'triangle'; o.frequency.value = hz(m); o.detune.value = det;
-      const v = (i<2 ? .05 : .028);
-      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t+2.6); g.gain.setValueAtTime(v, t+LEN-1.2); g.gain.linearRampToValueAtTime(0, t+LEN+2.2);
-      o.connect(g); g.connect(bus); o.start(t); o.stop(t+LEN+2.4); }); });
-  }
-  function pluck(t){
-    const m = PENTA[Math.floor(Math.random()*PENTA.length)], o = ctx.createOscillator(), g = ctx.createGain();
-    o.type='sine'; o.frequency.value = hz(m); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.045, t+.02); g.gain.exponentialRampToValueAtTime(.0008, t+2.2);
-    o.connect(g); g.connect(bus); o.start(t); o.stop(t+2.3);
+    lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = STYLES[si].lp; lp.connect(master);
+    rv = ctx.createConvolver(); rv.buffer = impulse(3.2); wet = ctx.createGain(); wet.gain.value = STYLES[si].wet; rv.connect(wet); wet.connect(lp);
+    const n = ctx.sampleRate * .5; noise = ctx.createBuffer(1, n, ctx.sampleRate); const d = noise.getChannelData(0); for (let i=0;i<n;i++) d[i] = Math.random()*2-1;
+    newBus(); return true;
   }
   function tick(){
-    const now = ctx.currentTime;
-    while (nextChord < now + 1) { pad(nextChord, CHORDS[ci++ % CHORDS.length]); nextChord += LEN; }
-    while (nextNote < now + 1) { if (Math.random() < .55) pluck(nextNote); nextNote += [.5,.75,1][Math.floor(Math.random()*3)]; }
+    const now = ctx.currentTime, st = STYLES[si];
+    while (nextChord < now + 1) { pad(nextChord, st.chords[ci % st.chords.length], st); nextChord += st.len; ci++; }
+    while (nextStep < now + 1) { const k = Math.round((nextStep - chordStart) / st.step);
+      const ch = st.chords[Math.max(0, Math.floor((nextStep - chordStart) / st.len)) % st.chords.length];
+      st.note(nextStep, k, ch); nextStep += st.step; }
   }
+  let chordStart = 0;
+  function restart(){ ci = 0; chordStart = nextChord = nextStep = ctx.currentTime + .15; }
+  const level = () => Math.pow(vol / 100, 1.6) * 1.1;   // 音量滑桿 → 實際大小（耳朵對小聲比較敏感，所以用曲線）
   async function on(){
     if (!ctx && !build()) return false;
     try { await ctx.resume(); } catch(e){}
     if (ctx.state !== 'running') return false;
-    if (!timer){ nextChord = nextNote = ctx.currentTime + .1; tick(); timer = setInterval(tick, 250); }
-    master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(.55, ctx.currentTime, 1.2);
+    if (!timer){ restart(); tick(); timer = setInterval(tick, 250); }
+    master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(level(), ctx.currentTime, 1.2);
     playing = true; return true;
   }
   function off(){ if (!ctx) return; master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(0, ctx.currentTime, .35);
     setTimeout(() => { if (!playing){ clearInterval(timer); timer = null; ctx.suspend(); } }, 1500); playing = false; }
-  function ui(){ sndBtn.classList.toggle('on', playing); sndBtn.classList.toggle('off', !want);
-    sndBtn.querySelector('.tx').textContent = want ? '輕觸開啟音樂' : '音樂已關';
-    sndBtn.setAttribute('aria-pressed', playing ? 'true' : 'false'); }
-  async function toggle(){ if (want && !playing){ await on(); ui(); return; }   // 還沒開始播：按鈕＝開音樂
-    want = !want; if (want) await on(); else off(); ui(); }
+  function setVol(v){ vol = v; store.set('intro-vol', v); if (ctx && playing){ master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(level(), ctx.currentTime, .08); } ui(); }
+  async function setStyle(i){ si = i; store.set('intro-style', STYLES[i].key);
+    if (ctx){ lp.frequency.setTargetAtTime(STYLES[i].lp, ctx.currentTime, .3); wet.gain.setTargetAtTime(STYLES[i].wet, ctx.currentTime, .3); newBus(); if (timer) restart(); }
+    if (!want){ want = true; } if (!playing) await on(); ui(); }
+  // 面板
+  sndPanel.innerHTML = `<div class="sp-head"><b>背景音樂</b><button type="button" class="sp-sz" aria-label="縮小／放大面板"></button><button type="button" class="sp-sw" role="switch"><i></i><span></span></button></div>
+    <label class="sp-vol"><span>音量</span><input type="range" min="0" max="100" step="1" aria-label="音量"><em></em></label>
+    <p class="sp-cur"></p><p class="sp-t">選一種曲風</p>
+    <div class="sp-list">${STYLES.map((s, i) => `<button type="button" class="sp-st" data-i="${i}"><b>${s.name}</b><small>${s.desc}</small></button>`).join('')}</div>`;
+  const sz = sndPanel.querySelector('.sp-sz');
+  function mini(m){ sndPanel.classList.toggle('mini', m); sz.textContent = m ? '放大 ▾' : '縮小 ▴'; store.set('intro-mini', m ? '1' : '0'); }
+  mini(store.get('intro-mini', '0') === '1');
+  sz.addEventListener('click', () => mini(!sndPanel.classList.contains('mini')));
+  const sw = sndPanel.querySelector('.sp-sw'), rng = sndPanel.querySelector('input'), pct = sndPanel.querySelector('.sp-vol em');
+  rng.value = vol;
+  rng.addEventListener('input', () => setVol(+rng.value));
+  sw.addEventListener('click', async () => { want = !(want && playing); if (want) await on(); else off(); ui(); });
+  sndPanel.querySelectorAll('.sp-st').forEach(b => b.addEventListener('click', () => setStyle(+b.dataset.i)));
+  ['pointerdown','touchstart','touchmove','wheel','keydown','click'].forEach(ev => sndPanel.addEventListener(ev, e => e.stopPropagation(), { passive: true }));
+  function ui(){ const live = playing && vol > 0;
+    sndBtn.classList.toggle('on', live); sndBtn.classList.toggle('off', !want || vol === 0);
+    sndBtn.querySelector('.tx').textContent = !want ? '音樂已關' : (playing ? (vol === 0 ? '靜音' : '') : '輕觸開啟音樂');
+    sndBtn.setAttribute('aria-pressed', playing ? 'true' : 'false');
+    sw.classList.toggle('on', want && playing); sw.querySelector('span').textContent = want && playing ? '開' : '關';
+    pct.textContent = vol + '%'; sndPanel.querySelector('.sp-cur').textContent = '曲風：' + STYLES[si].name;
+    sndPanel.querySelectorAll('.sp-st').forEach((b, i) => b.classList.toggle('cur', i === si)); }
+  function panel(open){ sndPanel.hidden = !open; sndBtn.setAttribute('aria-expanded', open ? 'true' : 'false'); }
+  async function press(){ if (want && !playing){ await on(); ui(); } panel(sndPanel.hidden); }
+  document.addEventListener('pointerdown', e => { if (!sndPanel.hidden && !e.target.closest('#sndp, #snd')) panel(false); }, true);
   // 第一次碰螢幕（點、滑、按鍵）就開始播
-  async function firstTouch(e){ if (e && e.target && e.target.closest && e.target.closest('#snd')) return; if (want && !playing){ if (await on()) ui(); } if (playing) ['pointerdown','touchend','keydown','click'].forEach(ev => removeEventListener(ev, firstTouch, true)); }
+  async function firstTouch(e){ if (e && e.target && e.target.closest && e.target.closest('#snd, #sndp')) return; if (want && !playing){ if (await on()) ui(); } if (playing) ['pointerdown','touchend','keydown','click'].forEach(ev => removeEventListener(ev, firstTouch, true)); }
   ['pointerdown','touchend','keydown','click'].forEach(ev => addEventListener(ev, firstTouch, true));
   document.addEventListener('visibilitychange', () => { if (!ctx) return; if (document.hidden) ctx.suspend(); else if (want && playing) ctx.resume(); });
   on().then(ui);   // 有些瀏覽器允許直接播
   ui();
-  return { toggle };
+  return { press };
 })();
-sndBtn.addEventListener('click', e => { e.stopPropagation(); Music.toggle(); });
+sndBtn.addEventListener('click', e => { e.stopPropagation(); Music.press(); });
 </script>
 </body>
 </html>
