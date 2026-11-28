@@ -1,6 +1,6 @@
 // 文章頁畫面（正式文章頁 post.html 與後台裝置預覽 preview.html 共用）
-import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js?v=20261127173131";
-import { mountMap, markRead, mountWhere } from "./finmap.js?v=20261127173131";
+import { esc, fmtDate, fmtTime, md, readMins, hydrateMedia } from "./ui.js?v=20261128030513";
+import { mountMap, markRead, mountWhere } from "./finmap.js?v=20261128030513";
 
 const ICON_TOC = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 6h2M4 12h2M4 18h2M9 6h11M9 12h11M9 18h11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>`;
 const ICON_ARROW = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
@@ -56,11 +56,7 @@ export function renderArticle(art, p, { CFG, next = null, loginNext = "", user =
     };
     pre.classList.add("has-copy"); pre.append(b);
   });
-  art.querySelectorAll(".prose img").forEach(img => !img.closest(".bookmark") && img.addEventListener("click", () => {
-    const box = document.createElement("div"); box.className = "lightbox";
-    box.innerHTML = `<img src="${img.src}" alt=""><p>${esc(img.alt || "")}　點一下關閉</p>`;
-    box.onclick = () => box.remove(); document.body.append(box);
-  }));
+  // 2026-11-28 Edward 指示：文章裡的圖片一律不能點開放大（拿掉 lightbox）
   buildToc(art);
 }
 

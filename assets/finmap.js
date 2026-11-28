@@ -1,7 +1,7 @@
 // 理財地圖（理財新手村）：文章裡寫一行「🗺️ 理財地圖」，這裡就自動畫出三階段地圖，所有已發布文章自動排進去（Edward 2026-11-27）
 // 新文章：照「分類」自動分到對應的關卡；要放到別的關卡，在 PLACE 加一行。排序：ORDER 裡的先排，其餘照發布日期。
-import { store } from "./store.js?v=20261127173131";
-import { esc } from "./ui.js?v=20261127173131";
+import { store } from "./store.js?v=20261128030513";
+import { esc } from "./ui.js?v=20261128030513";
 
 export const MAP_POST_ID = "n-ec9e7cff9014";
 const STAGES = [
@@ -25,17 +25,19 @@ const PLACE = {
   "q4-2026-12-11-pub-mwlxdjir": "numbers", // 保證月領 3%
   "q4-2026-12-15-pub-mwlxdjjp": "numbers", // 儲蓄險報酬率
   "q4-draft-pub-stabilization-fund": "macro", // 國安基金進場
+  "q4-2026-12-18-pub-mwlxdjmi": "macro", // 景氣四季：讀景氣燈號、看大環境，屬【進攻】（分類是投資理財，預設會掉到系統）
+  "q4-2026-12-22-pub-mwlxdjnq": "retire", // 勞退自提6%：自己決定扣多少、長期自動累積，屬【系統】（分類是社會保險，預設會掉到防禦）
 };
 // 建議閱讀順序（沒列到的接在後面，照發布日期）
 const ORDER = [
   "n-ec7cd08d0089", "q4-2026-12-29-pub-mwlxdjr5",
   "n-f96aa59472a0", "n-f042c44cfa69", "n-ed25b21dc79d", "notify-cleanup-mwlt4w58",
   "n-d2949ecaf61e", "q4-draft-pub-medical6", "q4-draft-pub-travel", "q4-draft-pub-travel-flu", "q4-draft-pub-travel-sports",
-  "q4-2026-11-20-pub-mwlxdj5j", "q4-2026-11-25-vip-mwlxdja3", "q4-2026-12-22-pub-mwlxdjnq", "q4-draft-pub-national-pension",
+  "q4-2026-11-20-pub-mwlxdj5j", "q4-2026-11-25-vip-mwlxdja3", "q4-draft-pub-national-pension",
   "n-ebbc12a6e34b", "q4-2026-11-24-pub-mwlxdj8a", "n-da45a8525d5c", "q4-2026-12-04-pub-mwlxdjeu", "q4-2026-11-27-pub-mwlxdjbf", "n-f73d0e49d0f4", "q4-2026-12-08-pub-mwlxdjga", "q4-2026-12-16-vip-mwlxdjl4",
   "q4-2026-12-11-pub-mwlxdjir", "q4-2026-12-15-pub-mwlxdjjp",
-  "q4-2026-12-01-pub-mwlxdjd4", "q4-2026-12-09-vip-mwlxdjhj",
-  "q4-draft-pub-stabilization-fund", "n-f16212282114", "n-d061314876d7", "n-cf2ad1ad8308",
+  "q4-2026-12-22-pub-mwlxdjnq", "q4-2026-12-01-pub-mwlxdjd4", "q4-2026-12-09-vip-mwlxdjhj",
+  "q4-2026-12-18-pub-mwlxdjmi", "q4-draft-pub-stabilization-fund", "n-f16212282114", "n-d061314876d7", "n-cf2ad1ad8308",
 ];
 const MARK = /^\s*🗺️?\s*理財地圖\s*$/;
 const READ_KEY = "eb-read";

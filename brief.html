@@ -10,20 +10,21 @@
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap"></noscript>
 <link rel="preconnect" href="https://firestore.googleapis.com">
-<link rel="stylesheet" href="assets/style.css?v=20261127173131">
-<script src="config.js?v=20261127173131"></script>
+<link rel="stylesheet" href="assets/style.css?v=20261128030513">
+<script src="config.js?v=20261128030513"></script>
 </head>
 <body>
 <main><div class="wrap narrow article">
-  <div class="bf-nav"><a href="index.html" class="stamp">← 回首頁</a><span><select id="pick" aria-label="選擇日期"></select></span></div>
+  <div class="bf-nav"><a href="index.html" class="stamp">← 回首頁</a><span class="stamp">往右滑看更早的早報</span></div>
+  <div class="bf-strip" id="pick" role="navigation" aria-label="選擇日期"></div>
   <div id="bf"><div class="empty">載入中…</div></div>
   <div class="bf-pager"><a id="prev" class="btn ghost sm" hidden>‹ 前一天</a><a id="next" class="btn ghost sm" hidden>後一天 ›</a></div>
 </div></main>
 <script>window.__ebDeferFirebase = true;</script>
 <script type="module">
-import { store } from "./assets/store.js?v=20261127173131";
-import { header, footer, toast } from "./assets/ui.js?v=20261127173131";
-import { loadIndex, loadBriefRows, merge, renderBrief, fmtDay } from "./assets/brief.js?v=20261127173131";
+import { store } from "./assets/store.js?v=20261128030513";
+import { header, footer, toast } from "./assets/ui.js?v=20261128030513";
+import { loadIndex, loadBriefRows, merge, renderBrief, fmtDay } from "./assets/brief.js?v=20261128030513";
 const el = document.getElementById("bf");
 header("brief"); footer();
 let rows = null, authUser, paintKey = "";
@@ -46,8 +47,13 @@ function paint(u) {
   paintKey = key;
   if (!shown.length) { el.innerHTML = `<div class="empty">早報準備中，每天早上 10 點見！</div>`; return; }
   const cur = shown.find(x => x.d === want) || shown[0];
-  document.getElementById("pick").innerHTML = shown.map(x => `<option value="${x.d}" ${x === cur ? "selected" : ""}>${fmtDay(x.d)}${x.ok ? "" : "（草稿，只有你看得到）"}</option>`).join("");
-  document.getElementById("pick").onchange = e => location.search = "?d=" + e.target.value;
+  const pick = document.getElementById("pick");
+  pick.innerHTML = shown.map(x => {
+    const [yy, mm, dd] = x.d.split("-").map(Number), wk = new Date(Date.UTC(yy, mm - 1, dd)).getUTCDay();
+    return `<a class="bf-chip${x === cur ? " on" : ""}${wk === 0 || wk === 6 ? " wk" : ""}${x.ok ? "" : " draft"}" href="?d=${x.d}"${x === cur ? ' aria-current="date"' : ""}${x.ok ? "" : ' title="草稿，只有你看得到"'}><i>${mm}月</i><b>${dd}</b><i>${x.ok ? "週" + "日一二三四五六"[wk] : "草稿"}</i></a>`;
+  }).join("");
+  const on = pick.querySelector(".on");
+  if (on) pick.scrollLeft = on.offsetLeft - pick.clientWidth / 2 + on.offsetWidth / 2;
   const i = shown.indexOf(cur);
   const prev = document.getElementById("prev"), next = document.getElementById("next");
   prev.hidden = true; next.hidden = true;
